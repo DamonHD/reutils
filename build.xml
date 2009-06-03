@@ -56,10 +56,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <project name="edh" default="core.jar.opt" basedir=".">
 
-    <property name="app.name" value="edh"/>
+    <property name="app.name" value="reutils"/>
     <property name="app.version.major" value="0"/>
-    <property name="app.version.minor" value="0"/>
-    <property name="app.version.micro" value="17"/>
+    <property name="app.version.minor" value="1"/>
+    <property name="app.version.micro" value="0"/>
     <property name="app.version" value="${app.version.major}.${app.version.minor}.${app.version.micro}"/>
     <!-- Version excluding the "micro" portion, thus reflecting only significant API/functionality changes. -->
     <property name="app.version.notmicro" value="${app.version.major}.${app.version.minor}"/>
@@ -68,8 +68,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <!-- Target/minimum JDK/JSE version for build and run. -->
     <property name="JDKVER" value="6"/>
-    <!-- Target/minimum .class file version for build. -->
-    <property name="CLASSVER" value="5"/>
 
     <!-- Stub names, used in source and output dirs and package names. -->
     <!-- This is core code. -->

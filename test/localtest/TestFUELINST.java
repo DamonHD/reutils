@@ -53,23 +53,23 @@ public final class TestFUELINST extends TestCase
         final float weightedIntensity = FUELINST.computeWeightedIntensity(intensities, generationByFuel, 0);
         assertTrue("Computed intensity must be correct/close", Math.abs(0.5276563f - weightedIntensity) < 1e-5);
 
-        // Open our sample CVS data file.
-        final Reader sampleFile1 = new FileReader("data-samples/20090311T0806-FUELINST.csv");
-        try
-            {
-            final List<List<String>> sdRows = DataUtils.parseBMRCSV(sampleFile1, "INSTANTANEOUS GENERATION BY FUEL TYPE DATA");
-            assertEquals("must extract correct number of rows from sample data", 288, sdRows.size());
-            for(final List<String> sdRow : sdRows)
-                {
-                final Map<String, String> nF = DataUtils.extractNamedFieldsByPositionFromRow(template, sdRow);
-                final Map<String,Integer> gBF = new HashMap<String,Integer>();
-                for(final String name : intensities.keySet())
-                    { gBF.put(name, Integer.parseInt(nF.get(name), 10)); }
-                final float wi = FUELINST.computeWeightedIntensity(intensities, gBF, 0);
-                // Intensity change throughout the day varies < 10% on this sample.
-                if(wi != 0) { assertTrue("Computed intensity must be close-ish to central value", Math.abs(0.5 - wi) < 0.4); }
-                }
-            }
-        finally { sampleFile1.close(); }
+//        // Open our sample CVS data file.
+//        final Reader sampleFile1 = new FileReader("data-samples/20090311T0806-FUELINST.csv");
+//        try
+//            {
+//            final List<List<String>> sdRows = DataUtils.parseBMRCSV(sampleFile1, "INSTANTANEOUS GENERATION BY FUEL TYPE DATA");
+//            assertEquals("must extract correct number of rows from sample data", 288, sdRows.size());
+//            for(final List<String> sdRow : sdRows)
+//                {
+//                final Map<String, String> nF = DataUtils.extractNamedFieldsByPositionFromRow(template, sdRow);
+//                final Map<String,Integer> gBF = new HashMap<String,Integer>();
+//                for(final String name : intensities.keySet())
+//                    { gBF.put(name, Integer.parseInt(nF.get(name), 10)); }
+//                final float wi = FUELINST.computeWeightedIntensity(intensities, gBF, 0);
+//                // Intensity change throughout the day varies < 10% on this sample.
+//                if(wi != 0) { assertTrue("Computed intensity must be close-ish to central value", Math.abs(0.5 - wi) < 0.4); }
+//                }
+//            }
+//        finally { sampleFile1.close(); }
         }
     }
