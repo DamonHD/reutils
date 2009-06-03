@@ -12,6 +12,6 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.hd.d.edh.Main"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="FUELINST _fuelinst.html data-samples"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="FUELINST _fuelinst.html ../edh-trunk/data-samples"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="reutils-trunk"/>
 </launchConfiguration>
