@@ -1,10 +1,5 @@
 /*
- * Created by IntelliJ IDEA.
- * User: d@hd.org
- * Date: 27-May-02
- * Time: 09:32:06
-
-Copyright (c) 1996-2009, Damon Hart-Davis
+Copyright (c) 2008-2009, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,8 +25,8 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
- */
 package org.hd.d.edh;
 
 // We try to depend as little as possible on other classes in the
