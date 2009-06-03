@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+
+<!--
+Copyright (c) 2009, Damon Hart-Davis
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the
+    distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+
+<!-- ======================================================================= -->
+<!-- Stand-alone 'daemon' app.                                               -->
+<!-- ======================================================================= -->
+
+<!-- Use Ant 1.6 or newer. -->
+
+<!-- All code runs under JDK 6. -->
+
+<!--
+    This builds one command-line app to regenerate Web pages
+    showing electricity grid current carbon intensity (kgCO2/kWh).
+
+
+    The debug builds are designed for the fastest possible incremental
+    compilation, but at some slight risk of things not being rebuilt
+    when they should be; occasionally use the "clean" target to zap
+    cached state.  The debug builds are also as debuggable as possible.
+
+    The optimised builds are always from scratch for reliability,
+    and are configured for run-time speed.  They will be
+    relatively slow to build and difficult to debug.
+
+    Expects JUnit 3.8.1 or newer.
+  -->
+
+<project name="edh" default="core.jar.opt" basedir=".">
+
+    <property name="app.name" value="edh"/>
+    <property name="app.version.major" value="0"/>
+    <property name="app.version.minor" value="0"/>
+    <property name="app.version.micro" value="17"/>
+    <property name="app.version" value="${app.version.major}.${app.version.minor}.${app.version.micro}"/>
+    <!-- Version excluding the "micro" portion, thus reflecting only significant API/functionality changes. -->
+    <property name="app.version.notmicro" value="${app.version.major}.${app.version.minor}"/>
+
+    <property name="dist.jar" value="${app.name}-${app.version}.jar"/>
+
+    <!-- Target/minimum JDK/JSE version for build and run. -->
+    <property name="JDKVER" value="6"/>
+    <!-- Target/minimum .class file version for build. -->
+    <property name="CLASSVER" value="5"/>
+
+    <!-- Stub names, used in source and output dirs and package names. -->
+    <!-- This is core code. -->
+    <property name="core" value="core"/>
+
+    <!-- The base dir of the Java source. -->
+    <property name="jsrc.base.dir" value="javasrc"/>
+    <property name="core.src.dir" value="${jsrc.base.dir}"/>
+
+    <property name="dirsuffix.dbg" value="_D"/>
+    <property name="dirsuffix.opt" value="_O"/>
+    <property name="build.dir.base" value="out"/>
+    <property name="build.dir.dbg" value="../${build.dir.base}${dirsuffix.dbg}"/>
+    <property name="build.dir.opt" value="../${build.dir.base}${dirsuffix.opt}"/>
+    <!-- Build dir for common (non-opt, non-dbg) items. -->
+    <property name="build.dir.cmn" value="../${build.dir.base}_C"/>
+
+    <!-- General temporary work directory. -->
+    <property name="tmp.workdir" value="work.tmp"/>
+
+    <!-- Basic class path we compile against; includes any external libs. -->
+    <property name="cp.common.basic" value=""/>
+    <!-- Provided in debug/non-debug versions. -->
+    <!-- Expects cp.J2EEAPI to contain a classpath fragment for the J2EE API. -->
+    <property name="cp.dbg.basic" value="${cp.common.basic}"/>
+    <property name="cp.opt.basic" value="${cp.common.basic}"/>
+
+
+    <!--Place where source snapshot is built. -->
+    <property name="src.snapshot.dir" value="${build.dir.cmn}/snapshot"/>
+    <!--Name of raw source snapshot archive to include in generated WAR file. -->
+    <property name="src.snapshot.tar.bz2" value="src.snapshot.tar.bz2"/>
+
+    <!--Place where javadoc is built. -->
+    <property name="javadoc.dir" value="${build.dir.cmn}/javadoc"/>
+
+    <!-- General initialisation target. -->
+    <target name="init">
+        <tstamp/>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Prepares the core build directories, debug and optimised         -->
+    <!-- =================================================================== -->
+    <!-- DBG -->
+    <target name="core.prepare.dbg.testuptodate">
+        <!-- Claim that the JAR target is up-to-date if its source files are. -->
+        <uptodate property="core.jar.dbg.uptodate"
+            targetfile="${build.dir.dbg}/${core.jar}">
+            <srcfiles dir="${core.src.dir}" includes="**/*.java"/>
+            <srcfiles dir="${ai.src.dir}" includes="**/*.java"/>
+            <srcfiles dir="${tp.src.dir}" includes="**/*.java"/>
+        </uptodate>
+    </target>
+    <target name="core.prepare.dbg"
+        depends="init,core.prepare.dbg.testuptodate"
+        unless="core.jar.dbg.uptodate">
+        <delete file="${build.dir.dbg}/${core.jar}" quiet="true"/>
+        <mkdir dir="${build.dir.dbg}/${tmp.workdir}/${core}"/>
+        <delete file="${build.dir.dbg}/.tmp.${core.jar}" quiet="true"/>
+    </target>
+
+    <!-- OPT -->
+    <!-- This is extra strict and cleans everything out before starting. -->
+    <target name="core.prepare.opt"
+        depends="init">
+        <!-- Make sure that the working dir is clear of cached state. -->
+        <delete dir="${build.dir.opt}" quiet="true"/>
+        <mkdir dir="${build.dir.opt}/${tmp.workdir}/${core}"/>
+        <delete file="${build.dir.opt}/.tmp.${core.jar}" quiet="true"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Compiles the core source code, debug and optimised               -->
+    <!-- =================================================================== -->
+    <!-- FOR NOW, the core will include the AI code. -->   
+    <!-- DBG -->
+    <target name="core.compile.dbg"
+        depends="core.prepare.dbg"
+        unless="core.jar.dbg.uptodate">
+        <javac srcdir="${core.src.dir}"
+            destdir="${build.dir.dbg}/${tmp.workdir}/${core}"
+            classpath="${cp.dbg.basic}"
+            debug="on"
+            deprecation="on"
+            target="${CLASSVER}"
+            optimize="off">
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+
+    <!-- OPT -->
+    <target name="core.compile.opt"
+        depends="core.prepare.opt">
+        <javac srcdir="${core.src.dir}"
+            destdir="${build.dir.opt}/${tmp.workdir}/${core}"
+            classpath="${cp.opt.basic}"
+            debug="off"
+            deprecation="on"
+            target="${CLASSVER}"   
+            optimize="on">
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- JARs the core source code, debug and optimised                   -->
+    <!-- =================================================================== -->
+    <!-- DBG -->
+    <target name="core.jar.dbg"
+        depends="core.compile.dbg"
+        unless="core.jar.dbg.uptodate"
+        description="builds the debug core classes JAR shared by all other app components">
+        <jar jarfile="${build.dir.dbg}/${core.jar}"
+            basedir="${build.dir.dbg}/${tmp.workdir}/${core}">
+            <include name="**/*.class"/>
+            <manifest>
+                <attribute name="Main-Class" value="org.hd.d.edh.Main"/>
+            </manifest>   
+        </jar>
+    </target>
+
+    <!-- OPT -->
+    <target name="core.jar.opt"
+        depends="core.compile.opt"
+        description="builds the optimised/release core classes JAR shared by all other app components">
+        <jar jarfile="${build.dir.opt}/${dist.jar}"
+            basedir="${build.dir.opt}/${tmp.workdir}/${core}">
+            <include name="**/*.class"/>   
+            <manifest>
+                <attribute name="Main-Class" value="org.hd.d.edh.Main"/>
+            </manifest>   
+        </jar>
+     <echo message="Release JAR now at ${build.dir.opt}/${dist.jar} ..." />   
+    </target>
+
+
+
+
+
+
+    <!-- =================================================================== -->
+    <!-- Prepares the raw source snapshot; dbg/opt-independent...            -->
+    <!-- Packages ALL local source files for (usually opt-only) WAR.         -->
+    <!-- =================================================================== -->
+    <!--Few source suffixes to be excluded, including IDE files and big test data files. -->
+    <property name="src.snapshot.suffixes.exclude" value="**/*.tmp,*.ipr,*.iws,**/~*,**/*.dat,**.dll,**.so,**/*.ldb,**/*.mdb,**/*.jpg,java.hprof.*,**/_3rdParty**/*"/>
+    <target name="src.snapshot.testuptodate">
+        <!-- Claim that the JAR target is up-to-date if its source files/JARs are. -->
+        <uptodate property="src.snapshot.uptodate"
+            targetfile="${src.snapshot.dir}/${src.snapshot.tar.bz2}">
+            <srcfiles dir="." excludes="${src.snapshot.suffixes.exclude}"/>
+        </uptodate>
+    </target>
+    <!-- Makes BZIP2ed tar file for space efficiency,
+         in own directory for ease of packaging into WAR file.
+
+         Files not to be redistributed must be excluded by path and/or suffix.
+         -->
+    <target name="src.snapshot"
+        description="Prepares raw source snapshot to export with the WAR"
+        depends="src.snapshot.testuptodate"
+        unless="src.snapshot.uptodate">
+        <delete dir="${src.snapshot.dir}"/>
+        <mkdir dir="${src.snapshot.dir}"/>
+        <tar destfile="${src.snapshot.dir}/${src.snapshot.tar.bz2}"
+            basedir="."
+            excludes="${src.snapshot.suffixes.exclude}"
+            compression="bzip2"
+            longfile="gnu">
+        </tar>
+    </target>
+
+
+
+
+    <!-- =================================================================== -->
+    <!-- Prepares the javadoc snapshot; dbg/opt-independent...               -->
+    <!-- =================================================================== -->
+    <target name="jar.javadoc.testuptodate">
+        <!-- Claim that the JAR target is up-to-date if its source files/JARs are. -->
+        <uptodate property="jar.javadoc.uptodate"
+            targetfile="${javadoc.dir}/index.html">
+            <srcfiles dir="${jsrc.base.dir}"/>
+        </uptodate>
+    </target>
+    <!--Build javadoc, identically for debug and optimised; rebuild only if source changes so as to save time. -->
+    <target name="jar.javadoc"
+        depends="jar.javadoc.testuptodate"
+        description="builds a javadoc JAR"
+        unless="jar.javadoc.uptodate">
+        <delete dir="${javadoc.dir}" quiet="true"/>
+        <mkdir dir="${javadoc.dir}"/>
+        <javadoc
+            destdir="${javadoc.dir}"
+            classpath="${cp.opt.basic}"
+            access="private"
+            verbose="false"
+            windowtitle="EDH V${app.version} Javadoc"
+            overview="${jsrc.base.dir}/javadoc-overview.html"
+            linksource="true"
+            >
+            <fileset dir="${core.src.dir}"/>
+
+            <header><![CDATA[
+<a href="http://d.hd.org/" target="_top">EDH</a> V${app.version}<br />
+                            ]]></header>
+            <footer>EDH V${app.version}</footer>
+            <bottom>Copyright (c) 2009, Damon Hart-Davis. All rights reserved.</bottom>
+        </javadoc>
+    </target>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- =================================================================== -->
+    <!-- Builds debug and optimised code from scratch, and tests it.         -->
+    <!-- =================================================================== -->
+    <target name="all"
+        depends="clean,core.jar.opt,src.snapshot"
+        description="cleans, then does optimised/release build and test">
+        <echo message="Builds and tests complete."/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Cleans up generated intermediate stuff                              -->
+    <!-- =================================================================== -->
+    <target name="clean"
+        description="cleans up all generated files and cached state">
+        <echo message="Doing cleanup of all build dirs..."/>
+    	<parallel>
+	        <delete dir="${test.install.cache.dir}" quiet="true"/> <!-- Slowest job first. -->
+            <delete dir="${build.dir.dbg}" quiet="true"/>
+	        <delete dir="${build.dir.cmn}" quiet="true"/>
+	        <delete dir="${build.dir.opt}" quiet="true"/>
+        </parallel>
+    </target>
+
+
+</project>
+

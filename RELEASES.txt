@@ -1,0 +1,218 @@
+ALL SIGNIFICANT RELEASES AND BRANCHES
+
+
+This document is used to record all significant releases and branches
+in the code tree.
+
+Follow agreed procedures before creating (or deleting) branches
+or release/freeze points.
+
+
+IMMEDIATE TODO
+==============
+
+John Stott RFE: the page could be improved for the benefit of those knowing little about electricity generation by defining the acronyms. e.g. INTIRL , NPSHYD etc . Even though I have worked in the electricity and energy field, I am not familiar with all the abbreviations used.
+
+
+
+
+SIGNIFICANT CHANGES SINCE LAST RELEASE
+======================================
+
+
+
+
+
+
+
+
+SIGNIFICANT RELEASES (newest first)
+===================================
+
+20090603:
+    freezepoint name: V0.1.0
+    SVN revision: 388
+    branch name: HEAD
+    Deployed where: nowhere
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.16
+    DHD20090601: Added display of emissions savable per washload.
+    DHD20090528: Applied first Ecotricity patch to generate XML file.
+
+IMPORTED FROM EDH PROJECT AT V0.0.12
+
+
+
+
+20090523:
+    freezepoint name: V0.0.16
+    SVN revision: 388
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.15
+    DHD20090523: Still more conservative still notion of 'green', to bottom 1/3rd of intensity.
+    DHD20090522: Minor text changes on traffic-light HTML page.
+
+
+20090516:
+    freezepoint name: V0.0.15
+    SVN revision: 383
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.14
+    DHD20090516: Showing zero-carbon generation compared to all generation/demand.
+    DHD20090510: More conservative evaluation of 'green' status in various places.
+
+
+20090502:
+    freezepoint name: V0.0.14
+    SVN revision: 350
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.13
+    DHD20090502: Initial cut of XHTML (mobile-friendly) page.
+    DHD20090502: Minor improvements in traffic lights HTML.
+
+
+20090430:
+    freezepoint name: V0.0.13
+    SVN revision: 337
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.12
+    DHD20090430: Fixing interesting graph display bug where some hours' data are missing.
+    DHD20090420: Extended data analysis to show daily variability.
+
+
+20090418:
+    freezepoint name: V0.0.12
+    SVN revision: 319
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.11
+    DHD20090418: Added display of MW demand (so that the correlation with intensity is clear).
+
+
+20090415:
+    freezepoint name: V0.0.11
+    SVN revision: 312
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.10
+    DHD20090415: Cautiously capping status to 'YELLOW' when data is stale.
+    DHD20090415: Wrapping recent data graph to end at 'now' in traffic-lights page.
+    DHD20090415: Showing fuel mix in traffic-lights page.
+    DHD20090415: Adding methodology text to traffic-lights page and data analysis report.
+
+
+20090414:
+    freezepoint name: V0.0.10
+    SVN revision: 302
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.9
+    DHD20090414: First pass of bulk data analysis code.
+    DHD20090413: Small tweaks to traffic-light HTML.
+
+
+20090413:
+    freezepoint name: V0.0.9
+    SVN revision: 245
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.8
+    DHD20090413: Glaring bug in man-heading generation (using wrong status when stale)!
+    DHD20090412: Driving flag file from historical data when current data not available.
+    DHD20090412: Small tweaks to traffic-light HTML, especially when working from stale data.
+
+
+20090412:
+    freezepoint name: V0.0.8
+    SVN revision: 226
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.7
+    DHD20090412: Bargraph intensity chart.
+    DHD20090412: Better handling of data-feed problems and old cached data.
+
+
+20090411:
+    freezepoint name: V0.0.7
+    SVN revision: 209
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.6
+    DHD20090411: Added simple cacheing to overcome short data outages.
+
+
+20090410:
+    freezepoint name: V0.0.6
+    SVN revision: 202
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.5
+    DHD20090410: Lengthened HTTP connection/read timeouts; defaults may have been marginal.
+    DHD20090410: Various cosmetic fixes.
+
+
+20090410:
+    freezepoint name: V0.0.5
+    SVN revision: 193
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.4
+    DHD20090410: Various cosmetic fixes.
+    DHD20090316: Changed name of flag file to omit .html extension component.
+
+
+20090316:
+    freezepoint name: V0.0.4
+    SVN revision: 171
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.3
+    DHD20090316: Various cosmetic fixes.
+
+
+20090315:
+    freezepoint name: V0.0.3
+    SVN revision: 158
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.2
+    DHD20090315: Fixed bug where output file has no directory component.
+
+
+20090315:
+    freezepoint name: V0.0.2
+    SVN revision: 154
+    branch name: HEAD
+    Deployed where:
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.0.1
+    DHD20090315: Fixed bogus dependency.
+
+
+20090315:
+    freezepoint name: V0.0.1
+    SVN revision: 151
+    branch name: HEAD
+    Deployed where:
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: N/A
+    DHD20090315: Initial cut.
+    
