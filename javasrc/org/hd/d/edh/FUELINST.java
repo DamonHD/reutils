@@ -1175,11 +1175,11 @@ public final class FUELINST
 
             if(!isDataStale)
                 {
-                    w.println("<fuel_mix>");
-                    w.println("<timestamp>"+summary.timestamp+"</timestamp>");
-                    final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary.currentGenerationMWByFuelMW);
-                    for(final String fuel : power.keySet()) { w.println("<"+fuel.toLowerCase()+">"+power.get(fuel)+"</"+fuel.toLowerCase()+">"); }
-                    w.println("</fuel_mix>");
+                w.println("<fuel_mix>");
+                w.println("<timestamp>"+summary.timestamp+"</timestamp>");
+                final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary.currentGenerationMWByFuelMW);
+                for(final String fuel : power.keySet()) { w.println("<"+fuel.toLowerCase()+">"+power.get(fuel)+"</"+fuel.toLowerCase()+">"); }
+                w.println("</fuel_mix>");
                 }
 
             w.println("<fuel_intensities>");
