@@ -1173,6 +1173,9 @@ public final class FUELINST
 
             // TODO: Show cumulative MWh and tCO2.
 
+            // FIXME: DHD20090608: I suggest leaving the fuel names as-is (upper case) in the XML as those are the 'formal' Elexon names; convert for display if need be.
+            // FIXME: DHD20090608: As fuel names may not always be XML-token-safe, maybe <fuel name="NNN">amount</fuel> would be better?
+
             if(!isDataStale)
                 {
                 w.println("<fuel_mix>");
