@@ -19,6 +19,7 @@ John Stott RFE: the page could be improved for the benefit of those knowing litt
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
+DHD20090608: Minor adjustments (more 'symbolic') to XML output as discussed with Ecotricity.
 
 
 

@@ -790,7 +790,7 @@ public final class FUELINST
                 {
                 updateXMLFile(startTime, outputXMLFileName, summary, isDataStale,
                     hourOfDayHistorical, status);
-		}
+                }
 
             // Update the (mobile-friendly) XHTML page.
             final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
@@ -1060,12 +1060,15 @@ public final class FUELINST
 
             w.println("<stale_data>"+(isDataStale ? "1" : "0")+"</stale_data>");
 
-            if(status == TrafficLight.RED)
-                { w.println("<status>1</status>"); }
-            else if(status == TrafficLight.YELLOW)
-                { w.println("<status>0</status>"); }
-            if(status == TrafficLight.GREEN)
-                { w.println("<status>-1</status>"); }
+//            if(status == TrafficLight.RED)
+//                { w.println("<status>1</status>"); }
+//            else if(status == TrafficLight.YELLOW)
+//                { w.println("<status>0</status>"); }
+//            else if(status == TrafficLight.GREEN)
+//                { w.println("<status>-1</status>"); }
+            w.print("<status>");
+            if(null != status) { w.print(status); }
+            w.println("</status>");
 
             if(summary.histMinIntensity < summary.histMaxIntensity)
                 { w.println("<saving>"+computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"</saving>"); }
@@ -1074,9 +1077,11 @@ public final class FUELINST
             if(!isDataStale)
                 {
                 if(summary.recentChange == TrafficLight.GREEN)
-                    { w.println("<carbon_intensity>-1</carbon_intensity>"); }
+//                    { w.println("<carbon_intensity>-1</carbon_intensity>"); }
+                    { w.println("<carbon_intensity>GREEN</carbon_intensity>"); }
                 else if(summary.recentChange == TrafficLight.RED)
-                    { w.println("<carbon_intensity>1</carbon_intensity>"); }
+//                    { w.println("<carbon_intensity>1</carbon_intensity>"); }
+                    { w.println("<carbon_intensity>RED</carbon_intensity>"); }
                 }
 
             w.println("<timestamp>"+summary.timestamp+"</timestamp>");
@@ -1118,7 +1123,7 @@ public final class FUELINST
 
             // Always start at midnight GMT if the data is stale.
             final int startSlot = isDataStale ? 0 : (1 + Math.max(0, newSlot)) % 24;
-            final int maxHourlyIntensity = summary.histAveIntensityByHourOfDay.max0();
+//            final int maxHourlyIntensity = summary.histAveIntensityByHourOfDay.max0();
             for(int h = 0; h < 24; ++h)
                 {
                 final StringBuffer sbh = new StringBuffer(2);
@@ -1130,9 +1135,9 @@ public final class FUELINST
                 w.println("<sample>");
                 w.println("<hour>"+sbh+"</hour>");
                 if((null == hIntensity) || (0 == hIntensity))
-		    { w.println("<carbon_intensity></carbon_intensity>"); continue; /* Skip empty slot. */ }
+                    { w.println("<carbon_intensity></carbon_intensity>"); continue; /* Skip empty slot. */ }
                 else
-		    { w.println("<carbon_intensity>"+ String.valueOf(hIntensity)+"</carbon_intensity>"); }
+                    { w.println("<carbon_intensity>"+ String.valueOf(hIntensity)+"</carbon_intensity>"); }
                 w.println("</sample>");
                 }
             w.println("</generation_intensity>");
@@ -1150,7 +1155,7 @@ public final class FUELINST
 
                 final Integer hGeneration = summary.histAveGenerationByHourOfDay.get(displayHourGMT);
                 if((null == hGeneration) || (0 == hGeneration)) { continue; /* Skip empty slot. */ }
-                final int height = (GCOMP_PX_MAX*hGeneration) / Math.max(1, maxGenerationMW);
+//                final int height = (GCOMP_PX_MAX*hGeneration) / Math.max(1, maxGenerationMW);
                 final int scaledToGW = (hGeneration + 500) / 1000;
 
                 w.println("<sample>");
