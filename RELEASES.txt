@@ -37,7 +37,7 @@ SIGNIFICANT RELEASES (newest first)
     Deployed where: nowhere
     Changes since last freezepoint (developer/mgr initials and brief description):
     Previous significant freezepoint: V0.0.16
-    DHD20090601: Added display of emissions savable per washload.
+    DHD20090601: Added display of emissions available to be saved per washload.
     DHD20090528: Applied first Ecotricity patch to generate XML file.
 
 IMPORTED FROM EDH PROJECT AT V0.0.12
