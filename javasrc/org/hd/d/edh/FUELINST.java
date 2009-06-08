@@ -1058,7 +1058,7 @@ public final class FUELINST
             if(isDataStale)
                 { w.println("<warning>*WARNING: cannot obtain current data so this is partly based on predictions from historical data (for "+hourOfDayHistorical+":XX GMT).</warning>"); }
 
-            w.println("<stale_data>"+(isDataStale ? "1" : "0")+"</stale_data>");
+            w.println("<stale_data>"+isDataStale+"</stale_data>");
 
 //            if(status == TrafficLight.RED)
 //                { w.println("<status>1</status>"); }
