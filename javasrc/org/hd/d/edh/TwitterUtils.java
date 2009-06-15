@@ -133,7 +133,11 @@ public final class TwitterUtils
         {
         if((null == passwordFilename) || passwordFilename.trim().isEmpty()) { return(null); }
         final File f = new File(passwordFilename);
-        if(!f.canRead()) { return(null); }
+        if(!f.canRead())
+            {
+            System.err.println("Cannot open pass file for reading: " + f);
+            return(null);
+            }
 
         try
             {
