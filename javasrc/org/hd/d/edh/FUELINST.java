@@ -780,26 +780,60 @@ public final class FUELINST
                 { if(outputFlagFile.delete()) { System.out.println("Flag file deleted"); } }
 
             // Update the HTML page.
-            updateHTMLFile(startTime, outputHTMLFileName, summary, isDataStale,
-                hourOfDayHistorical, status);
-
-            // Update the (mobile-friendly) XHTML page.
-            final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
-                (outputHTMLFileName + ".xml");
-            if(null != outputXMLFileName)
-                {
-                updateXMLFile(startTime, outputXMLFileName, summary, isDataStale,
+            try {
+                updateHTMLFile(startTime, outputHTMLFileName, summary, isDataStale,
                     hourOfDayHistorical, status);
                 }
+            catch(final IOException e) { e.printStackTrace(); }
 
             // Update the (mobile-friendly) XHTML page.
-            final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
-                (outputHTMLFileName + ".xhtml");
-            if(null != outputXHTMLFileName)
-                {
-                updateXHTMLFile(startTime, outputXHTMLFileName, summary, isDataStale,
-                    hourOfDayHistorical, status);
+            try {
+                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
+                    (outputHTMLFileName + ".xml");
+                if(null != outputXMLFileName)
+                    {
+                    updateXMLFile(startTime, outputXMLFileName, summary, isDataStale,
+                        hourOfDayHistorical, status);
+                    }
                 }
+            catch(final IOException e) { e.printStackTrace(); }
+
+            // Update the (mobile-friendly) XHTML page.
+            try {
+                final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
+                    (outputHTMLFileName + ".xhtml");
+                if(null != outputXHTMLFileName)
+                    {
+                    updateXHTMLFile(startTime, outputXHTMLFileName, summary, isDataStale,
+                        hourOfDayHistorical, status);
+                    }
+                }
+            catch(final IOException e) { e.printStackTrace(); }
+
+            // Update Twitter if it is set up
+            // and if we have non-stale stats
+            // and if this represents a change from the previous status.
+            try {
+                if(!isDataStale)
+                    {
+                    final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+                    if(td != null)
+                        {
+                        // Compute name of file in which to cache last status we sent to Twitter.
+                        final String TwitterCacheFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
+                            (outputHTMLFileName + ".twittercache");
+                        // Attempt to update the displayed Twitter status as necessary
+                        // only if we think the status changed since we last sent it
+                        // and it has actually changed compared to what is at Twitter...
+                        // If we can't get a hand-crafted message then we create one on the fly...
+                        final String statusMessage = MainProperties.getRawProperties().get("Twitter.trafficlight.status." + statusHistoricalCapped);
+                        TwitterUtils.setTwitterStatusIfChanged(TwitterCacheFileName,
+                                ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage :
+                                ("Grid status: " + statusHistoricalCapped));
+                        }
+                    }
+                }
+            catch(final IOException e) { e.printStackTrace(); }
             }
         }
 
@@ -906,6 +940,18 @@ public final class FUELINST
                 }
 
             w.println("<p>Latest data is from <strong>"+(new Date(summary.timestamp))+"</strong>. This page should be updated every few minutes: use your browser's refresh/reload button if you need to check again.</p>");
+
+            // If we have a Twitter account set up then brag about it here,
+            // but only if we believe that we actually have write access to be doing updates...
+            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+            if(td != null)
+                {
+                w.print("<p>Follow this grid status on Twitter @<a href=\"http://twitter.com/");
+                w.print(td.username);
+                w.print("\">");
+                w.print(td.username);
+                w.println("</a>.</p>");
+                }
 
             // A bit of explanation...
             w.println(rawProperties.get("trafficLightPage.HTML.midamble"));
