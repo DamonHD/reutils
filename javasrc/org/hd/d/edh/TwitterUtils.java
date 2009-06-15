@@ -118,7 +118,7 @@ public final class TwitterUtils
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > 140) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
-        // Don't resend if not different from previous status string that we cached...
+        // Don't try to resend unless different from previous status string that we generated and cached...
         if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
             {
             try
@@ -129,19 +129,14 @@ public final class TwitterUtils
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
             }
 
-        // Don't send a repeat message to Twitter... Save money and patience...
-        if(statusMessage.equals(td.handle.getStatus(td.username))) { return; }
-
-        // Now send the new status...
-        td.handle.setStatus(statusMessage);
+        // Don't send a repeat/redundant message to Twitter... Save money and patience...
+        if(!statusMessage.equals(td.handle.getStatus(td.username)))
+            { td.handle.setStatus(statusMessage); }
 
         // Now try to cache the status message (uncompressed, since it will be small) if we can.
         if(null != TwitterCacheFileName)
             {
-            try
-                {
-                DataUtils.serialiseToFile(statusMessage, TwitterCacheFileName, false, true);
-                }
+            try { DataUtils.serialiseToFile(statusMessage, TwitterCacheFileName, false, true); }
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
             }
         }
