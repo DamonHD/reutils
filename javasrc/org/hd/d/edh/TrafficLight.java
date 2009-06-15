@@ -29,7 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
-/**To indicate a status good/neutral/bad. */
+/**To indicate a status good/neutral/bad.
+ */
 public enum TrafficLight
     {
     /**Bad/poor. */
@@ -39,5 +40,9 @@ public enum TrafficLight
     YELLOW,
 
     /**Good/OK. */
-    GREEN
+    GREEN;
+
+    /**True if this state is better than the argument state. */
+    public boolean betterThan(final TrafficLight other)
+        { return(this.ordinal() > other.ordinal()); }
     }

@@ -39,6 +39,7 @@ import junit.framework.TestCase;
 
 import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.MainProperties;
+import org.hd.d.edh.TrafficLight;
 
 /**Miscellaneous tests.
  *
@@ -97,5 +98,17 @@ public final class TestMisc extends TestCase
         assertEquals("must extract correct number of fields", 5, namedFields.size());
         assertEquals("must extract correct value for named field", "SOMETYPENAME", namedFields.get("type"));
         assertEquals("must extract correct value for named field", "stuff", namedFields.get("STUFF"));
+        }
+
+    /**Test ordering of traffic light status values.
+     */
+    public static void testTrafficLightStatusOrder()
+        {
+        assertTrue("YELLOW must be better than RED", TrafficLight.YELLOW.betterThan(TrafficLight.RED));
+        assertTrue("GREEN must be better than YELLOW", TrafficLight.GREEN.betterThan(TrafficLight.YELLOW));
+        assertTrue("GREEN must be better than RED", TrafficLight.GREEN.betterThan(TrafficLight.RED));
+        assertTrue("RED must not be better than GREEN", !TrafficLight.RED.betterThan(TrafficLight.GREEN));
+        assertTrue("RED must not be better than YELLOW", !TrafficLight.RED.betterThan(TrafficLight.YELLOW));
+        assertTrue("YELLOW must not be better than GREEN", !TrafficLight.YELLOW.betterThan(TrafficLight.GREEN));
         }
     }
