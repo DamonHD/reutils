@@ -42,7 +42,7 @@ public enum TrafficLight
     /**Good/OK. */
     GREEN;
 
-    /**True if this state is better than the argument state. */
+    /**True if this state is better than the argument state, eg GREEN is better than YELLOW. */
     public boolean betterThan(final TrafficLight other)
         { return(this.ordinal() > other.ordinal()); }
     }
