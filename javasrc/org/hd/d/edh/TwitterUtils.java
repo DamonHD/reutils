@@ -78,6 +78,16 @@ public final class TwitterUtils
             }
         }
 
+    /**Get the specified non-empty Twitter user name or null if none. */
+    public static String getTwitterUsername()
+        {
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
+        // Transform empty user name to null.
+        if((null != tUsername) && tUsername.isEmpty()) { return(null); }
+        return(tUsername);
+        }
+
     /**Get Twitter handle for updates; null if nothing suitable set up.
      * May return a read-only handle for testing
      * if that is permitted by the argument.
@@ -91,22 +101,42 @@ public final class TwitterUtils
     public static TwitterDetails getTwitterHandle(final boolean allowReadOnly)
         {
         final String tUsername = getTwitterUsername();
-        // Need at least a Twitter user ID to proceed.
+        // We need at least a Twitter user ID to do anything; return null if we don't have one.
         if(null == tUsername) { return(null); }
 
-        if(!allowReadOnly) { return(null); } // FIXME: can't do r/w yet!
+        // Try first the primary password file, then the alternate if need be.
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String pass1 = getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME));
+        final String pass = (pass1 != null) ? pass1 : getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME2));
 
-        return(new TwitterDetails(tUsername, new Twitter(tUsername, null), true));
+        // If we have no password then we are definitely read-only.
+        final boolean noWriteAccess = (pass == null);
+        // If definitely read-only and that is not acceptable then return null.
+        if(noWriteAccess && !allowReadOnly) { return(null); }
+
+        return(new TwitterDetails(tUsername, new Twitter(tUsername, pass), noWriteAccess));
         }
 
-    /**Get the specified non-empty Twitter user name or null if none. */
-    public static String getTwitterUsername()
+    /**Extract a (non-empty) password from the specified file, or null if none or if the filename is bad.
+     * This does not throw an exception if it cannot find or open the specified file
+     * (or the file name is null or empty)
+     * of it the file does not contain a password; for all these cases null is returned.
+     *
+     * @param pnameTwitterPasswordFilename  property name of
+     * @return non-null, non-empty password
+     */
+    private static String getPasswordFromFile(final String passwordFilename)
         {
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
-        // Transform empty user name to null.
-        if((null != tUsername) && tUsername.isEmpty()) { return(null); }
-        return(tUsername);
+        if((null == passwordFilename) || passwordFilename.trim().isEmpty()) { return(null); }
+        final File f = new File(passwordFilename);
+        if(!f.canRead()) { return(null); }
+
+
+
+
+
+        // TODO Auto-generated method stub
+        return null;
         }
 
     /**Attempt to update the displayed Twitter status as necessary.
