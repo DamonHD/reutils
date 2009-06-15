@@ -106,6 +106,7 @@ public final class TwitterUtils
      * <p>
      * We must take great pains to avoid unnecessary annoying/expensive updates.
      *
+     * @params td non-null, non-read-only Twitter handle
      * @param TwitterCacheFileName  if non-null is the location to cache twitter status messages;
      *     if the new status supplied is the same as the cached value then we won't send an update
      * @param statusMessage  short (max 140 chars) Twitter status message; never null
@@ -115,6 +116,7 @@ public final class TwitterUtils
                                                  final String statusMessage)
         throws IOException
         {
+        if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > 140) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
