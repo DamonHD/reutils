@@ -29,15 +29,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.util.Map;
+
+import winterwell.jtwitter.Twitter;
+
 
 
 /**Twitter Utilities.
- * Handles interactions with Twitter.
+ * Handles some common interactions with Twitter.
  */
 public final class TwitterUtils
     {
     /**Prevent creation of an instance. */
     private TwitterUtils() { }
 
+    /**Property name for Twitter user. */
+    public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
 
+    /**Get Twitter handle for updates; null if nothing suitable set up.
+     * May return a read-only handle for testing
+     * if that is permitted by the argument.
+     * <p>
+     * A read/write handle is a valid return value if read-only is allowed.
+     */
+    public static Twitter getTwitterHandle(final boolean allowReadOnly)
+        {
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
+        // Need at least a Twitter user ID to proceed.
+        if(null == tUsername) { return(null); }
+
+        if(!allowReadOnly) { return(null); } // FIXME: can't do r/w yet!
+
+        return(new Twitter(tUsername, null));
+        }
     }
