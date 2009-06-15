@@ -829,7 +829,7 @@ public final class FUELINST
                         final String statusMessage = MainProperties.getRawProperties().get(TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES + statusHistoricalCapped);
                         TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName),
                                 ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage :
-                                ("Grid status: " + statusHistoricalCapped));
+                                ("Grid status " + statusHistoricalCapped));
                         }
                     }
                 }
