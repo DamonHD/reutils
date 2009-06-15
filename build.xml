@@ -154,7 +154,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             classpath="${cp.dbg.basic}"
             debug="on"
             deprecation="on"
-            target="${CLASSVER}"
             optimize="off">
             <include name="**/*.java"/>
         </javac>
@@ -168,7 +167,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             classpath="${cp.opt.basic}"
             debug="off"
             deprecation="on"
-            target="${CLASSVER}"   
             optimize="on">
             <include name="**/*.java"/>
         </javac>
