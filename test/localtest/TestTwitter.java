@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
+import java.util.Map;
+
 import junit.framework.TestCase;
 
 import org.hd.d.edh.MainProperties;
@@ -45,6 +47,8 @@ public final class TestTwitter extends TestCase
     public static void testBasics()
         {
         assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
+        
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
 
         final String password = null; // Must be non-null to set status.
 
