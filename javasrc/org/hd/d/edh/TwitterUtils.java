@@ -126,7 +126,7 @@ public final class TwitterUtils
                 final String lastStatus = (String) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
                 if(statusMessage.equals(lastStatus)) { return; }
                 }
-            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
+            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
             }
 
         // Don't send a repeat message to Twitter... Save money and patience...
