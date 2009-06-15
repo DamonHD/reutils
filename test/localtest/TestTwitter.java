@@ -44,8 +44,11 @@ public final class TestTwitter extends TestCase
     public static void testBasics()
         {
         final TwitterDetails td = TwitterUtils.getTwitterHandle(true);
-        assertNotNull("Must be able to see a Twitter user set up");
-        // Print our user's status (should not throw any exception).
-        System.out.println(td.handle.getStatus(td.username));
+        if(null != td)
+            {
+            // If we have a Twitter ID then we should be able to
+            // print our user's status with no exception.
+            System.out.println(td.handle.getStatus(td.username));
+            }
         }
     }
