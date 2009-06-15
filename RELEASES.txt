@@ -31,11 +31,21 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 20090615:
+    freezepoint name: V0.1.2
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.1
+    DHD20090615: Bug-fix to Twitter correct status.
+
+
+20090615:
     freezepoint name: V0.1.1
     branch name: HEAD
     Deployed where: earth.org.uk
     Changes since last freezepoint (developer/mgr initials and brief description):
     Previous significant freezepoint: V0.1.0
+    DHD20090615: Ability to Twitter/tweet traffic-light status. 
 
 
 20090603:

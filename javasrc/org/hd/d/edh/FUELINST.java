@@ -827,10 +827,10 @@ public final class FUELINST
                         // only if we think the status changed since we last sent it
                         // and it has actually changed compared to what is at Twitter...
                         // If we can't get a hand-crafted message then we create one on the fly...
-                        final String statusMessage = MainProperties.getRawProperties().get(TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES + statusHistoricalCapped);
+                        final String statusMessage = MainProperties.getRawProperties().get(TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES + status);
                         TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName),
                                 ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage :
-                                ("Grid status " + statusHistoricalCapped));
+                                ("Grid status " + status));
                         }
                     }
                 }
