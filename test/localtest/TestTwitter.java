@@ -29,16 +29,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
 
-import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.MainProperties;
+
+import winterwell.jtwitter.Twitter;
 
 /**Twitter tests.
  *
@@ -51,7 +46,12 @@ public final class TestTwitter extends TestCase
         {
         assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
 
+        final String password = null; // Must be non-null to set status.
 
+        final Twitter twitter = new Twitter("DamonHD", password);
+        // Print DamonHD's status
+        System.out.println(twitter.getStatus("DamonHD"));
+        // Set my status if I have a non-null password.
+        if(null != password) { twitter.updateStatus("Testing my Java code!"); }
         }
-
     }
