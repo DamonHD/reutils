@@ -46,21 +46,51 @@ public final class TwitterUtils
     /**Property name for Twitter user. */
     public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
 
+    /**Immutable class containing Twitter handle, user ID and read-only flag. */
+    public static final class TwitterDetails
+        {
+        /**User name on Twitter; never null nor empty. */
+        public final String username;
+        /**Handle; never null. */
+        public final Twitter handle;
+        /**True if we know the handle to be read-only, eg because we have no password. */
+        public final boolean readOnly;
+
+        /**Create an instance. */
+        public TwitterDetails(final String username, final Twitter handle, final boolean readOnly)
+            {
+            if((null == username) || username.isEmpty()) { throw new IllegalArgumentException(); }
+            if(null == handle) { throw new IllegalArgumentException(); }
+            this.username = username;
+            this.handle = handle;
+            this.readOnly = readOnly;
+            }
+        }
+
     /**Get Twitter handle for updates; null if nothing suitable set up.
      * May return a read-only handle for testing
      * if that is permitted by the argument.
      * <p>
      * A read/write handle is a valid return value if read-only is allowed.
      */
-    public static Twitter getTwitterHandle(final boolean allowReadOnly)
+    public static TwitterDetails getTwitterHandle(final boolean allowReadOnly)
         {
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
+        final String tUsername = getTwitterUsername();
         // Need at least a Twitter user ID to proceed.
         if(null == tUsername) { return(null); }
 
         if(!allowReadOnly) { return(null); } // FIXME: can't do r/w yet!
 
-        return(new Twitter(tUsername, null));
+        return(new TwitterDetails(tUsername, new Twitter(tUsername, null), true));
+        }
+
+    /**Get the specified non-empty Twitter user name or null if none. */
+    public static String getTwitterUsername()
+        {
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
+        // Transform empty user name to null.
+        if((null != tUsername) && tUsername.isEmpty()) { return(null); }
+        return(tUsername);
         }
     }

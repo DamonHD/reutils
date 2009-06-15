@@ -29,33 +29,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
-import java.util.Map;
-
 import junit.framework.TestCase;
 
-import org.hd.d.edh.MainProperties;
-
-import winterwell.jtwitter.Twitter;
+import org.hd.d.edh.TwitterUtils;
+import org.hd.d.edh.TwitterUtils.TwitterDetails;
 
 /**Twitter tests.
  *
  */
 public final class TestTwitter extends TestCase
     {
-    /**Test loading and other aspects of the main properties/config.
+    /**Test very basic access to our selected Twitter user.
      */
     public static void testBasics()
         {
-        assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
-        
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-
-        final String password = null; // Must be non-null to set status.
-
-        final Twitter twitter = new Twitter("DamonHD", password);
-        // Print DamonHD's status
-        System.out.println(twitter.getStatus("DamonHD"));
-        // Set my status if I have a non-null password.
-        if(null != password) { twitter.updateStatus("Testing my Java code!"); }
+        final TwitterDetails td = TwitterUtils.getTwitterHandle(true);
+        assertNotNull("Must be able to see a Twitter user set up");
+        // Print our user's status (should not throw any exception).
+        System.out.println(td.handle.getStatus(td.username));
         }
     }
