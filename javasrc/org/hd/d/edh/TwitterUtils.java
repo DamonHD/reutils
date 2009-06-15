@@ -108,8 +108,8 @@ public final class TwitterUtils
 
         // Try first the primary password file, then the alternate if need be.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String pass1 = getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME));
-        final String pass = (pass1 != null) ? pass1 : getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME2));
+        final String pass1 = getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME), allowReadOnly);
+        final String pass = (pass1 != null) ? pass1 : getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME2), allowReadOnly);
 
         // If we have no password then we are definitely read-only.
         final boolean noWriteAccess = (pass == null);
@@ -126,16 +126,19 @@ public final class TwitterUtils
      * <p>
      * The password must be on the first line.
      *
-     * @param pnameTwitterPasswordFilename  property name of
+     * @param passwordFilename  name of file containing password or null/empty if none
+     * @param quiet  if true then keep quiet about file errors
      * @return non-null, non-empty password
      */
-    private static String getPasswordFromFile(final String passwordFilename)
+    private static String getPasswordFromFile(final String passwordFilename, final boolean quiet)
         {
+        // Null/empty file name results in quiet return of null.
         if((null == passwordFilename) || passwordFilename.trim().isEmpty()) { return(null); }
+
         final File f = new File(passwordFilename);
         if(!f.canRead())
             {
-            System.err.println("Cannot open pass file for reading: " + f);
+            if(!quiet) { System.err.println("Cannot open pass file for reading: " + f); }
             return(null);
             }
 
@@ -152,7 +155,11 @@ public final class TwitterUtils
             finally { r.close(); /* Release resources. */ }
             }
         // In case of error whinge but continue.
-        catch(final Exception e) { e.printStackTrace(); return(null); }
+        catch(final Exception e)
+            {
+            if(!quiet) { e.printStackTrace(); }
+            return(null);
+            }
         }
 
     /**Attempt to update the displayed Twitter status as necessary.
@@ -161,7 +168,7 @@ public final class TwitterUtils
      * <p>
      * We must take great pains to avoid unnecessary annoying/expensive updates.
      *
-     * @params td non-null, non-read-only Twitter handle
+     * @param td  non-null, non-read-only Twitter handle
      * @param TwitterCacheFileName  if non-null is the location to cache twitter status messages;
      *     if the new status supplied is the same as the cached value then we won't send an update
      * @param statusMessage  short (max 140 chars) Twitter status message; never null

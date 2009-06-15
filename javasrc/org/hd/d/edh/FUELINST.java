@@ -779,10 +779,12 @@ public final class FUELINST
             else
                 { if(outputFlagFile.delete()) { System.out.println("Flag file deleted"); } }
 
+            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+
             // Update the HTML page.
             try {
                 updateHTMLFile(startTime, outputHTMLFileName, summary, isDataStale,
-                    hourOfDayHistorical, status);
+                    hourOfDayHistorical, status, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
 
@@ -816,7 +818,6 @@ public final class FUELINST
             try {
                 if(!isDataStale)
                     {
-                    final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
                     if(td != null)
                         {
                         // Compute name of file in which to cache last status we sent to Twitter.
@@ -893,7 +894,8 @@ public final class FUELINST
                                        final CurrentSummary summary,
                                        final boolean isDataStale,
                                        final int hourOfDayHistorical,
-                                       final TrafficLight status)
+                                       final TrafficLight status,
+                                       final TwitterUtils.TwitterDetails td)
         throws IOException
         {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
@@ -943,7 +945,6 @@ public final class FUELINST
 
             // If we have a Twitter account set up then brag about it here,
             // but only if we believe that we actually have write access to be doing updates...
-            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
             if(td != null)
                 {
                 w.print("<p>Follow this grid status on Twitter @<a href=\"http://twitter.com/");

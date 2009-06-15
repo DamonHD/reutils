@@ -30,6 +30,14 @@ DHD20090608: Minor adjustments (more 'symbolic') to XML output as discussed with
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20090615:
+    freezepoint name: V0.1.1
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.0
+
+
 20090603:
     freezepoint name: V0.1.0
     SVN revision: 388
