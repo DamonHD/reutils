@@ -51,6 +51,12 @@ public final class TwitterUtils
     /**Property name for Twitter user; not null. */
     public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
 
+    /**Property name for file containing Twitter password; not null. */
+    public static final String PNAME_TWITTER_PASSWORD_FILENAME = "Twitter.passfile";
+
+    /**Property name for alternate file containing Twitter password; not null. */
+    public static final String PNAME_TWITTER_PASSWORD_FILENAME2 = "Twitter.passfile2";
+
     /**Immutable class containing Twitter handle, user ID and read-only flag. */
     public static final class TwitterDetails
         {
