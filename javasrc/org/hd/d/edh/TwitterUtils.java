@@ -116,7 +116,7 @@ public final class TwitterUtils
         {
         if(null == statusMessage) { throw new IllegalArgumentException(); }
 
-        // Don't resend if not different from status string that we cached...
+        // Don't resend if not different from previous status string that we cached...
         if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
             {
             try
@@ -131,6 +131,16 @@ public final class TwitterUtils
 
         // TODO Auto-generated method stub
 
-        throw new IOException("NOT IMPLEMENTED");
+
+
+        // Now try to cache the status message (uncompressed, since it will be small) if we can.
+        if(null != TwitterCacheFileName)
+            {
+            try
+                {
+                DataUtils.serialiseToFile(statusMessage, TwitterCacheFileName, false, true);
+                }
+            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
+            }
         }
     }
