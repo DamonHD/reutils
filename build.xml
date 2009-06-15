@@ -89,7 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="tmp.workdir" value="work.tmp"/>
 
     <!-- Basic class path we compile against; includes any external libs. -->
-    <property name="cp.common.basic" value=""/>
+    <property name="cp.common.basic" value="libs/jtwitter.jar"/>
     <!-- Provided in debug/non-debug versions. -->
     <!-- Expects cp.J2EEAPI to contain a classpath fragment for the J2EE API. -->
     <property name="cp.dbg.basic" value="${cp.common.basic}"/>
