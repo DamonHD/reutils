@@ -45,7 +45,10 @@ public final class TwitterUtils
     /**Prevent creation of an instance. */
     private TwitterUtils() { }
 
-    /**Property name for Twitter user. */
+    /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
+    public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES = "Twitter.trafficlight.status.";
+
+    /**Property name for Twitter user; not null. */
     public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
 
     /**Immutable class containing Twitter handle, user ID and read-only flag. */

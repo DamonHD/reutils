@@ -29,8 +29,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
-import java.io.FileReader;
-import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
