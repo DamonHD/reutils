@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import winterwell.jtwitter.Twitter;
@@ -72,6 +74,10 @@ public final class TwitterUtils
      * if that is permitted by the argument.
      * <p>
      * A read/write handle is a valid return value if read-only is allowed.
+     * <p>
+     * We may test that we actually have authenticated (read/write) access
+     * before claiming it as such,
+     * so obtaining one of these may require network access and significant time.
      */
     public static TwitterDetails getTwitterHandle(final boolean allowReadOnly)
         {
@@ -92,5 +98,39 @@ public final class TwitterUtils
         // Transform empty user name to null.
         if((null != tUsername) && tUsername.isEmpty()) { return(null); }
         return(tUsername);
+        }
+
+    /**Attempt to update the displayed Twitter status as necessary.
+     * Do so only if we think the status changed since we last sent it
+     * and it has actually changed compared to what is at Twitter...
+     * <p>
+     * We must take great pains to avoid unnecessary annoying/expensive updates.
+     *
+     * @param TwitterCacheFileName  if non-null is the location to cache twitter status messages;
+     *     if the new status supplied is the same as the cached value then we won't send an update
+     * @param statusMessage  short (max 140 chars) Twitter status message; never null
+     */
+    public static void setTwitterStatusIfChanged(final File TwitterCacheFileName,
+                                                 final String statusMessage)
+        throws IOException
+        {
+        if(null == statusMessage) { throw new IllegalArgumentException(); }
+
+        // Don't resend if not different from status string that we cached...
+        if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
+            {
+            try
+                {
+                final String lastStatus = (String) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
+                if(statusMessage.equals(lastStatus)) { return; }
+                }
+            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
+            }
+
+
+
+        // TODO Auto-generated method stub
+
+        throw new IOException("NOT IMPLEMENTED");
         }
     }
