@@ -29,7 +29,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
 
@@ -121,6 +123,8 @@ public final class TwitterUtils
      * This does not throw an exception if it cannot find or open the specified file
      * (or the file name is null or empty)
      * of it the file does not contain a password; for all these cases null is returned.
+     * <p>
+     * The password must be on the first line.
      *
      * @param pnameTwitterPasswordFilename  property name of
      * @return non-null, non-empty password
@@ -131,12 +135,20 @@ public final class TwitterUtils
         final File f = new File(passwordFilename);
         if(!f.canRead()) { return(null); }
 
-
-
-
-
-        // TODO Auto-generated method stub
-        return null;
+        try
+            {
+            final BufferedReader r =  new BufferedReader(new FileReader(f));
+            try
+                {
+                final String firstLine = r.readLine();
+                if((null == firstLine) || firstLine.trim().isEmpty()) { return(null); }
+                // Return non-null non-empty password.
+                return(firstLine);
+                }
+            finally { r.close(); /* Release resources. */ }
+            }
+        // In case of error whinge but continue.
+        catch(final Exception e) { e.printStackTrace(); return(null); }
         }
 
     /**Attempt to update the displayed Twitter status as necessary.
