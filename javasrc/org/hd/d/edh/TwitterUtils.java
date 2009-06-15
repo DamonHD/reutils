@@ -140,7 +140,8 @@ public final class TwitterUtils
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
             }
 
-        // Don't send a repeat/redundant message to Twitter... Save money and patience...
+        // Don't send a repeat/redundant message to Twitter... Save follower money and patience...
+        // If this fails with an exception then we won't update our cached status message either...
         if(!statusMessage.equals(td.handle.getStatus(td.username)))
             { td.handle.setStatus(statusMessage); }
 
