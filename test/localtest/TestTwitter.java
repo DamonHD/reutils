@@ -48,7 +48,7 @@ public final class TestTwitter extends TestCase
             {
             // If we have a Twitter ID then we should be able to
             // print our user's status with no exception.
-            System.out.println(td.handle.getStatus(td.username));
+            System.out.println("Current status of "+td.username+": " + td.handle.getStatus(td.username));
             }
         }
     }
