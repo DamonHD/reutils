@@ -19,7 +19,7 @@ John Stott RFE: the page could be improved for the benefit of those knowing litt
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-DHD20090608: Minor adjustments (more 'symbolic') to XML output as discussed with Ecotricity.
+DHD20090616: Tweaked tweeting, mainly to make for less traffic.
 
 
 
@@ -46,6 +46,7 @@ SIGNIFICANT RELEASES (newest first)
     Changes since last freezepoint (developer/mgr initials and brief description):
     Previous significant freezepoint: V0.1.0
     DHD20090615: Ability to Twitter/tweet traffic-light status. 
+    DHD20090608: Minor adjustments (more 'symbolic') to XML output as discussed with Ecotricity.
 
 
 20090603:

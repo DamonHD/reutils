@@ -947,11 +947,14 @@ public final class FUELINST
             // but only if we believe that we actually have write access to be doing updates...
             if(td != null)
                 {
-                w.print("<p>Follow this grid status on Twitter @<a href=\"http://twitter.com/");
+                final int followers = td.handle.getFollowers().size();
+                w.print("<p>Follow this grid status on Twitter <a href=\"http://twitter.com/");
                 w.print(td.username);
-                w.print("\">");
+                w.print("\">@");
                 w.print(td.username);
-                w.println("</a>.</p>");
+                w.print("</a>");
+                if(followers > 1) { w.print("; "+followers+" followers"); }
+                w.println(".</p>");
                 }
 
             // A bit of explanation...

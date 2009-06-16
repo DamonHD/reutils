@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="app.name" value="reutils"/>
     <property name="app.version.major" value="0"/>
     <property name="app.version.minor" value="1"/>
-    <property name="app.version.micro" value="2"/>
+    <property name="app.version.micro" value="3"/>
     <property name="app.version" value="${app.version.major}.${app.version.minor}.${app.version.micro}"/>
     <!-- Version excluding the "micro" portion, thus reflecting only significant API/functionality changes. -->
     <property name="app.version.notmicro" value="${app.version.major}.${app.version.minor}"/>
