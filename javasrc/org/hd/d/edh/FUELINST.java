@@ -829,7 +829,7 @@ public final class FUELINST
                         // If we can't get a hand-crafted message then we create one on the fly...
                         final String statusMessage = MainProperties.getRawProperties().get(TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES + status);
                         TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName),
-                                ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage :
+                                ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage.trim() :
                                 ("Grid status " + status));
                         }
                     }
