@@ -953,7 +953,7 @@ public final class FUELINST
                 w.print("\">@");
                 w.print(td.username);
                 w.print("</a>");
-                if(followers > 1) { w.print("; "+followers+" followers"); }
+                if(followers > 1) { w.print("; "+followers+" currently following"); }
                 w.println(".</p>");
                 }
 
