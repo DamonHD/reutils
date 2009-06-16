@@ -947,7 +947,8 @@ public final class FUELINST
             // but only if we believe that we actually have write access to be doing updates...
             if(td != null)
                 {
-                final int followers = td.handle.getFollowers().size();
+                int followers = -1;
+                try { followers = td.handle.getFollowers().size(); } catch(final Exception e) { e.printStackTrace(); }
                 w.print("<p>Follow this grid status on Twitter <a href=\"http://twitter.com/");
                 w.print(td.username);
                 w.print("\">@");
