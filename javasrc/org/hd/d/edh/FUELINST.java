@@ -152,6 +152,30 @@ public final class FUELINST
         return(Collections.unmodifiableMap(result));
         }
 
+    /**Prefix in main properties of fuel name information (for non-obvious code names); never null. */
+    public static final String FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX = "intensity.fuelname.";
+
+    /**Extract (immutable) intensity map from configuration information; never null but may be empty.
+     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
+     */
+    public static Map<String, String> getConfiguredFuelNames()
+        {
+        final Map<String, String> result = new HashMap<String, String>();
+
+        // Have to scan through all keys, which may be inefficient...
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        for(final String key : rawProperties.keySet())
+            {
+            if(!key.startsWith(FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
+            final String fuelname = key.substring(FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX.length());
+            final String descriptiveName = rawProperties.get(key).trim();
+            if(descriptiveName.isEmpty()) { continue; }
+            result.put(fuelname, descriptiveName);
+            }
+
+        return(Collections.unmodifiableMap(result));
+        }
+
     /**Number of hours in a day. */
     public static final int HOURS_PER_DAY = 24;
 
@@ -1061,18 +1085,29 @@ public final class FUELINST
 
             if(!isDataStale)
                 {
+                final Map<String,String> fullFuelNames = getConfiguredFuelNames();
                 w.write("<p>Current/latest fuel mix at ");
                     w.write(String.valueOf(new Date(summary.timestamp)));
-                    w.write(":");
+                    w.write(':');
                     final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary.currentGenerationMWByFuelMW);
-                    for(final String fuel : power.keySet()) { w.write(" "+fuel+"@"+power.get(fuel)+"MW"); }
+                    for(final String fuel : power.keySet())
+                        {
+                        w.write(' '); w.write(fuel);
+                        final String fullFuelName = fullFuelNames.get(fuel);
+                        if(null != fullFuelName) { w.write("("+fullFuelName+")"); }
+                        w.write("@"+power.get(fuel)+"MW");
+                        }
                     w.write(".</p>");
                 w.println();
                 }
 
             w.write("<p>Overall generation intensity (kgCO2/kWh) computed using the following fuel intensities (other fuels/sources are ignored):");
                 final SortedMap<String,Float> intensities = new TreeMap<String, Float>(getConfiguredIntensities());
-                for(final String fuel : intensities.keySet()) { w.write(" "+fuel+"="+intensities.get(fuel)); }
+                for(final String fuel : intensities.keySet())
+                    {
+                    w.write(' '); w.write(fuel);
+                    w.write("="+intensities.get(fuel));
+                    }
                 w.write(".</p>");
             w.println();
 

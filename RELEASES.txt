@@ -11,7 +11,6 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
-John Stott RFE: the page could be improved for the benefit of those knowing little about electricity generation by defining the acronyms. e.g. INTIRL , NPSHYD etc . Even though I have worked in the electricity and energy field, I am not familiar with all the abbreviations used.
 
 
 
@@ -19,7 +18,6 @@ John Stott RFE: the page could be improved for the benefit of those knowing litt
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-DHD20090616: Tweaked tweeting, mainly to make for less traffic.
 
 
 
@@ -29,6 +27,16 @@ DHD20090616: Tweaked tweeting, mainly to make for less traffic.
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20090618:
+    freezepoint name: V0.1.3
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.2
+    DHD20090618: John Stott traffic-lights RFE: "The page could be improved for the benefit of those knowing little about electricity generation by defining the acronyms. e.g. INTIRL, NPSHYD etc."
+    DHD20090616: Tweaked tweeting, mainly to make for less traffic.
+
 
 20090615:
     freezepoint name: V0.1.2
