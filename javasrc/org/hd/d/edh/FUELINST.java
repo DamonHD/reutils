@@ -947,7 +947,7 @@ public final class FUELINST
             final String weaselWord = isDataStale ? "probably " : "";
             w.write(open+((status == TrafficLight.RED) ? " bgcolor=\"red\">Grid carbon intensity is "+weaselWord+"high; please do not run big appliances such as a dishwasher or washing machine now if you can postpone" : ">&nbsp;")+close);
             w.write(open+((status == TrafficLight.YELLOW) ? " bgcolor=\"yellow\">Grid is "+weaselWord+"OK; but you could still avoid CO2 emissions by postponing running big appliances such as dishwashers or washing machines" : ((status == null) ? ">Status is unknown" : ">&nbsp;"))+close);
-            w.write(open+((status == TrafficLight.GREEN) ? " bgcolor=\"green\">Grid is "+weaselWord+"good; run appliances now to minimise CO2 emissions" : ">&nbsp;")+close);
+            w.write(open+((status == TrafficLight.GREEN) ? " bgcolor=\"green\">Grid is "+weaselWord+"good; you might run major loads such as your dishwasher and/or washing machine now to minimise CO2 emissions" : ">&nbsp;")+close);
             w.write("</table>");
             w.println();
 
