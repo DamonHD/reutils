@@ -11,6 +11,9 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
+Put in configurable (say) ~30m min delay between Tweets to avoid flapping near boundaries.
+
+Put in list of fuels (eg PS) that must be at zero for 'green' state.
 
 
 
