@@ -13,7 +13,9 @@ IMMEDIATE TODO
 
 Put in configurable (say) ~30m min delay between Tweets to avoid flapping near boundaries.
 
-Put in list of fuels (eg PS) that must be at zero for 'green' state.
+Put in list of fuels (eg PS) that must be at zero for 'super-green' state.
+
+For long-term data analysis show fraction of hear hour/day/month in bottom 1/3, 1/4 intensity, no PS, green/supergreen, etc.
 
 
 
