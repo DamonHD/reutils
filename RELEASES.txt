@@ -19,6 +19,8 @@ For long-term data analysis show fraction of hear hour/day/month in bottom 1/3, 
 
 Store a week's worth of data for better predictions on most days except holidays such as Xmas!
 
+Break out key of expansion of FUELINST types in HTML.
+
 
 
 
