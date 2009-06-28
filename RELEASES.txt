@@ -28,6 +28,7 @@ Break out key of expansion of FUELINST types in HTML.
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
+DHD20090628: Creation of alternate 'weaker' and 'stronger' flags for different use cases.
 DHD20090628: Showing 'predicted' status Tweets when data is not live.
 DHD20090628: Added configurable minimum delay between Tweets to avoid flapping near boundaries.
 
