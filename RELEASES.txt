@@ -21,7 +21,7 @@ Store a week's worth of data for better predictions on most days except holidays
 
 Break out key of expansion of FUELINST types in HTML.
 
-Show Tweets, but as 'PREDICTED', when data is stale.
+Still show Tweets, but as 'predicted' variants, when data is stale.
 
 
 
