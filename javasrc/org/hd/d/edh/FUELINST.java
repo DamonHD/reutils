@@ -838,29 +838,43 @@ public final class FUELINST
             catch(final IOException e) { e.printStackTrace(); }
 
             // Update Twitter if it is set up
-            // and if we have non-stale stats
             // and if this represents a change from the previous status.
-            try {
-                if(!isDataStale)
+            // We may have different messages when we're working from historical data
+            // because real-time / live data is not available.
+            try
+                {
+                if(td != null)
                     {
-                    if(td != null)
-                        {
-                        // Compute name of file in which to cache last status we sent to Twitter.
-                        final String TwitterCacheFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
-                            (outputHTMLFileName + ".twittercache");
-                        // Attempt to update the displayed Twitter status as necessary
-                        // only if we think the status changed since we last sent it
-                        // and it has actually changed compared to what is at Twitter...
-                        // If we can't get a hand-crafted message then we create one on the fly...
-                        final String statusMessage = MainProperties.getRawProperties().get(TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES + statusUncapped);
-                        TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName),
-                                ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage.trim() :
-                                ("Grid status " + status));
-                        }
+                    // Compute name of file in which to cache last status we sent to Twitter.
+                    final String TwitterCacheFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
+                        (outputHTMLFileName + ".twittercache");
+                    // Attempt to update the displayed Twitter status as necessary
+                    // only if we think the status changed since we last sent it
+                    // and it has actually changed compared to what is at Twitter...
+                    // If we can't get a hand-crafted message then we create a simple one on the fly...
+                    // We use different messages for live and historical (stale) data.
+                    final String tweetMessage = generateTweetMessage(isDataStale, statusUncapped);
+                    TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName), tweetMessage);
                     }
                 }
             catch(final IOException e) { e.printStackTrace(); }
             }
+        }
+
+    /**Generate the text of the status Tweet.
+     * Public to allow testing that returned Tweets are always valid.
+     *
+     * @param isDataStale  true if we are working on historical/predicted (non-live) data
+     * @param statusUncapped  the uncapped current or predicted status
+     * @return  human readable valid Tweet message
+     */
+    public static String generateTweetMessage(final boolean isDataStale,
+            final TrafficLight statusUncapped)
+        {
+        final String statusMessage = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
+        final String tweetMessage = ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage.trim() :
+            ("Grid status " + statusUncapped);
+        return(tweetMessage);
         }
 
 
