@@ -892,9 +892,10 @@ public final class FUELINST
         // The flag file has terminating extension (from final ".") replaced with ".flag".
         // (If no extension is present then ".flag" is simply appended.)
         final File outputFlagFile = new File(baseFileName + ".flag");
-        System.out.println("Basic flag file is " + outputFlagFile);
+        final boolean basicFlagState = TrafficLight.GREEN != statusCapped;
+        System.out.println("Basic flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        if(TrafficLight.GREEN != statusCapped)
+        if(basicFlagState)
             { if(outputFlagFile.createNewFile()) { System.out.println("Basic flag file created"); } }
         else
             { if(outputFlagFile.delete()) { System.out.println("Basic flag file deleted"); } }
@@ -903,20 +904,22 @@ public final class FUELINST
         // ie helps to ensure that the flag will probably be cleared some time each day
         // even if our data source is unreliable.
         // When live data is available then this should be the same as the basic flag.
-        final File outputPredFlagFile = new File(baseFileName + ".predicted.flag");
-        System.out.println("Predicted flag file is " + outputPredFlagFile);
+        final File outputPredictedFlagFile = new File(baseFileName + ".predicted.flag");
+        final boolean predictedFlagState = TrafficLight.GREEN != statusUncapped;
+        System.out.println("Predicted flag file is " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        if(TrafficLight.GREEN != statusUncapped)
-            { if(outputPredFlagFile.createNewFile()) { System.out.println("Predicted flag file created"); } }
+        if(predictedFlagState)
+            { if(outputPredictedFlagFile.createNewFile()) { System.out.println("Predicted flag file created"); } }
         else
-            { if(outputPredFlagFile.delete()) { System.out.println("Predicted flag file deleted"); } }
+            { if(outputPredictedFlagFile.delete()) { System.out.println("Predicted flag file deleted"); } }
 
         // Present unless 'capped' value is green (and thus must also be from live data)
         // AND there storage is not being drawn from.
         final File outputSupergreenFlagFile = new File(baseFileName + ".supergreen.flag");
-        System.out.println("Supergreen flag file is " + outputFlagFile);
+        final boolean supergreenFlagState = (basicFlagState) || (currentStorageDrawdownMW > 0);
+        System.out.println("Supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        if((TrafficLight.GREEN != statusCapped) || (currentStorageDrawdownMW > 0))
+        if(supergreenFlagState)
             { if(outputSupergreenFlagFile.createNewFile()) { System.out.println("Supergreen flag file created"); } }
         else
             { if(outputSupergreenFlagFile.delete()) { System.out.println("Supergreen flag file deleted"); } }
