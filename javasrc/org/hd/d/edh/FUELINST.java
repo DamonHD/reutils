@@ -1003,6 +1003,10 @@ public final class FUELINST
         DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray());
         }
 
+
+    /**If the basic colour is GREEN but we're using pumped storage then we can indicate that with a yellowish green instead (ie mainly green, but not fully). */
+    private static final String LESS_GREEN_STORAGE_DRAWDOWN = "olive";
+
     /**Update (atomically if possible) the HTML traffic-light page.
      */
     private static void updateHTMLFile(final long startTime,
@@ -1123,15 +1127,23 @@ public final class FUELINST
                 }
             w.write("</tr>");
             w.write("<tr>");
+            boolean usedLessGreen = false;
             final int maxHourlyIntensity = summary.histAveIntensityByHourOfDay.max0();
             for(int h = 0; h < 24; ++h)
                 {
                 final int displayHourGMT = (h + startSlot) % 24;
                 final Integer hIntensity = summary.histAveIntensityByHourOfDay.get(displayHourGMT);
                 if((null == hIntensity) || (0 == hIntensity)) { w.write("<td></td>"); continue; /* Skip empty slot. */ }
+                final TrafficLight rawHourStatus = summary.selectColour(hIntensity);
+                // But if the colour is GREEN but we're using pumped storage
+                // then switch to a paler shade instead (ie mainly green, but not fully)...
+                final boolean lessGreen = ((TrafficLight.GREEN == rawHourStatus) && (summary.histAveStorageDrawdownByHourOfDay.get(displayHourGMT) > 0));
+                if(lessGreen) { usedLessGreen = true; }
+                final String barColour = lessGreen ? LESS_GREEN_STORAGE_DRAWDOWN :
+                    rawHourStatus.toString().toLowerCase();
                 final int height = (GCOMP_PX_MAX*hIntensity) / Math.max(1, maxHourlyIntensity);
                 w.write("<td width=\"30\"><ul class=\"barGraph\">");
-                    w.write("<li style=\"background-color:"+summary.selectColour(hIntensity).toString().toLowerCase()+";height:"+height+"px;left:0px;\">");
+                    w.write("<li style=\"background-color:"+barColour+";height:"+height+"px;left:0px;\">");
                     w.write(String.valueOf(hIntensity));
                     w.write("</li>");
                     w.write("</ul></td>");
@@ -1172,6 +1184,9 @@ public final class FUELINST
             w.write("</tr>");
             w.write("</table>");
             w.println();
+            // Footnotes
+            if(usedLessGreen)
+                { w.println("<p>Hours that are basically <span style=\"color:green\">green</span> but drawing down on storage with attendant losses and suggesting no excess generation available, ie marginally green, are coloured <span style=\"color:"+LESS_GREEN_STORAGE_DRAWDOWN+"\">"+LESS_GREEN_STORAGE_DRAWDOWN+"</span>.</p>"); }
 
             // TODO: Show cumulative MWh and tCO2.
 

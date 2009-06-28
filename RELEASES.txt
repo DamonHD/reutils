@@ -13,7 +13,7 @@ IMMEDIATE TODO
 
 Refactor to allow easy replacement of output modules.
 
-Allow for WIND (and other fuel) fudge factor (for generation invisible to Elexon).
+Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon).
 
 For long-term data analysis show fraction of hear hour/day/month in bottom 1/3, 1/4 intensity, no PS, green/supergreen, etc.
 
@@ -26,6 +26,7 @@ Store a week's worth of data for better predictions on most days except holidays
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
+DHD20090628: Marking as 'marginally green' hours that use (pumped) storage.
 DHD20090628: Trying to ensure that flags are globally readable after creation (avoids 403 errors).
 
 
