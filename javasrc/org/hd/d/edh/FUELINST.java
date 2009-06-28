@@ -895,10 +895,7 @@ public final class FUELINST
         final boolean basicFlagState = TrafficLight.GREEN != statusCapped;
         System.out.println("Basic flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        if(basicFlagState)
-            { if(outputFlagFile.createNewFile()) { System.out.println("Basic flag file created"); } }
-        else
-            { if(outputFlagFile.delete()) { System.out.println("Basic flag file deleted"); } }
+        doPublicFlagFile(outputFlagFile, basicFlagState);
 
         // Now deal with the flag that is prepared to make predictions from historical data,
         // ie helps to ensure that the flag will probably be cleared some time each day
@@ -908,10 +905,7 @@ public final class FUELINST
         final boolean predictedFlagState = TrafficLight.GREEN != statusUncapped;
         System.out.println("Predicted flag file is " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        if(predictedFlagState)
-            { if(outputPredictedFlagFile.createNewFile()) { System.out.println("Predicted flag file created"); } }
-        else
-            { if(outputPredictedFlagFile.delete()) { System.out.println("Predicted flag file deleted"); } }
+        doPublicFlagFile(outputPredictedFlagFile, predictedFlagState);
 
         // Present unless 'capped' value is green (and thus must also be from live data)
         // AND there storage is not being drawn from.
@@ -919,10 +913,28 @@ public final class FUELINST
         final boolean supergreenFlagState = (basicFlagState) || (currentStorageDrawdownMW > 0);
         System.out.println("Supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        if(supergreenFlagState)
-            { if(outputSupergreenFlagFile.createNewFile()) { System.out.println("Supergreen flag file created"); } }
+        doPublicFlagFile(outputSupergreenFlagFile, supergreenFlagState);
+        }
+
+    /**Create/remove public (readable by everyone) flag file as needed to match required state.
+     * @param outputFlagFile  flag file to create (true) or remove (false) if required; non-null
+     * @param flagRequiredPresent  desired state for flag: true indicates present, false indicates absent
+     * @throws IOException  in case of difficulty
+     */
+    private static void doPublicFlagFile(final File outputFlagFile,
+            final boolean flagRequiredPresent)
+        throws IOException
+        {
+        if(flagRequiredPresent)
+            {
+            if(outputFlagFile.createNewFile())
+                {
+                outputFlagFile.setReadable(true);
+                System.out.println("Flag file created: "+outputFlagFile);
+                }
+            }
         else
-            { if(outputSupergreenFlagFile.delete()) { System.out.println("Supergreen flag file deleted"); } }
+            { if(outputFlagFile.delete()) { System.out.println("Flag file deleted: "+outputFlagFile); } }
         }
 
     /**Generate the text of the status Tweet.
