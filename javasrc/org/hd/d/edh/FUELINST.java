@@ -769,7 +769,10 @@ public final class FUELINST
 
         final String outputHTMLFileName = (args.length < 2) ? null : args[1];
         final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
-        final File cacheFile = (-1 == lastDot) ? null : (new File(outputHTMLFileName.substring(0, lastDot) + ".cache"));
+        // Base/prefix onto which to append specific extensions.
+        final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
+
+        final File cacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
 
         final CurrentSummary summary = computeCurrentSummary(cacheFile);
 
@@ -795,8 +798,8 @@ public final class FUELINST
             // then create/clear the flag based on historical data (ie predictions) where possible.
             // The flag file has terminating extension (from final ".") replaced with ".flag".
             // (If no extension is present then ".flag" is simply appended.)
-            final File outputFlagFile = (-1 != lastDot) ? (new File(outputHTMLFileName.substring(0, lastDot) + ".flag")) :
-                new File(outputHTMLFileName + ".flag");
+            final File outputFlagFile = (null == baseFileName) ? null : (new File(baseFileName + ".flag"));
+
             System.out.println("Flag file is " + outputFlagFile);
             // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
             if(TrafficLight.GREEN != status)
