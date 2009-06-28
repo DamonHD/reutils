@@ -271,6 +271,8 @@ public final class FUELINST
         public final int currentIntensity;
         /**Current/latest generation (MW) by fuel type, immutable; may be empty but not null. */
         public final Map<String,Integer> currentGenerationMWByFuelMW;
+        /**Current/latest storage-drawdown MW; non-negative. */
+        public final long currentStorageDrawdownMW;
 
         /**Historical minimum intensity of generation in gCO2/kWh (kgCO2/MWh); non-negative. */
         public final int histMinIntensity;
@@ -314,7 +316,7 @@ public final class FUELINST
          */
         public CurrentSummary()
             {
-            this(null, null, 0L, 0L, 0L, 0, Collections.<String,Integer>emptyMap(), 0, 0L, 0, 0, 0L, 0L, 0, 0, 0,
+            this(null, null, 0L, 0L, 0L, 0, Collections.<String,Integer>emptyMap(), 0L, 0, 0L, 0, 0, 0L, 0L, 0, 0, 0,
                     null, null, null, null,
                     0f);
             }
@@ -327,6 +329,7 @@ public final class FUELINST
                 final long currentMW,
                 final int currentIntensity,
                 final Map<String,Integer> currentGenerationMWByFuelMW,
+                final long currentStorageDrawdownMW,
                 final int histMinIntensity,
                 final long minIntensityRecordTimestamp,
                 final int histAveIntensity,
@@ -348,6 +351,7 @@ public final class FUELINST
             this.currentIntensity = currentIntensity;
             if(currentGenerationMWByFuelMW == null) { throw new IllegalArgumentException(); }
             this.currentGenerationMWByFuelMW = Collections.unmodifiableMap(new HashMap<String, Integer>(currentGenerationMWByFuelMW)); // Defensive copy.
+            this.currentStorageDrawdownMW = currentStorageDrawdownMW;
             this.histMinIntensity = histMinIntensity;
             this.histAveIntensity = histAveIntensity;
             this.histMaxIntensity = histMaxIntensity;
@@ -399,6 +403,7 @@ public final class FUELINST
             sb.append(":timestamp=").append((timestamp == 0) ? 0 : (new SimpleDateFormat(CSVTIMESTAMP_FORMAT)).format(new Date(timestamp)));
             sb.append(":currentMW=").append(currentMW);
             sb.append(":currentIntensity=").append(currentIntensity);
+            sb.append(":currentStorageDrawdownMW=").append(currentStorageDrawdownMW);
             sb.append(":histMinIntensity=").append(histMinIntensity);
             sb.append(":histAveIntensity=").append(histAveIntensity);
             sb.append(":histMaxIntensity=").append(histMaxIntensity);
@@ -559,6 +564,7 @@ public final class FUELINST
         int maxIntensity = Integer.MIN_VALUE;
         int currentIntensity = 0;
         long currentMW = 0;
+        long currentStorageDrawdownMW = 0;
         Map<String,Integer> currentGenerationByFuel = Collections.emptyMap();
         final int[] sampleCount = new int[HOURS_PER_DAY]; // Count of all good timestamped records.
         final long[] totalIntensityByHourOfDay = new long[HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
@@ -605,6 +611,7 @@ public final class FUELINST
             currentMW = thisMW;
             currentIntensity = weightedIntensity; // Last (good) record we process is the 'current' one as they are in date order.
             currentGenerationByFuel = generationByFuel;
+            currentStorageDrawdownMW = thisStorageDrawdownMW; // Last (good) record is 'current'.
 
             ++goodRecordCount;
             totalIntensity += weightedIntensity;
@@ -713,6 +720,7 @@ public final class FUELINST
                                   currentMW,
                                   currentIntensity,
                                   currentGenerationByFuel,
+                                  currentStorageDrawdownMW,
                                   minIntensity,
                                   minIntensityRecordTimestamp,
                                   aveIntensity,
@@ -795,7 +803,7 @@ public final class FUELINST
                 (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
 
             // Handle the flag files that can be tested by remote servers.
-            try { doFlagFiles(baseFileName, status, statusUncapped); }
+            try { doFlagFiles(baseFileName, status, statusUncapped, summary.currentStorageDrawdownMW); }
             catch(final IOException e) { e.printStackTrace(); }
 
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
@@ -856,8 +864,16 @@ public final class FUELINST
         }
 
     /**Handle the flag files that can be tested by remote servers.
-     * The basic ".flag" file is present unless status is green AND we have live data.
+     * The basic ".flag" file is present unless status is green
+     * AND we have live data.
      * <p>
+     * The more robust ".predicted.flag" file is present unless status is green.
+     * Live data is used if present, else a prediction is made from historical data.
+     * <p>
+     * The keen ".supergreen.flag" file is present unless status is green
+     * AND we have live data
+     * AND no storage is being drawn down on the grid.
+     * This means that we can be pretty sure that there is a surplus of energy available.
      *
      * @param baseFileName  base file name to make flags; if null then don't do flags.
      * @param statusCapped  status capped to YELLOW if there is no live data
@@ -865,7 +881,8 @@ public final class FUELINST
      * @throws IOException  in case of problems
      */
     private static void doFlagFiles(final String baseFileName,
-            final TrafficLight statusCapped, final TrafficLight statusUncapped)
+            final TrafficLight statusCapped, final TrafficLight statusUncapped,
+            final long currentStorageDrawdownMW)
         throws IOException
         {
         if(null == baseFileName) { return; }
@@ -893,6 +910,16 @@ public final class FUELINST
             { if(outputPredFlagFile.createNewFile()) { System.out.println("Predicted flag file created"); } }
         else
             { if(outputPredFlagFile.delete()) { System.out.println("Predicted flag file deleted"); } }
+
+        // Present unless 'capped' value is green (and thus must also be from live data)
+        // AND there storage is not being drawn from.
+        final File outputSupergreenFlagFile = new File(baseFileName + ".supergreen.flag");
+        System.out.println("Supergreen flag file is " + outputFlagFile);
+        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
+        if((TrafficLight.GREEN != statusCapped) || (currentStorageDrawdownMW > 0))
+            { if(outputSupergreenFlagFile.createNewFile()) { System.out.println("Supergreen flag file created"); } }
+        else
+            { if(outputSupergreenFlagFile.delete()) { System.out.println("Supergreen flag file deleted"); } }
         }
 
     /**Generate the text of the status Tweet.
