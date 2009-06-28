@@ -1165,7 +1165,6 @@ public final class FUELINST
 
             if(!isDataStale)
                 {
-                final Map<String,String> fullFuelNames = getConfiguredFuelNames();
                 w.write("<p>Current/latest fuel mix at ");
                     w.write(String.valueOf(new Date(summary.timestamp)));
                     w.write(':');
@@ -1173,8 +1172,6 @@ public final class FUELINST
                     for(final String fuel : power.keySet())
                         {
                         w.write(' '); w.write(fuel);
-                        final String fullFuelName = fullFuelNames.get(fuel);
-                        if(null != fullFuelName) { w.write("("+fullFuelName+")"); }
                         w.write("@"+power.get(fuel)+"MW");
                         }
                     w.write(".</p>");
@@ -1182,14 +1179,28 @@ public final class FUELINST
                 }
 
             w.write("<p>Overall generation intensity (kgCO2/kWh) computed using the following fuel intensities (other fuels/sources are ignored):");
-                final SortedMap<String,Float> intensities = new TreeMap<String, Float>(getConfiguredIntensities());
-                for(final String fuel : intensities.keySet())
-                    {
-                    w.write(' '); w.write(fuel);
-                    w.write("="+intensities.get(fuel));
-                    }
-                w.write(".</p>");
+            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(getConfiguredIntensities());
+            for(final String fuel : intensities.keySet())
+                {
+                w.write(' '); w.write(fuel);
+                w.write("="+intensities.get(fuel));
+                }
+            w.write(".</p>");
             w.println();
+
+            // Key for fuel names/codes if available.
+            final SortedMap<String,String> fullFuelNames = new TreeMap<String,String>(getConfiguredFuelNames());
+            if(!fullFuelNames.isEmpty())
+                {
+                w.write("<p>Key to fuel types/names:<dl>");
+                    for(final String fuel : fullFuelNames.keySet())
+                        {
+                        w.write("<dt>"); w.write(fuel); w.write("</dt>");
+                        w.write("<dd>"); w.write(fullFuelNames.get(fuel)); w.write("</dd>");
+                        }
+                    w.write("</dl></p>");
+                w.println();
+                }
 
             w.println("<h3>Methodology</h3>");
             w.println(rawProperties.get("methodology.HTML"));
