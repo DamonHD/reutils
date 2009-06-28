@@ -47,6 +47,9 @@ public final class TwitterUtils
     /**Prevent creation of an instance. */
     private TwitterUtils() { }
 
+    /**Maximum Twitter message length (Tweet) in (ASCII) characters. */
+    public static final int MAX_TWEET_CHARS = 140;
+
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
     public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES = "Twitter.trafficlight.status.";
 
@@ -183,7 +186,7 @@ public final class TwitterUtils
         {
         if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
         if(null == statusMessage) { throw new IllegalArgumentException(); }
-        if(statusMessage.length() > 140) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
+        if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
         // Don't try to resend unless different from previous status string that we generated and cached...
         if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
