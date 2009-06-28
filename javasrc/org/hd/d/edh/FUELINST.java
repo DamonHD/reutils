@@ -794,18 +794,9 @@ public final class FUELINST
             final TrafficLight status = (!isDataStale) ? summary.status :
                 (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
 
-            // In the absence of current data,
-            // then create/clear the flag based on historical data (ie predictions) where possible.
-            // The flag file has terminating extension (from final ".") replaced with ".flag".
-            // (If no extension is present then ".flag" is simply appended.)
-            final File outputFlagFile = (null == baseFileName) ? null : (new File(baseFileName + ".flag"));
-
-            System.out.println("Flag file is " + outputFlagFile);
-            // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-            if(TrafficLight.GREEN != status)
-                { if(outputFlagFile.createNewFile()) { System.out.println("Flag file created"); } }
-            else
-                { if(outputFlagFile.delete()) { System.out.println("Flag file deleted"); } }
+            // Handle the flag files that can be tested by remote servers.
+            try { doFlagFiles(baseFileName, status, statusUncapped); }
+            catch(final IOException e) { e.printStackTrace(); }
 
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
 
@@ -862,6 +853,46 @@ public final class FUELINST
                 }
             catch(final IOException e) { e.printStackTrace(); }
             }
+        }
+
+    /**Handle the flag files that can be tested by remote servers.
+     * The basic ".flag" file is present unless status is green AND we have live data.
+     * <p>
+     *
+     * @param baseFileName  base file name to make flags; if null then don't do flags.
+     * @param statusCapped  status capped to YELLOW if there is no live data
+     * @param statusUncapped  uncapped status (can be green from prediction even if no live data)
+     * @throws IOException  in case of problems
+     */
+    private static void doFlagFiles(final String baseFileName,
+            final TrafficLight statusCapped, final TrafficLight statusUncapped)
+        throws IOException
+        {
+        if(null == baseFileName) { return; }
+
+        // In the absence of current data,
+        // then create/clear the flag based on historical data (ie predictions) where possible.
+        // The flag file has terminating extension (from final ".") replaced with ".flag".
+        // (If no extension is present then ".flag" is simply appended.)
+        final File outputFlagFile = new File(baseFileName + ".flag");
+        System.out.println("Basic flag file is " + outputFlagFile);
+        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
+        if(TrafficLight.GREEN != statusCapped)
+            { if(outputFlagFile.createNewFile()) { System.out.println("Basic flag file created"); } }
+        else
+            { if(outputFlagFile.delete()) { System.out.println("Basic flag file deleted"); } }
+
+        // Now deal with the flag that is prepared to make predictions from historical data,
+        // ie helps to ensure that the flag will probably be cleared some time each day
+        // even if our data source is unreliable.
+        // When live data is available then this should be the same as the basic flag.
+        final File outputPredFlagFile = new File(baseFileName + ".predicted.flag");
+        System.out.println("Predicted flag file is " + outputPredFlagFile);
+        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
+        if(TrafficLight.GREEN != statusUncapped)
+            { if(outputPredFlagFile.createNewFile()) { System.out.println("Predicted flag file created"); } }
+        else
+            { if(outputPredFlagFile.delete()) { System.out.println("Predicted flag file deleted"); } }
         }
 
     /**Generate the text of the status Tweet.
