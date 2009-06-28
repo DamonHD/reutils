@@ -171,11 +171,12 @@ public final class TwitterUtils
             }
         }
 
-    /**Attempt to update the displayed Twitter status as necessary.
-     * Do so only if we think the status changed since we last sent it
-     * and it has actually changed compared to what is at Twitter...
+    /**Attempt to update the displayed Twitter status if necessary.
+     * Send a new Tweet only if we think the message/status changed since we last sent one,
+     * and if it no longer matches what is actually at Twitter,
+     * so as to eliminate spurious Tweets.
      * <p>
-     * We must take great pains to avoid unnecessary annoying/expensive updates.
+     * We should take pains to avoid unnecessary annoying/expensive updates.
      *
      * @param td  non-null, non-read-only Twitter handle
      * @param TwitterCacheFileName  if non-null is the location to cache twitter status messages;
@@ -190,6 +191,32 @@ public final class TwitterUtils
         if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
+
+        // If there is a minimum interval between Tweets specified
+        // then check when our cache of the last one send was updated
+        // and quietly veto this message (though log it) if the last update was too recent.
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String minIntervalS = rawProperties.get(PNAME_TWITTER_MIN_GAP_MINS);
+        if((null != minIntervalS) && !minIntervalS.isEmpty())
+            {
+            try
+                {
+                final int minInterval = Integer.parseInt(minIntervalS, 10);
+                if(minInterval < 0) { throw new NumberFormatException(PNAME_TWITTER_MIN_GAP_MINS + " must be non-negative"); }
+                // Only restrict sending messages for a positive interval.
+                if(minInterval > 0)
+                    {
+                    final long minIntervalmS = minInterval * 60 * 1000L;
+                    if(TwitterCacheFileName.lastModified() + minIntervalmS > System.currentTimeMillis())
+                        {
+                        System.out.println("Too recently sent Tweet so skipping this one: " + statusMessage);
+                        return;
+                        }
+                    }
+                }
+            // Complain about badly-formatted value, and continue as if not present.
+            catch(final NumberFormatException e) { e.printStackTrace(); }
+            }
 
         // Don't try to resend unless different from previous status string that we generated and cached...
         if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
