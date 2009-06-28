@@ -1165,6 +1165,8 @@ public final class FUELINST
 
             if(!isDataStale)
                 {
+                // Show some stats only relevant for live data...
+
                 w.write("<p>Current/latest fuel mix at ");
                     w.write(String.valueOf(new Date(summary.timestamp)));
                     w.write(':');
@@ -1176,6 +1178,14 @@ public final class FUELINST
                         }
                     w.write(".</p>");
                 w.println();
+
+                if(summary.currentStorageDrawdownMW > 0)
+                    {
+                    w.write("<p>Current draw-down from storage is ");
+                        w.write(Long.toString(summary.currentStorageDrawdownMW));
+                        w.write("MW.</p>");
+                    w.println();
+                    }
                 }
 
             w.write("<p>Overall generation intensity (kgCO2/kWh) computed using the following fuel intensities (other fuels/sources are ignored):");
