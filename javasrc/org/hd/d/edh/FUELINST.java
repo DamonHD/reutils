@@ -865,12 +865,13 @@ public final class FUELINST
      * Public to allow testing that returned Tweets are always valid.
      *
      * @param isDataStale  true if we are working on historical/predicted (non-live) data
-     * @param statusUncapped  the uncapped current or predicted status
-     * @return  human readable valid Tweet message
+     * @param statusUncapped  the uncapped current or predicted status; never null
+     * @return human-readable valid Tweet message
      */
     public static String generateTweetMessage(final boolean isDataStale,
             final TrafficLight statusUncapped)
         {
+        if(null == statusUncapped) { throw new IllegalArgumentException(); }
         final String statusMessage = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
         final String tweetMessage = ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage.trim() :
             ("Grid status " + statusUncapped);
