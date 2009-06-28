@@ -50,6 +50,9 @@ public final class TwitterUtils
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
     public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES = "Twitter.trafficlight.status.";
 
+    /**Property name prefix (needs traffic-light colour appended) for Twitter status messages when using historical data, ie predicting; not null. */
+    public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES = "Twitter.trafficlight.prediction.";
+
     /**Property name for Twitter user; not null. */
     public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
 
