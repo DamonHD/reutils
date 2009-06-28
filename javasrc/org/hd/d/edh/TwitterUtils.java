@@ -65,6 +65,9 @@ public final class TwitterUtils
     /**Property name for alternate file containing Twitter password; not null. */
     public static final String PNAME_TWITTER_PASSWORD_FILENAME2 = "Twitter.passfile2";
 
+    /**Property name for minimum gap between Tweets in minutes (non-negative); not null. */
+    public static final String PNAME_TWITTER_MIN_GAP_MINS = "Twitter.minGapMins";
+
     /**Immutable class containing Twitter handle, user ID and read-only flag. */
     public static final class TwitterDetails
         {
