@@ -38,6 +38,8 @@ import junit.framework.TestCase;
 
 import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.FUELINST;
+import org.hd.d.edh.TrafficLight;
+import org.hd.d.edh.TwitterUtils;
 
 /**Test the FUELINST handler. */
 public final class TestFUELINST extends TestCase
@@ -98,5 +100,22 @@ public final class TestFUELINST extends TestCase
 //                }
 //            }
 //        finally { sampleFile1.close(); }
+        }
+
+    /**Test that all possible grid status Tweets are legal with the current property set.
+     */
+    public static void testTweetValidity()
+        {
+        for(final boolean isDataStale : new boolean[]{ true, false } )
+            {
+            for(final TrafficLight status : TrafficLight.values())
+                {
+                final String message = FUELINST.generateTweetMessage(isDataStale, status);
+                assertNotNull("Generated Tweet must not be null", message);
+System.out.println("LENGTH="+message.length()+": "+message);
+                assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
+                assertTrue("Generate Tweet must not be over-long", message.length() <= TwitterUtils.MAX_TWEET_CHARS);
+                }
+            }
         }
     }
