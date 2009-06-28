@@ -192,8 +192,19 @@ public final class TwitterUtils
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
+        // Don't try to resend unless different from previous status string that we generated/cached...
+        if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
+            {
+            try
+                {
+                final String lastStatus = (String) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
+                if(statusMessage.equals(lastStatus)) { return; }
+                }
+            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
+            }
+
         // If there is a minimum interval between Tweets specified
-        // then check when our cache of the last one send was updated
+        // then check when our cache of the last one sent was updated
         // and quietly veto this message (though log it) if the last update was too recent.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
         final String minIntervalS = rawProperties.get(PNAME_TWITTER_MIN_GAP_MINS);
@@ -209,24 +220,13 @@ public final class TwitterUtils
                     final long minIntervalmS = minInterval * 60 * 1000L;
                     if(TwitterCacheFileName.lastModified() + minIntervalmS > System.currentTimeMillis())
                         {
-                        System.out.println("Too recently sent Tweet so skipping this one: " + statusMessage);
+                        System.err.println("WARNING: sent previous Tweet too recently so skipping sending this one: " + statusMessage);
                         return;
                         }
                     }
                 }
             // Complain about badly-formatted value, and continue as if not present.
             catch(final NumberFormatException e) { e.printStackTrace(); }
-            }
-
-        // Don't try to resend unless different from previous status string that we generated and cached...
-        if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
-            {
-            try
-                {
-                final String lastStatus = (String) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
-                if(statusMessage.equals(lastStatus)) { return; }
-                }
-            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
             }
 
         // Don't send a repeat/redundant message to Twitter... Save follower money and patience...

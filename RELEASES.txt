@@ -11,7 +11,7 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
-Put in configurable (say) ~30m min delay between Tweets to avoid flapping near boundaries.
+
 
 Put in list of fuels (eg PS) that must be at zero for 'super-green' state.
 
@@ -21,7 +21,6 @@ Store a week's worth of data for better predictions on most days except holidays
 
 Break out key of expansion of FUELINST types in HTML.
 
-Still show Tweets, but as 'predicted' variants, when data is stale.
 
 
 
@@ -29,6 +28,8 @@ Still show Tweets, but as 'predicted' variants, when data is stale.
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
+DHD20090628: Showing 'predicted' status Tweets when data is not live.
+DHD20090628: Added configurable minimum delay between Tweets to avoid flapping near boundaries.
 
 
 
