@@ -679,14 +679,12 @@ public final class FUELINST
             {
             // Normally we expect bmreports to give us 24hrs' data.
             // RED will be where the current value is in the upper quartile of the last 24hrs' intensities,
-            // GREEN when in the bottom third (and below the mean to be safe), so is fairly conservative,
+            // GREEN when in the lower quartile (and below the mean to be safe), so is fairly conservative,
             // YELLOW otherwise.
-            // So this is asymmetric heavily in favour of GREEN
-            // as long as we're on better-than-median intensity compared to the last 24 hours.
             final List<Integer> sortedIntensitySamples = new ArrayList<Integer>(allIntensitySamples);
             Collections.sort(sortedIntensitySamples);
             upperThreshold = sortedIntensitySamples.get(allSamplesSize-1 - (allSamplesSize / 4));
-            lowerThreshold = Math.min(sortedIntensitySamples.get(allSamplesSize / 3), aveIntensity);
+            lowerThreshold = Math.min(sortedIntensitySamples.get(allSamplesSize / 4), aveIntensity);
             if(currentIntensity > upperThreshold) { status = TrafficLight.RED; }
             else if(currentIntensity < lowerThreshold) { status = TrafficLight.GREEN; }
             else { status = TrafficLight.YELLOW; }
@@ -1265,7 +1263,7 @@ public final class FUELINST
         final PrintWriter w = new PrintWriter(baos);
         try
             {
-            final Map<String, String> rawProperties = MainProperties.getRawProperties();
+//            final Map<String, String> rawProperties = MainProperties.getRawProperties();
             w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             w.println("<results>");
 

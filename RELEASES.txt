@@ -30,6 +30,7 @@ Store a week's worth of data for better predictions on most days except holidays
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
+DHD20090629: Reduced 'green' section to bottom quartile but may need configurable threshold.
 DHD20090628: Marking on traffic-lights HTML output as 'marginally green' hours that use (pumped) storage.
 DHD20090628: Trying to ensure that flags are globally readable after creation (avoids 403 errors).
 
