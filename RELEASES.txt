@@ -11,6 +11,8 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
+Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive output not allowed to go green in absense of live data.
+
 Refactor to allow easy replacement of output modules.
 
 Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon).
