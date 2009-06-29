@@ -87,12 +87,12 @@ public final class Main
             {
             if("FUELINST".equals(command))
                 {
-                FUELINST.doHistoricalAnalysis(args);
+                FUELINSTHistorical.doHistoricalAnalysis(args);
                 return; // Completed.
                 }
             else if("trafficLights".equals(command))
                 {
-                FUELINST.doTrafficLights(args);
+                FUELINSTUtils.doTrafficLights(args);
                 return; // Completed.
                 }
             }

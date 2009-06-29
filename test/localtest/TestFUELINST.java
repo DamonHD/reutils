@@ -37,7 +37,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.hd.d.edh.DataUtils;
-import org.hd.d.edh.FUELINST;
+import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
 
@@ -79,7 +79,7 @@ public final class TestFUELINST extends TestCase
         // Convert MW values to Integer.
         for(final String name : intensities.keySet())
             { generationByFuel.put(name, Integer.parseInt(namedFields.get(name), 10)); }
-        final float weightedIntensity = FUELINST.computeWeightedIntensity(intensities, generationByFuel, 0);
+        final float weightedIntensity = FUELINSTUtils.computeWeightedIntensity(intensities, generationByFuel, 0);
         assertTrue("Computed intensity must be correct/close", Math.abs(0.5276563f - weightedIntensity) < 1e-5);
 
 //        // Open our sample CVS data file.
@@ -110,7 +110,7 @@ public final class TestFUELINST extends TestCase
             {
             for(final TrafficLight status : TrafficLight.values())
                 {
-                final String message = FUELINST.generateTweetMessage(isDataStale, status);
+                final String message = FUELINSTUtils.generateTweetMessage(isDataStale, status);
                 assertNotNull("Generated Tweet must not be null", message);
 System.out.println("LENGTH="+message.length()+": "+message);
                 assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
