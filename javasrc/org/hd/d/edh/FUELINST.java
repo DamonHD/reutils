@@ -1204,7 +1204,7 @@ public final class FUELINST
             w.println();
             // Footnotes
             if(usedLessGreen)
-                { w.println("<p>Hours that are basically <span style=\"color:green\">green</span>, but are using grid-connected storage with its attendant losses and suggesting that little or no excess non-dispatchable generation is available, ie that are marginally green, are shaded <span style=\"color:"+LESS_GREEN_STORAGE_DRAWDOWN+"\">"+LESS_GREEN_STORAGE_DRAWDOWN+"</span>.</p>"); }
+                { w.println("<p>Hours that are basically <span style=\"color:green\">green</span>, but in which there is draw-down from grid-connected storage with its attendant energy losses and also suggesting that little or no excess non-dispatchable generation is available, ie that are marginally green, are shaded <span style=\"color:"+LESS_GREEN_STORAGE_DRAWDOWN+"\">"+LESS_GREEN_STORAGE_DRAWDOWN+"</span>.</p>"); }
 
             // TODO: Show cumulative MWh and tCO2.
 
