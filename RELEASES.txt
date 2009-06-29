@@ -11,17 +11,15 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
-Caching of the raw properties after loading and parsing for efficiency.
+Cache the raw properties after first loading and parsing for efficiency.
 
 Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive output not allowed to go green in absense of live data.
-
-Refactor to allow easy replacement of output modules.
 
 Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon).
 
 For long-term data analysis show fraction of hear hour/day/month in bottom 1/3, 1/4 intensity, no PS, green/supergreen, etc.
 
-Store a week's worth of data for better predictions on most days except holidays such as Xmas!
+Store a week's worth of data for better predictions on most days except holidays such as Xmas and have special treatment for them.
 
 
 
@@ -30,6 +28,7 @@ Store a week's worth of data for better predictions on most days except holidays
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
+DHD20090629: Refactored to allow easy use of non-default external trafficLights implementation.
 DHD20090629: Reduced 'green' section to bottom quartile but may need configurable threshold.
 DHD20090628: Marking on traffic-lights HTML output as 'marginally green' hours that use (pumped) storage.
 DHD20090628: Trying to ensure that flags are globally readable after creation (avoids 403 errors).
