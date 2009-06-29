@@ -43,22 +43,31 @@ public final class Main
         System.err.println("Commands/options");
         System.err.println("  -help");
         System.err.println("    This summary/help.");
-        System.err.println("  trafficLights outfile.html");
+        System.err.println("  trafficLights [-class full.generator.classname] {args}");
         System.err.println("  FUELINST outfile.html TIBCOfile.gz {TIBCOfile.gz*}");
         System.err.println("  FUELINST outfile.html <directory> [regex-filematch-pattern]");
         }
 
     /**Accepts command-line arguments.
      *
-     * Accepts following commands:
+     * Accepts the following commands:
      * <ul>
-     * <li>trafficLights [outfile.html]<br />
+     * <li>trafficLights [-class full.generator.classname] {args}<br />
+     *         Using the default implementation,
+     *         args consists of one optional filename.html
+     *         from which other output file names (for flags, xhtml, caches, etc)
+     *         are derived.
+     *         <p>
      *         Shows red/yellow/green 'start your appliance now' indication
      *         based primarily on current UK grid carbon intensity.
      *         Can write HTML output for eou site if output filename is supplied,
      *         else writes a summary on System.out.
      *         Will also delete outfile.html.flag file if status is GREEN, else will create it,
      *         which is useful for automated remote 200/404 status check.
+     *         <p>
+     *         If a full class name is supplied
+     *         then it is passed the remaining arguments
+     *         and may interpret them as it wishes.
      *     </li>
      * <li>FUELINST outfile.html TIBCOfile.gz {TIBCOfile.gz*}</li>
      * <li>FUELINST outfile.html <directory> [regex-filematch-pattern]<br />
@@ -94,7 +103,7 @@ public final class Main
                 }
             else if("trafficLights".equals(command))
                 {
-                // Pass in trailing args (if any).
+                // Pass in trailing args (if any), leading 'trafficLights' is omitted.
                 FUELINSTUtils.doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
                 return; // Completed.
                 }
