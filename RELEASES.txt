@@ -13,7 +13,7 @@ IMMEDIATE TODO
 
 Cache the raw properties after first loading and parsing for efficiency.
 
-Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive output not allowed to go green in absense of live data.
+Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive output is not allowed to go green in absence of live data.
 
 Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon).
 
@@ -30,7 +30,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 DHD20090629: Refactored to allow easy use of non-default external trafficLights implementation.
 DHD20090629: Reduced 'green' section to bottom quartile but may need configurable threshold.
-DHD20090628: Marking on traffic-lights HTML output as 'marginally green' hours that use (pumped) storage.
+DHD20090628: Marking on traffic-lights HTML output as 'marginally green' in hours that use (pumped) storage.
 DHD20090628: Trying to ensure that flags are globally readable after creation (avoids 403 errors).
 
 
