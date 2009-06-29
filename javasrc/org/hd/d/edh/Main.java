@@ -85,8 +85,6 @@ public final class Main
      */
     public static void main(final String[] args)
         {
-        final long startTime = System.currentTimeMillis();
-
         if((args.length < 1) || "-help".equals(args[0]))
             {
             printOptions();
