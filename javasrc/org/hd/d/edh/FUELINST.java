@@ -349,6 +349,7 @@ public final class FUELINST
         public void doTrafficLights(final String[] args)
             throws IOException
             {
+            System.out.println("Using default traffic-lights implementation: " + getClass().getName());
             // Delegate to static utilities method!
             FUELINSTUtils.doTrafficLights(args);
             }

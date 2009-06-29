@@ -31,6 +31,8 @@ package org.hd.d.edh;
 
 import java.util.Arrays;
 
+import org.hd.d.edh.FUELINST.TrafficLightsInterface;
+
 
 /**Main (command-line) entry-point for the data handler.
  *
@@ -102,9 +104,27 @@ public final class Main
                 return; // Completed.
                 }
             else if("trafficLights".equals(command))
-                {
-                // Pass in trailing args (if any), leading 'trafficLights' is omitted.
-                (new FUELINST.TrafficLightsDEFAULT()).doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
+                {;
+                final TrafficLightsInterface impl;
+
+                // Check if "-class" "name" optional args are present.
+                final boolean classSpecified = (args.length >= 2) && "-class".equals(args[1]);
+
+                // If first optional argument is "-class"
+                // then attempt to create an instance of the specified class.
+                if(classSpecified)
+                    {
+                    final String classname = args[2];
+                    System.out.println("Class specified: " + classname);
+                    impl = (TrafficLightsInterface) Class.forName(classname).newInstance();
+                    }
+                // Else use the default implementation.
+                else
+                    { impl = (new FUELINST.TrafficLightsDEFAULT()); }
+
+                // Pass in trailing args (if any) to impl;
+                // leading 'trafficLights' (and possible -class name) is omitted.
+                impl.doTrafficLights(Arrays.copyOfRange(args, classSpecified ? 3 : 1, args.length));
                 return; // Completed.
                 }
             }

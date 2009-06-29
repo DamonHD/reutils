@@ -12,6 +12,6 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.hd.d.edh.Main"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="trafficLights _trafficLightsOutput.html"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="trafficLights -class org.hd.d.edh.FUELINST$TrafficLightsDEFAULT _trafficLightsOutput.html"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="reutils-trunk"/>
 </launchConfiguration>
