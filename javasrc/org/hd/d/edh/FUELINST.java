@@ -763,8 +763,27 @@ public final class FUELINST
     /**Longest edge of graphics building block components in pixels; strictly positive. */
     private static final int GCOMP_PX_MAX = 100;
 
-    /**If true then when data is stale then cautiously never show a GREEN status, but YELLOW at best. */
+    /**If true then when data is stale then cautiously never normally show a GREEN status, but YELLOW at best. */
     private static final boolean NEVER_GREEN_WHEN_STALE = true;
+
+
+    /**Generic interface to implement 'traffic lights' command-line option.
+     * There will generally be a default implementation
+     * and one or more customised implementations.
+     */
+    public static interface TrafficLightsInterface
+        {
+        /**Generates outputs from the arguments and the current summary.
+         * When called from the command-line the supplied args
+         * will be the trailing/optional parameters after initial parsing.
+         *
+         * @param args   arguments/parameters; never null but may be empty
+         * @param summary  summary of current/historical FUELINST stats; never null
+         * @throws IOException  in case of difficulty generating the output(s)
+         */
+        public void doTrafficLights(final String[] args, final CurrentSummary summary) throws IOException;
+        }
+
 
     /**Implement the 'traffic lights' command line option.
      */
