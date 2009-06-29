@@ -40,7 +40,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**Handle FUELINST data.
  */
@@ -52,8 +51,26 @@ public final class FUELINST
     /**Prefix in main properties of fuel name information (for non-obvious code names); never null. */
     public static final String FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX = "intensity.fuelname.";
 
-    /**Number of hours in a day. */
-    public static final int HOURS_PER_DAY = 24;
+    /**URL of source of 'current' FUELINST data (and up to 24h of history); not null.
+     * May be http: or file:, for example.
+     */
+    public static final String FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL = "intensity.URL.current.csv";
+
+    /**Field names for FUELINST csv file row; not null.
+     */
+    public static final String FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES = "intensity.csv.fueltype";
+
+    /**Field name for maximum age (in seconds) of FUELINST data we will regard as 'current'; not null. */
+    public static final String FUELINST_MAIN_PROPNAME_MAX_AGE = "timescale.intensity.max";
+
+    /**Field name for fractional loss in local distribution in range [0.0,1.0]; not null. */
+    public static final String FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS = "intensity.loss.distribution";
+
+    /**Field name for fractional loss in grid transmission in range [0.0,1.0]; not null. */
+    public static final String FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS = "intensity.loss.transmission";
+
+    /**Field name for set of 'fuel' types/names for storage sources on the grid; not null. */
+    public static final String FUELINST_MAIN_PROPNAME_STORAGE_TYPES = "intensity.storageTypes";
 
     /**Immutable summary by hour (GMT) of a single Integer parameter.
      * Behaves as if a List of Integer with exactly 24 slots.
@@ -70,10 +87,10 @@ public final class FUELINST
         private static final long serialVersionUID = -8701522495858911120L;
 
         /**Internal fixed-size store; never null but may contain nulls. */
-        private final Integer[] data = new Integer[HOURS_PER_DAY];
+        private final Integer[] data = new Integer[FUELINSTUtils.HOURS_PER_DAY];
 
         /**Fixed size. */
-        public int size() { return(HOURS_PER_DAY); }
+        public int size() { return(FUELINSTUtils.HOURS_PER_DAY); }
 
         /* (non-Javadoc)
          * @see java.util.AbstractList#get(int)
@@ -89,8 +106,8 @@ public final class FUELINST
         public SummaryByHour(final List<Integer> values)
             {
             if(null == values) { return; }
-            if(HOURS_PER_DAY != values.size()) { throw new IllegalArgumentException(); }
-            for(int i = HOURS_PER_DAY; --i >= 0; )
+            if(FUELINSTUtils.HOURS_PER_DAY != values.size()) { throw new IllegalArgumentException(); }
+            for(int i = FUELINSTUtils.HOURS_PER_DAY; --i >= 0; )
                 { data[i] = values.get(i); }
             }
 
@@ -110,7 +127,7 @@ public final class FUELINST
         public int max0()
             {
             int maxGenerationMW = 0;
-            for(int h = HOURS_PER_DAY; --h >= 0; )
+            for(int h = FUELINSTUtils.HOURS_PER_DAY; --h >= 0; )
                 {
                 final Integer hGeneration = data[h];
                 if(null == hGeneration) { continue; }
@@ -263,7 +280,7 @@ public final class FUELINST
         public static int getGMTHourOfDay(final long time)
             {
             if(time == 0) { return(-1); }
-            final Calendar cal = Calendar.getInstance(GMT_TIME_ZONE);
+            final Calendar cal = Calendar.getInstance(FUELINSTUtils.GMT_TIME_ZONE);
             cal.setTimeInMillis(time);
             return(cal.get(Calendar.HOUR_OF_DAY));
             }
@@ -297,34 +314,6 @@ public final class FUELINST
             return(sb.toString());
             }
         }
-
-    /**URL of source of 'current' FUELINST data (and up to 24h of history); not null.
-     * May be http: or file:, for example.
-     */
-    public static final String FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL = "intensity.URL.current.csv";
-
-    /**Field names for FUELINST csv file row; not null.
-     */
-    public static final String FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES = "intensity.csv.fueltype";
-
-    /**Field name for maximum age (in seconds) of FUELINST data we will regard as 'current'; not null. */
-    public static final String FUELINST_MAIN_PROPNAME_MAX_AGE = "timescale.intensity.max";
-
-    /**Field name for fractional loss in local distribution in range [0.0,1.0]; not null. */
-    public static final String FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS = "intensity.loss.distribution";
-
-    /**Field name for fractional loss in grid transmission in range [0.0,1.0]; not null. */
-    public static final String FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS = "intensity.loss.transmission";
-
-    /**Field name for set of 'fuel' types/names for storage sources on the grid; not null. */
-    public static final String FUELINST_MAIN_PROPNAME_STORAGE_TYPES = "intensity.storageTypes";
-
-    /**GMT TimeZone; never null.
-     * Only package-visible because it may be mutable though we never attempt to mutate it.
-     * <p>
-     * We may share this (read-only) between threads and within this package.
-     */
-    static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
 
     /**Generic interface to implement 'traffic lights' command-line option.
      * There will generally be a default implementation

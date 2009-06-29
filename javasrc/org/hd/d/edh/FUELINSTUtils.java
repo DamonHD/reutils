@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -59,60 +60,653 @@ import org.hd.d.edh.FUELINST.CurrentSummary;
  */
 public final class FUELINSTUtils
     {
+    private FUELINSTUtils() { /* Prevent creation of an instance. */ }
 
-    /**Update (atomically if possible) the mobile-friendly XHTML traffic-light page.
-     * The generated page is designed to be very light-weight
-     * and usable by a mobile phone (eg as if under the .mobi TLD).
-     */
-    static void updateXHTMLFile(final long startTime,
-                                        final String outputXHTMLFileName,
-                                        final FUELINST.CurrentSummary summary,
-                                        final boolean isDataStale,
-                                        final int hourOfDayHistorical,
-                                        final TrafficLight status)
-        throws IOException
-        {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
-        final PrintWriter w = new PrintWriter(baos);
-        try
-            {
-            final Map<String, String> rawProperties = MainProperties.getRawProperties();
-
-            w.println(rawProperties.get("trafficLightPage.XHTML.preamble"));
-
-            w.println("<div style=\"background:"+((status == null) ? "gray" : status.toString().toLowerCase())+"\">");
-            final String weaselWord = isDataStale ? "probably " : "";
-
-            if(status == TrafficLight.RED)
-                { w.println("Status RED: grid carbon intensity is "+weaselWord+"high; please do not run big appliances such as a dishwasher or washing machine now if you can postpone."); }
-            else if(status == TrafficLight.GREEN)
-                { w.println("Status GREEN: grid is "+weaselWord+"good; run appliances now to minimise CO2 emissions."); }
-            else if(status == TrafficLight.YELLOW)
-                { w.println("Status YELLOW: grid is "+weaselWord+"OK; but you could still avoid CO2 emissions by postponing running big appliances such as dishwashers or washing machines."); }
-            else
-                { w.println("Grid status is UNKNOWN."); }
-            w.println("</div>");
-
-            if(isDataStale)
-                { w.println("<p><em>*WARNING: cannot obtain current data so this is partly based on predictions from historical data (for "+hourOfDayHistorical+":XX GMT).</em></p>"); }
-
-            w.println("<p>This page updated at "+(new Date())+".</p>");
-
-            w.println(rawProperties.get("trafficLightPage.XHTML.postamble"));
-
-            w.flush();
-            }
-        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
-
-        // Attempt atomic replacement of XHTML page...
-        DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray());
-        }
-
-    /**Longest edge of graphics building block components in pixels; strictly positive. */
+    /**Longest edge of graphics building block components in pixels for HTML generation; strictly positive. */
     static final int GCOMP_PX_MAX = 100;
 
     /**If true then when data is stale then cautiously never normally show a GREEN status, but YELLOW at best. */
     private static final boolean NEVER_GREEN_WHEN_STALE = true;
+
+    /**If the basic colour is GREEN but we're using pumped storage then we can indicate that with a yellowish green instead (ie mainly green, but not fully). */
+    static final String LESS_GREEN_STORAGE_DRAWDOWN = "olive";
+
+    /**If true then reject points with too few fuel types in mix since this is likely an error. */
+    final static int MIN_FUEL_TYPES_IN_MIX = 2;
+
+    /**If true, compress (GZIP) any persisted state. */
+    static final boolean GZIP_CACHE = true;
+
+    /**Immutable regex pattern for matching a valid fuel name (all upper-case ASCII); non-null. */
+    public static final Pattern FUEL_NAME_REGEX = Pattern.compile("[A-Z]+");
+
+    /**SimpleDateFormat pattern to parse TIBCO FUELINST timestamp down to seconds (all assumed GMT/UTC); not null.
+     * Example TIBCO timestamp: 2009:03:09:23:57:30:GMT
+     * Note that SimpleDateFormat is not immutable nor thread-safe.
+     */
+    public static final String TIBCOTIMESTAMP_FORMAT = "yyyy:MM:dd:HH:mm:ss:zzz";
+
+    /**SimpleDateFormat pattern to parse CSV FUELINST timestamp down to seconds (all assumed GMT/UTC); not null.
+     * Note that SimpleDateFormat is not immutable nor thread-safe.
+     */
+    public static final String CSVTIMESTAMP_FORMAT = "yyyyMMddHHmmss";
+
+    /**GMT TimeZone; never null.
+     * Only package-visible because it may be mutable though we never attempt to mutate it.
+     * <p>
+     * We may share this (read-only) between threads and within this package.
+     */
+    static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
+
+    /**Number of hours in a day. */
+    public static final int HOURS_PER_DAY = 24;
+
+    /**Compute current status of fuel intensity; never null, but may be empty/default if data not available.
+     * If cacheing is enabled, then this may revert to cache in case of
+     * difficulty retrieving new data.
+     *
+     * @param cacheFile  if non-null, file to cache (parsed) data in between calls in case of data-source problems
+     * @throws IOException in case of data corruption
+     */
+    public static FUELINST.CurrentSummary computeCurrentSummary(final File cacheFile)
+        throws IOException
+        {
+        // Get as much set up as we can before pestering the data source...
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
+        if(null == dataURL)
+            { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
+        final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
+        if(null == template)
+            { throw new IllegalStateException("Property undefined for FUELINST row field names: " + FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES); }
+        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
+        if(configuredIntensities.isEmpty())
+            { throw new IllegalStateException("Properties undefined for fuel intensities: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX + "*"); }
+        final String maxIntensityAgeS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_MAX_AGE);
+        if(null == maxIntensityAgeS)
+            { throw new IllegalStateException("Property undefined for FUELINST acceptable age (s): " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_AGE); }
+        final long maxIntensityAge = Math.round(1000 * Double.parseDouble(maxIntensityAgeS));
+        final String distLossS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS);
+        if(null == distLossS)
+            { throw new IllegalStateException("Property undefined for FUELINST distribution loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS); }
+        final float distLoss = Float.parseFloat(distLossS);
+        if(!(distLoss >= 0) && (distLoss <= 1))
+            { throw new IllegalStateException("Bad value outside range [0.0,1.0] for FUELINST distribution loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS); }
+        final String tranLossS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS);
+        if(null == tranLossS)
+            { throw new IllegalStateException("Property undefined for FUELINST transmission loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS); }
+        final float tranLoss = Float.parseFloat(tranLossS);
+        if(!(tranLoss >= 0) && (tranLoss <= 1))
+            { throw new IllegalStateException("Bad value outside range [0.0,1.0] for FUELINST transmission loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS); }
+        // Extract Set of zero-or-more 'storage'/'fuel' types/names.
+        final String storageTypesS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_STORAGE_TYPES);
+        final Set<String> storageTypes = ((null == storageTypesS) || storageTypesS.isEmpty()) ? Collections.<String>emptySet() :
+            new HashSet<String>(Arrays.asList(storageTypesS.trim().split(",")));
+
+        final List<List<String>> parsedBMRCSV;
+
+        // Fetch and parse the CSV file from the data source.
+        // Return an empty summary instance in case of IO error here.
+        URL url = null;
+        try
+            {
+            // Set up URL connection to fetch the data.
+            url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
+            final URLConnection conn = url.openConnection();
+            conn.setAllowUserInteraction(false);
+            conn.setUseCaches(true); // Ensure that we get non-stale values each time.
+            conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
+            conn.setReadTimeout(60000); // Set a long-ish read timeout.
+
+            final InputStreamReader is = new InputStreamReader(conn.getInputStream());
+            try { parsedBMRCSV = DataUtils.parseBMRCSV(is, null); }
+            finally { is.close(); }
+            }
+        catch(final IOException e)
+            {
+            // Could not get data, so status is unknown.
+            System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
+            // Try to retrieve from cache...
+            FUELINST.CurrentSummary cached = null;
+            try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(cacheFile, FUELINSTUtils.GZIP_CACHE); }
+            catch(final IOException err) { /* Fall through... */ }
+            catch(final Exception err) { e.printStackTrace(); }
+            if(null != cached)
+                {
+                System.err.println("WARNING: using previous response from cache...");
+                return(cached);
+                }
+            // Return empty place-holder value.
+            return(new FUELINST.CurrentSummary());
+            }
+
+        final int rawRowCount = parsedBMRCSV.size();
+        System.out.println("Record/row count of CSV FUELINST data: " + rawRowCount + " from source: " + url);
+
+        // All intensity sample values from good records (assuming roughly equally spaced).
+        final List<Integer> allIntensitySamples = new ArrayList<Integer>(rawRowCount);
+
+        // Compute summary.
+        final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
+        int goodRecordCount = 0;
+        int totalIntensity = 0;
+        long firstGoodRecordTimestamp = 0;
+        long lastGoodRecordTimestamp = 0;
+        long minIntensityRecordTimestamp = 0;
+        long maxIntensityRecordTimestamp = 0;
+        int minIntensity = Integer.MAX_VALUE;
+        int maxIntensity = Integer.MIN_VALUE;
+        int currentIntensity = 0;
+        long currentMW = 0;
+        long currentStorageDrawdownMW = 0;
+        Map<String,Integer> currentGenerationByFuel = Collections.emptyMap();
+        final int[] sampleCount = new int[FUELINSTUtils.HOURS_PER_DAY]; // Count of all good timestamped records.
+        final long[] totalIntensityByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
+        final long[] totalGenerationByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
+        final long[] totalZCGenerationByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
+        final long[] totalStorageDrawdownByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
+        for(final List<String> row : parsedBMRCSV)
+            {
+            // Extract fuel values for this row and compute a weighted intensity...
+            final Map<String, String> namedFields = DataUtils.extractNamedFieldsByPositionFromRow(template, row);
+            if(!"FUELINST".equals(namedFields.get("type")))
+                { throw new IOException("Expected FUELINST data but got: " + namedFields.get("type")); }
+            final Map<String,Integer> generationByFuel = new HashMap<String,Integer>();
+            long thisMW = 0; // Total MW generation in this slot.
+            long thisStorageDrawdownMW = 0; // Total MW storage draw-down in this slot.
+            long thisZCGenerationMW = 0; // Total zero-carbon generation in this slot.
+            // Retain any field that is all caps so that we can display it.
+            for(final String name : namedFields.keySet())
+                {
+                // Skip if something other than a valid fuel name.
+                if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(name).matches()) { continue; }
+                // Store the MW for this fuel.
+                final int fuelMW = Integer.parseInt(namedFields.get(name), 10);
+                if(fuelMW < 0) { throw new IOException("Bad (-ve) fuel generation MW value: "+row); }
+                thisMW += fuelMW;
+                generationByFuel.put(name, fuelMW);
+                // Slices of generation/demand.
+                if(storageTypes.contains(name)) { thisStorageDrawdownMW += fuelMW; }
+                final Float fuelInt = configuredIntensities.get(name);
+                if((null != fuelInt) && (fuelInt <= 0)) { thisZCGenerationMW += fuelMW; }
+                }
+            // Compute weighted intensity as gCO2/kWh for simplicity of representation.
+            // 'Bad' fuels such as coal are ~1000, natural gas is <400, wind and nuclear are roughly 0.
+            final int weightedIntensity = Math.round(1000 * FUELINSTUtils.computeWeightedIntensity(configuredIntensities, generationByFuel, MIN_FUEL_TYPES_IN_MIX));
+            // Reject bad (-ve) records.
+            if(weightedIntensity < 0)
+                {
+                System.err.println("Skipping non-positive weighed intensity record at " + namedFields.get("timestamp"));
+                continue;
+                }
+
+            allIntensitySamples.add(weightedIntensity);
+
+            currentMW = thisMW;
+            currentIntensity = weightedIntensity; // Last (good) record we process is the 'current' one as they are in date order.
+            currentGenerationByFuel = generationByFuel;
+            currentStorageDrawdownMW = thisStorageDrawdownMW; // Last (good) record is 'current'.
+
+            ++goodRecordCount;
+            totalIntensity += weightedIntensity;
+
+            // Extract timestamp field as defined in the template, format YYYYMMDDHHMMSS.
+            final String rawTimestamp = namedFields.get("timestamp");
+            long recordTimestamp = 0; // Will be non-zero after a successful parse.
+            if(null == rawTimestamp)
+                { System.err.println("missing FUELINST row timestamp"); }
+            else
+                {
+                try
+                    {
+                    final Date d = timestampParser.parse(rawTimestamp);
+                    recordTimestamp = d.getTime();
+                    lastGoodRecordTimestamp = recordTimestamp;
+                    if(firstGoodRecordTimestamp == 0) { firstGoodRecordTimestamp = recordTimestamp; }
+
+                    // Extract raw GMT hour from YYYYMMDDHH...
+                    final int hour = Integer.parseInt(rawTimestamp.substring(8, 10), 10);
+//System.out.println("H="+hour+": int="+weightedIntensity+", MW="+currentMW+" time="+d);
+                    ++sampleCount[hour];
+                    // Accumulate intensity by hour...
+                    totalIntensityByHourOfDay[hour] += weightedIntensity;
+                    // Accumulate generation by hour...
+                    totalGenerationByHourOfDay[hour] += currentMW;
+                    // Note zero-carbon generation.
+                    totalZCGenerationByHourOfDay[hour] += thisZCGenerationMW;
+                    // Note storage draw-down, if any.
+                    totalStorageDrawdownByHourOfDay[hour] += thisStorageDrawdownMW;
+                    }
+                catch(final ParseException e)
+                    {
+                    System.err.println("Unable to parse FUELINST record timestamp " + rawTimestamp + ": " + e.getMessage());
+                    }
+                }
+
+            if(weightedIntensity < minIntensity)
+                { minIntensity = weightedIntensity; minIntensityRecordTimestamp = recordTimestamp; }
+            if(weightedIntensity > maxIntensity)
+                { maxIntensity = weightedIntensity; maxIntensityRecordTimestamp = recordTimestamp; }
+            }
+
+        // Note if the intensity dropped/improved in the final samples.
+        TrafficLight recentChange = null;
+        if(allIntensitySamples.size() > 1)
+            {
+            final Integer prev = allIntensitySamples.get(allIntensitySamples.size() - 2);
+            final Integer last = allIntensitySamples.get(allIntensitySamples.size() - 1);
+            if(prev < last) { recentChange = TrafficLight.RED; }
+            else if(prev > last) { recentChange = TrafficLight.GREEN; }
+            else { recentChange = TrafficLight.YELLOW; }
+            }
+
+        // Compute traffic light status: defaults to 'unknown'.
+        TrafficLight status = null;
+
+        final int aveIntensity = totalIntensity / Math.max(goodRecordCount, 1);
+
+        // Always set the outputs and let the caller decide what to do with aged data.
+        int lowerThreshold = 0;
+        int upperThreshold = 0;
+        final int allSamplesSize = allIntensitySamples.size();
+        if(allSamplesSize > 3) // Only useful above some minimal set size.
+            {
+            // Normally we expect bmreports to give us 24hrs' data.
+            // RED will be where the current value is in the upper quartile of the last 24hrs' intensities,
+            // GREEN when in the lower quartile (and below the mean to be safe), so is fairly conservative,
+            // YELLOW otherwise.
+            // as long as we're on better-than-median intensity compared to the last 24 hours.
+            final List<Integer> sortedIntensitySamples = new ArrayList<Integer>(allIntensitySamples);
+            Collections.sort(sortedIntensitySamples);
+            upperThreshold = sortedIntensitySamples.get(allSamplesSize-1 - (allSamplesSize / 4));
+            lowerThreshold = Math.min(sortedIntensitySamples.get(allSamplesSize / 4), aveIntensity);
+            if(currentIntensity > upperThreshold) { status = TrafficLight.RED; }
+            else if(currentIntensity < lowerThreshold) { status = TrafficLight.GREEN; }
+            else { status = TrafficLight.YELLOW; }
+            }
+        else { System.err.println("Newest data point too old"); }
+
+        // Compute mean intensity by time slot.
+        final List<Integer> aveIntensityByHourOfDay = new ArrayList<Integer>(24);
+        for(int h = 0; h < 24; ++h)
+            { aveIntensityByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalIntensityByHourOfDay[h] / sampleCount[h]))); }
+
+        // Compute mean generation by time slot.
+        final List<Integer> aveGenerationByHourOfDay = new ArrayList<Integer>(24);
+        for(int h = 0; h < 24; ++h)
+            { aveGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalGenerationByHourOfDay[h] / sampleCount[h]))); }
+
+        // Compute mean zero-carbon generation by time slot.
+        final List<Integer> aveZCGenerationByHourOfDay = new ArrayList<Integer>(24);
+        for(int h = 0; h < 24; ++h)
+            { aveZCGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalZCGenerationByHourOfDay[h] / sampleCount[h]))); }
+
+        // Compute mean draw-down from storage by time slot.
+        final List<Integer> aveStorageDrawdownByHourOfDay = new ArrayList<Integer>(24);
+        for(int h = 0; h < 24; ++h)
+            { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h]))); }
+
+        // Construct summary status...
+        final FUELINST.CurrentSummary result =
+            new FUELINST.CurrentSummary(status, recentChange,
+                                  lastGoodRecordTimestamp, lastGoodRecordTimestamp + maxIntensityAge,
+                                  currentMW,
+                                  currentIntensity,
+                                  currentGenerationByFuel,
+                                  currentStorageDrawdownMW,
+                                  minIntensity,
+                                  minIntensityRecordTimestamp,
+                                  aveIntensity,
+                                  maxIntensity,
+                                  maxIntensityRecordTimestamp, (lastGoodRecordTimestamp - firstGoodRecordTimestamp),
+                                  goodRecordCount,
+                                  lowerThreshold, upperThreshold,
+                                  aveIntensityByHourOfDay,
+                                  aveGenerationByHourOfDay,
+                                  aveZCGenerationByHourOfDay,
+                                  aveStorageDrawdownByHourOfDay,
+                                  tranLoss + distLoss);
+
+        // If cacheing is enabled then persist this result, compressed.
+        if(null != cacheFile)
+            { DataUtils.serialiseToFile(result, cacheFile, FUELINSTUtils.GZIP_CACHE, true); }
+
+        return(result);
+        }
+
+
+    /**Compute variability % of a set as a function of its (non-negative) min and max values; always in range [0,100]. */
+    static int computeVariability(final int min, final int max)
+        {
+        if((min < 0) || (max < 0)) { throw new IllegalArgumentException(); }
+        if(max == 0) { return(0); }
+        return(100 - ((100*min)/max));
+        }
+
+    /**Compute variability % of a set as a function of its min and max values; always in range [0,100]. */
+    static int computeVariability(final List<FUELINSTHistorical.TimestampedNonNegInt> intensities)
+        {
+        if(null == intensities) { throw new IllegalArgumentException(); }
+        int min = Integer.MAX_VALUE;
+        int max = 0;
+        for(final FUELINSTHistorical.TimestampedNonNegInt ti : intensities)
+            {
+            if(ti.value > max) { max = ti.value; }
+            if(ti.value < min) { min = ti.value; }
+            }
+        return(computeVariability(min, max));
+        }
+
+    /**Given a set of relative fuel usages and carbon intensities, computes an overall intensity; never null.
+     * This computes an intensity in the same units as the supplied values.
+     * Fuels whose keys are not in the intensities Map will be ignored.
+     * <p>
+     * Inputs must not be altered while this is in progress.
+     * <p>
+     * This will not attempt to alter its inputs.
+     *
+     * @param intensities  Map from fuel name to CO2 per unit of energy; never null
+     * @param generationByFuel  Map from fuel name to power being generated from that fuel; never null
+     * @param minFuelTypesInMix  minimum number of fuel types in mix else return -1; non-negative
+     *
+     * @return weighted intensity of specified fuel mix for fuels with known intensity,
+     *         or -1 if too few fuels in mix
+     */
+    public static float computeWeightedIntensity(final Map<String, Float> intensities,
+                                                 final Map<String, Integer> generationByFuel,
+                                                 final int minFuelTypesInMix)
+        {
+        if(null == intensities) { throw new IllegalArgumentException(); }
+        if(null == generationByFuel) { throw new IllegalArgumentException(); }
+        if(minFuelTypesInMix < 0) { throw new IllegalArgumentException(); }
+
+        // Compute set of keys common to both Maps.
+        final Set<String> commonKeys = new HashSet<String>(intensities.keySet());
+        commonKeys.retainAll(generationByFuel.keySet());
+        // If too few fuels in the mix then quickly return -1 as a distinguished value.
+        if(commonKeys.size() < minFuelTypesInMix) { return(-1); }
+
+        int nonZeroFuelCount = 0;
+        float totalGeneration = 0;
+        float totalCO2 = 0;
+
+        for(final String fuelName : commonKeys)
+            {
+            final float power = generationByFuel.get(fuelName);
+            if(power < 0) { throw new IllegalArgumentException(); }
+            if(power == 0) { continue; }
+            ++nonZeroFuelCount;
+            totalGeneration += power;
+            totalCO2 += power * intensities.get(fuelName);
+            }
+
+        // If too few (non-zero) fuels in the mix then quickly return -1 as a distinguished value.
+        if(nonZeroFuelCount < minFuelTypesInMix) { return(-1); }
+
+        final float weightedIntensity = (totalGeneration == 0) ? 0 : totalCO2 / totalGeneration;
+        return(weightedIntensity);
+        }
+
+    /**Handle the flag files that can be tested by remote servers.
+     * The basic ".flag" file is present unless status is green
+     * AND we have live data.
+     * <p>
+     * The more robust ".predicted.flag" file is present unless status is green.
+     * Live data is used if present, else a prediction is made from historical data.
+     * <p>
+     * The keen ".supergreen.flag" file is present unless status is green
+     * AND we have live data
+     * AND no storage is being drawn down on the grid.
+     * This means that we can be pretty sure that there is a surplus of energy available.
+     *
+     * @param baseFileName  base file name to make flags; if null then don't do flags.
+     * @param statusCapped  status capped to YELLOW if there is no live data
+     * @param statusUncapped  uncapped status (can be green from prediction even if no live data)
+     * @throws IOException  in case of problems
+     */
+    static void doFlagFiles(final String baseFileName,
+            final TrafficLight statusCapped, final TrafficLight statusUncapped,
+            final long currentStorageDrawdownMW)
+        throws IOException
+        {
+        if(null == baseFileName) { return; }
+
+        // In the absence of current data,
+        // then create/clear the flag based on historical data (ie predictions) where possible.
+        // The flag file has terminating extension (from final ".") replaced with ".flag".
+        // (If no extension is present then ".flag" is simply appended.)
+        final File outputFlagFile = new File(baseFileName + ".flag");
+        final boolean basicFlagState = TrafficLight.GREEN != statusCapped;
+        System.out.println("Basic flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
+        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
+        FUELINSTUtils.doPublicFlagFile(outputFlagFile, basicFlagState);
+
+        // Now deal with the flag that is prepared to make predictions from historical data,
+        // ie helps to ensure that the flag will probably be cleared some time each day
+        // even if our data source is unreliable.
+        // When live data is available then this should be the same as the basic flag.
+        final File outputPredictedFlagFile = new File(baseFileName + ".predicted.flag");
+        final boolean predictedFlagState = TrafficLight.GREEN != statusUncapped;
+        System.out.println("Predicted flag file is " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
+        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
+        FUELINSTUtils.doPublicFlagFile(outputPredictedFlagFile, predictedFlagState);
+
+        // Present unless 'capped' value is green (and thus must also be from live data)
+        // AND there storage is not being drawn from.
+        final File outputSupergreenFlagFile = new File(baseFileName + ".supergreen.flag");
+        final boolean supergreenFlagState = (basicFlagState) || (currentStorageDrawdownMW > 0);
+        System.out.println("Supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
+        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
+        FUELINSTUtils.doPublicFlagFile(outputSupergreenFlagFile, supergreenFlagState);
+        }
+
+    /**Create/remove public (readable by everyone) flag file as needed to match required state.
+     * @param outputFlagFile  flag file to create (true) or remove (false) if required; non-null
+     * @param flagRequiredPresent  desired state for flag: true indicates present, false indicates absent
+     * @throws IOException  in case of difficulty
+     */
+    static void doPublicFlagFile(final File outputFlagFile,
+            final boolean flagRequiredPresent)
+        throws IOException
+        {
+        if(flagRequiredPresent)
+            {
+            if(outputFlagFile.createNewFile())
+                {
+                outputFlagFile.setReadable(true);
+                System.out.println("Flag file created: "+outputFlagFile);
+                }
+            }
+        else
+            { if(outputFlagFile.delete()) { System.out.println("Flag file deleted: "+outputFlagFile); } }
+        }
+
+    /**Implement the 'traffic lights' command line option.
+     */
+    static void doTrafficLights(final String[] args) throws IOException
+        {
+        final long startTime = System.currentTimeMillis();
+
+        System.out.println("Generating traffic-light summary "+Arrays.asList(args)+"...");
+
+        final String outputHTMLFileName = (args.length < 2) ? null : args[1];
+        final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
+        // Base/prefix onto which to append specific extensions.
+        final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
+
+        final File cacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
+
+        final CurrentSummary summary = FUELINSTUtils.computeCurrentSummary(cacheFile);
+
+        // Dump a summary of the current status re fuel.
+        System.out.println(summary);
+
+        if(outputHTMLFileName != null)
+            {
+            // Is the data stale?
+            final boolean isDataStale = summary.useByTime < startTime;
+
+            // Status to use to drive traffic-light measure.
+            // If the data is current then use the latest data point,
+            // else extract a suitable historical value to use in its place.
+            final int hourOfDayHistorical = CurrentSummary.getGMTHourOfDay(startTime);
+            final TrafficLight statusHistorical = summary.selectColour(summary.histAveIntensityByHourOfDay.get(hourOfDayHistorical));
+            final TrafficLight statusHistoricalCapped = (TrafficLight.GREEN != statusHistorical) ? statusHistorical : TrafficLight.YELLOW;
+            final TrafficLight statusUncapped = (!isDataStale) ? summary.status : statusHistorical;
+            final TrafficLight status = (!isDataStale) ? summary.status :
+                (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
+
+            // Handle the flag files that can be tested by remote servers.
+            try { FUELINSTUtils.doFlagFiles(baseFileName, status, statusUncapped, summary.currentStorageDrawdownMW); }
+            catch(final IOException e) { e.printStackTrace(); }
+
+            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+
+            // Update the HTML page.
+            try {
+                FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary, isDataStale,
+                    hourOfDayHistorical, status, td);
+                }
+            catch(final IOException e) { e.printStackTrace(); }
+
+            // Update the (mobile-friendly) XHTML page.
+            try {
+                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
+                    (outputHTMLFileName + ".xml");
+                if(null != outputXMLFileName)
+                    {
+                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary, isDataStale,
+                        hourOfDayHistorical, status);
+                    }
+                }
+            catch(final IOException e) { e.printStackTrace(); }
+
+            // Update the (mobile-friendly) XHTML page.
+            try {
+                final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
+                    (outputHTMLFileName + ".xhtml");
+                if(null != outputXHTMLFileName)
+                    {
+                    FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary, isDataStale,
+                        hourOfDayHistorical, status);
+                    }
+                }
+            catch(final IOException e) { e.printStackTrace(); }
+
+            // Update Twitter if it is set up
+            // and if this represents a change from the previous status.
+            // We may have different messages when we're working from historical data
+            // because real-time / live data is not available.
+            try
+                {
+                if(td != null)
+                    {
+                    // Compute name of file in which to cache last status we sent to Twitter.
+                    final String TwitterCacheFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
+                        (outputHTMLFileName + ".twittercache");
+                    // Attempt to update the displayed Twitter status as necessary
+                    // only if we think the status changed since we last sent it
+                    // and it has actually changed compared to what is at Twitter...
+                    // If we can't get a hand-crafted message then we create a simple one on the fly...
+                    // We use different messages for live and historical (stale) data.
+                    final String tweetMessage = FUELINSTUtils.generateTweetMessage(isDataStale, statusUncapped);
+                    TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName), tweetMessage);
+                    }
+                }
+            catch(final IOException e) { e.printStackTrace(); }
+            }
+        }
+
+    /**Generate the text of the status Tweet.
+     * Public to allow testing that returned Tweets are always valid.
+     *
+     * @param isDataStale  true if we are working on historical/predicted (non-live) data
+     * @param statusUncapped  the uncapped current or predicted status; never null
+     * @return human-readable valid Tweet message
+     */
+    public static String generateTweetMessage(final boolean isDataStale,
+            final TrafficLight statusUncapped)
+        {
+        if(null == statusUncapped) { throw new IllegalArgumentException(); }
+        final String statusMessage = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
+        final String tweetMessage = ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage.trim() :
+            ("Grid status " + statusUncapped);
+        return(tweetMessage);
+        }
+
+    /**Extract (immutable) intensity map from configuration information; never null but may be empty.
+     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
+     */
+    public static Map<String, String> getConfiguredFuelNames()
+        {
+        final Map<String, String> result = new HashMap<String, String>();
+
+        // Have to scan through all keys, which may be inefficient...
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        for(final String key : rawProperties.keySet())
+            {
+            if(!key.startsWith(FUELINST.FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
+            final String fuelname = key.substring(FUELINST.FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX.length());
+            final String descriptiveName = rawProperties.get(key).trim();
+            if(descriptiveName.isEmpty()) { continue; }
+            result.put(fuelname, descriptiveName);
+            }
+
+        return(Collections.unmodifiableMap(result));
+        }
+
+    /**Extract (immutable) intensity map from configuration information; never null but may be empty.
+     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
+     */
+    public static Map<String, Float> getConfiguredIntensities()
+        {
+        final Map<String, Float> result = new HashMap<String, Float>();
+
+        // Have to scan through all keys, which may be inefficient...
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        for(final String key : rawProperties.keySet())
+            {
+            if(!key.startsWith(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
+            // TODO: verify that fuel name is all upper-case ASCII and of reasonable length, else reject.
+            final String fuelname = key.substring(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX.length());
+            // Reject non-parsable and illegal (eg -ve) values.
+            final Float intensity;
+            try { intensity = new Float(rawProperties.get(key)); }
+            catch(final NumberFormatException e)
+                {
+                System.err.println("Unable to parse kgCO2/kWh intensity value for " + key);
+                continue;
+                }
+            if(!(intensity >= 0) || Float.isInfinite(intensity) || Float.isNaN(intensity))
+                {
+                System.err.println("Invalid (non-positive) kgCO2/kWh intensity value for " + key);
+                continue;
+                }
+            result.put(fuelname, intensity);
+            }
+
+        return(Collections.unmodifiableMap(result));
+        }
+
+    /**Get a parser for the BM timestamps in at least FUELINST data; never null.
+     * A returned instance is not safe to share between threads.
+     */
+    public static SimpleDateFormat getCSVTimestampParser()
+        {
+        final SimpleDateFormat sDF = new SimpleDateFormat(FUELINSTUtils.CSVTIMESTAMP_FORMAT);
+        sDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All BM timestamps are GMT/UTC.
+        return sDF;
+        }
+
+    /**Get a parser for the BM timestamps in at least FUELINST data; never null.
+     * A returned instance is not safe to share between threads.
+     */
+    public static SimpleDateFormat getTIBCOTimestampParser()
+        {
+        final SimpleDateFormat sDF = new SimpleDateFormat(FUELINSTUtils.TIBCOTIMESTAMP_FORMAT);
+        sDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+        return sDF;
+        }
 
     /**Update (atomically if possible) the HTML traffic-light page. */
     public static void updateHTMLFile(final long startTime,
@@ -360,796 +954,213 @@ public final class FUELINSTUtils
         DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
         }
 
+    /**Update (atomically if possible) the mobile-friendly XHTML traffic-light page.
+     * The generated page is designed to be very light-weight
+     * and usable by a mobile phone (eg as if under the .mobi TLD).
+     */
+    static void updateXHTMLFile(final long startTime,
+                                        final String outputXHTMLFileName,
+                                        final FUELINST.CurrentSummary summary,
+                                        final boolean isDataStale,
+                                        final int hourOfDayHistorical,
+                                        final TrafficLight status)
+        throws IOException
+        {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
+        final PrintWriter w = new PrintWriter(baos);
+        try
+            {
+            final Map<String, String> rawProperties = MainProperties.getRawProperties();
+
+            w.println(rawProperties.get("trafficLightPage.XHTML.preamble"));
+
+            w.println("<div style=\"background:"+((status == null) ? "gray" : status.toString().toLowerCase())+"\">");
+            final String weaselWord = isDataStale ? "probably " : "";
+
+            if(status == TrafficLight.RED)
+                { w.println("Status RED: grid carbon intensity is "+weaselWord+"high; please do not run big appliances such as a dishwasher or washing machine now if you can postpone."); }
+            else if(status == TrafficLight.GREEN)
+                { w.println("Status GREEN: grid is "+weaselWord+"good; run appliances now to minimise CO2 emissions."); }
+            else if(status == TrafficLight.YELLOW)
+                { w.println("Status YELLOW: grid is "+weaselWord+"OK; but you could still avoid CO2 emissions by postponing running big appliances such as dishwashers or washing machines."); }
+            else
+                { w.println("Grid status is UNKNOWN."); }
+            w.println("</div>");
+
+            if(isDataStale)
+                { w.println("<p><em>*WARNING: cannot obtain current data so this is partly based on predictions from historical data (for "+hourOfDayHistorical+":XX GMT).</em></p>"); }
+
+            w.println("<p>This page updated at "+(new Date())+".</p>");
+
+            w.println(rawProperties.get("trafficLightPage.XHTML.postamble"));
+
+            w.flush();
+            }
+        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
+
+        // Attempt atomic replacement of XHTML page...
+        DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray());
+        }
+
     static void updateXMLFile(final long startTime,
                                            final String outputXMLFileName,
                                            final FUELINST.CurrentSummary summary,
                                            final boolean isDataStale,
                                            final int hourOfDayHistorical,
                                            final TrafficLight status)
-            throws IOException
-            {
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
-            final PrintWriter w = new PrintWriter(baos);
-            try
-                {
-    //            final Map<String, String> rawProperties = MainProperties.getRawProperties();
-                w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-                w.println("<results>");
-
-                if(isDataStale)
-                    { w.println("<warning>*WARNING: cannot obtain current data so this is partly based on predictions from historical data (for "+hourOfDayHistorical+":XX GMT).</warning>"); }
-
-                w.println("<stale_data>"+isDataStale+"</stale_data>");
-
-    //            if(status == TrafficLight.RED)
-    //                { w.println("<status>1</status>"); }
-    //            else if(status == TrafficLight.YELLOW)
-    //                { w.println("<status>0</status>"); }
-    //            else if(status == TrafficLight.GREEN)
-    //                { w.println("<status>-1</status>"); }
-                w.print("<status>");
-                if(null != status) { w.print(status); }
-                w.println("</status>");
-
-                if(summary.histMinIntensity < summary.histMaxIntensity)
-                    { w.println("<saving>"+FUELINSTUtils.computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"</saving>"); }
-
-                // Note any recent change/delta if the data is not stale.
-                if(!isDataStale)
-                    {
-                    if(summary.recentChange == TrafficLight.GREEN)
-    //                    { w.println("<carbon_intensity>-1</carbon_intensity>"); }
-                        { w.println("<carbon_intensity>GREEN</carbon_intensity>"); }
-                    else if(summary.recentChange == TrafficLight.RED)
-    //                    { w.println("<carbon_intensity>1</carbon_intensity>"); }
-                        { w.println("<carbon_intensity>RED</carbon_intensity>"); }
-                    }
-
-                w.println("<timestamp>"+summary.timestamp+"</timestamp>");
-
-                w.write("<grid_carbon_intensity>");
-                w.write(String.valueOf(Math.round((isDataStale ? summary.histAveIntensity : summary.currentIntensity) * (1 + summary.totalGridLosses))));
-                w.write("</grid_carbon_intensity>");
-                w.println();
-
-                w.write("<transmission_losses>");
-                w.write(String.valueOf(Math.round(100 * summary.totalGridLosses)));
-                w.write("</transmission_losses>");
-                w.println();
-
-                w.println("<latest>");
-                w.println("<carbon_intensity>"+ summary.currentIntensity +"</carbon_intensity>");
-                w.println("<timestamp>"+ summary.timestamp +"</timestamp>");
-                w.println("<generation>"+ summary.currentMW+"</generation>");
-                w.println("<rolling_average_period>"+((summary.histWindowSize+1800000) / 3600000)+"</rolling_average_period>");
-                w.println("<rolling_average_carbon_intensity>"+ summary.histAveIntensity+"</rolling_average_carbon_intensity>");
-                w.println("</latest>");
-
-                w.println("<minimum>");
-                w.println("<carbon_intensity>"+ summary.histMinIntensity +"</carbon_intensity>");
-                w.println("<timestamp>"+ summary.minIntensityRecordTimestamp +"</timestamp>");
-                w.println("</minimum>");
-
-                w.println("<maximum>");
-                w.println("<carbon_intensity>"+ summary.histMaxIntensity +"</carbon_intensity>");
-                w.println("<timestamp>"+ summary.maxIntensityRecordTimestamp +"</timestamp>");
-                w.println("</maximum>");
-
-
-                // Intensity (and generation) by hour of day.
-                final int newSlot = FUELINST.CurrentSummary.getGMTHourOfDay(startTime);
-                w.println("<generation_intensity>");
-                w.println("<average>"+summary.histAveIntensity+"</average>");
-                w.println("<current>"+summary.currentIntensity+"</current>");
-
-                // Always start at midnight GMT if the data is stale.
-                final int startSlot = isDataStale ? 0 : (1 + Math.max(0, newSlot)) % 24;
-    //            final int maxHourlyIntensity = summary.histAveIntensityByHourOfDay.max0();
-                for(int h = 0; h < 24; ++h)
-                    {
-                    final StringBuffer sbh = new StringBuffer(2);
-                    final int displayHourGMT = (h + startSlot) % 24;
-                    sbh.append(displayHourGMT);
-                    if(sbh.length() < 2) { sbh.insert(0, '0'); }
-                    final Integer hIntensity = summary.histAveIntensityByHourOfDay.get(displayHourGMT);
-
-                    w.println("<sample>");
-                    w.println("<hour>"+sbh+"</hour>");
-                    if((null == hIntensity) || (0 == hIntensity))
-                        { w.println("<carbon_intensity></carbon_intensity>"); continue; /* Skip empty slot. */ }
-                    else
-                        { w.println("<carbon_intensity>"+ String.valueOf(hIntensity)+"</carbon_intensity>"); }
-                    w.println("</sample>");
-                    }
-                w.println("</generation_intensity>");
-
-                w.println("<generation>");
-                // Compute the maximum generation in any of the hourly slots
-                // to give us maximum scaling of the displayed bars.
-                final int maxGenerationMW = summary.histAveGenerationByHourOfDay.max0();
-                for(int h = 0; h < 24; ++h)
-                    {
-                    final int displayHourGMT = (h + startSlot) % 24;
-                    final StringBuffer sbh = new StringBuffer(2);
-                    sbh.append(displayHourGMT);
-                    if(sbh.length() < 2) { sbh.insert(0, '0'); }
-
-                    final Integer hGeneration = summary.histAveGenerationByHourOfDay.get(displayHourGMT);
-                    if((null == hGeneration) || (0 == hGeneration)) { continue; /* Skip empty slot. */ }
-    //                final int height = (GCOMP_PX_MAX*hGeneration) / Math.max(1, maxGenerationMW);
-                    final int scaledToGW = (hGeneration + 500) / 1000;
-
-                    w.println("<sample>");
-                    w.println("<hour>"+sbh+"</hour>");
-                    w.println("<all>"+String.valueOf(scaledToGW)+"</all>");
-
-                    final int hZCGeneration = summary.histAveZCGenerationByHourOfDay.get0(displayHourGMT);
-                    if(0 != hZCGeneration)
-                        {
-                        if(hZCGeneration >= maxGenerationMW/8) { w.println("<zero_carbon>"+String.valueOf((hZCGeneration + 500) / 1000)+"</zero_carbon>"); }
-                        }
-                    w.println("</sample>");
-                    }
-                w.println("</generation>");
-
-                // TODO: Show cumulative MWh and tCO2.
-
-                // FIXME: DHD20090608: I suggest leaving the fuel names as-is (upper case) in the XML as those are the 'formal' Elexon names; convert for display if need be.
-                // FIXME: DHD20090608: As fuel names may not always be XML-token-safe, maybe <fuel name="NNN">amount</fuel> would be better?
-
-                if(!isDataStale)
-                    {
-                    w.println("<fuel_mix>");
-                    w.println("<timestamp>"+summary.timestamp+"</timestamp>");
-                    final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary.currentGenerationMWByFuelMW);
-                    for(final String fuel : power.keySet()) { w.println("<"+fuel.toLowerCase()+">"+power.get(fuel)+"</"+fuel.toLowerCase()+">"); }
-                    w.println("</fuel_mix>");
-                    }
-
-                w.println("<fuel_intensities>");
-                w.println("<timestamp>"+summary.timestamp+"</timestamp>");
-                final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities());
-                for(final String fuel : intensities.keySet()) { w.println("<"+fuel.toLowerCase()+">"+intensities.get(fuel)+"</"+fuel.toLowerCase()+">"); }
-                w.println("</fuel_intensities>");
-
-                w.println("</results>");
-
-                w.flush();
-                }
-            finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
-
-            // Attempt atomic replacement of XML page...
-            DataUtils.replacePublishedFile(outputXMLFileName, baos.toByteArray());
-            }
-
-    /**If the basic colour is GREEN but we're using pumped storage then we can indicate that with a yellowish green instead (ie mainly green, but not fully). */
-    static final String LESS_GREEN_STORAGE_DRAWDOWN = "olive";
-
-    /**Compute variability % of a set as a function of its (non-negative) min and max values; always in range [0,100]. */
-    static int computeVariability(final int min, final int max)
-        {
-        if((min < 0) || (max < 0)) { throw new IllegalArgumentException(); }
-        if(max == 0) { return(0); }
-        return(100 - ((100*min)/max));
-        }
-
-    /**Handle the flag files that can be tested by remote servers.
-     * The basic ".flag" file is present unless status is green
-     * AND we have live data.
-     * <p>
-     * The more robust ".predicted.flag" file is present unless status is green.
-     * Live data is used if present, else a prediction is made from historical data.
-     * <p>
-     * The keen ".supergreen.flag" file is present unless status is green
-     * AND we have live data
-     * AND no storage is being drawn down on the grid.
-     * This means that we can be pretty sure that there is a surplus of energy available.
-     *
-     * @param baseFileName  base file name to make flags; if null then don't do flags.
-     * @param statusCapped  status capped to YELLOW if there is no live data
-     * @param statusUncapped  uncapped status (can be green from prediction even if no live data)
-     * @throws IOException  in case of problems
-     */
-    static void doFlagFiles(final String baseFileName,
-            final TrafficLight statusCapped, final TrafficLight statusUncapped,
-            final long currentStorageDrawdownMW)
         throws IOException
         {
-        if(null == baseFileName) { return; }
-
-        // In the absence of current data,
-        // then create/clear the flag based on historical data (ie predictions) where possible.
-        // The flag file has terminating extension (from final ".") replaced with ".flag".
-        // (If no extension is present then ".flag" is simply appended.)
-        final File outputFlagFile = new File(baseFileName + ".flag");
-        final boolean basicFlagState = TrafficLight.GREEN != statusCapped;
-        System.out.println("Basic flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
-        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        FUELINSTUtils.doPublicFlagFile(outputFlagFile, basicFlagState);
-
-        // Now deal with the flag that is prepared to make predictions from historical data,
-        // ie helps to ensure that the flag will probably be cleared some time each day
-        // even if our data source is unreliable.
-        // When live data is available then this should be the same as the basic flag.
-        final File outputPredictedFlagFile = new File(baseFileName + ".predicted.flag");
-        final boolean predictedFlagState = TrafficLight.GREEN != statusUncapped;
-        System.out.println("Predicted flag file is " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
-        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        FUELINSTUtils.doPublicFlagFile(outputPredictedFlagFile, predictedFlagState);
-
-        // Present unless 'capped' value is green (and thus must also be from live data)
-        // AND there storage is not being drawn from.
-        final File outputSupergreenFlagFile = new File(baseFileName + ".supergreen.flag");
-        final boolean supergreenFlagState = (basicFlagState) || (currentStorageDrawdownMW > 0);
-        System.out.println("Supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
-        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
-        FUELINSTUtils.doPublicFlagFile(outputSupergreenFlagFile, supergreenFlagState);
-        }
-
-    /**Create/remove public (readable by everyone) flag file as needed to match required state.
-     * @param outputFlagFile  flag file to create (true) or remove (false) if required; non-null
-     * @param flagRequiredPresent  desired state for flag: true indicates present, false indicates absent
-     * @throws IOException  in case of difficulty
-     */
-    static void doPublicFlagFile(final File outputFlagFile,
-            final boolean flagRequiredPresent)
-        throws IOException
-        {
-        if(flagRequiredPresent)
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
+        final PrintWriter w = new PrintWriter(baos);
+        try
             {
-            if(outputFlagFile.createNewFile())
+//            final Map<String, String> rawProperties = MainProperties.getRawProperties();
+            w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+            w.println("<results>");
+
+            if(isDataStale)
+                { w.println("<warning>*WARNING: cannot obtain current data so this is partly based on predictions from historical data (for "+hourOfDayHistorical+":XX GMT).</warning>"); }
+
+            w.println("<stale_data>"+isDataStale+"</stale_data>");
+
+//            if(status == TrafficLight.RED)
+//                { w.println("<status>1</status>"); }
+//            else if(status == TrafficLight.YELLOW)
+//                { w.println("<status>0</status>"); }
+//            else if(status == TrafficLight.GREEN)
+//                { w.println("<status>-1</status>"); }
+            w.print("<status>");
+            if(null != status) { w.print(status); }
+            w.println("</status>");
+
+            if(summary.histMinIntensity < summary.histMaxIntensity)
+                { w.println("<saving>"+FUELINSTUtils.computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"</saving>"); }
+
+            // Note any recent change/delta if the data is not stale.
+            if(!isDataStale)
                 {
-                outputFlagFile.setReadable(true);
-                System.out.println("Flag file created: "+outputFlagFile);
+                if(summary.recentChange == TrafficLight.GREEN)
+//                    { w.println("<carbon_intensity>-1</carbon_intensity>"); }
+                    { w.println("<carbon_intensity>GREEN</carbon_intensity>"); }
+                else if(summary.recentChange == TrafficLight.RED)
+//                    { w.println("<carbon_intensity>1</carbon_intensity>"); }
+                    { w.println("<carbon_intensity>RED</carbon_intensity>"); }
                 }
-            }
-        else
-            { if(outputFlagFile.delete()) { System.out.println("Flag file deleted: "+outputFlagFile); } }
-        }
 
-    /**Generate the text of the status Tweet.
-     * Public to allow testing that returned Tweets are always valid.
-     *
-     * @param isDataStale  true if we are working on historical/predicted (non-live) data
-     * @param statusUncapped  the uncapped current or predicted status; never null
-     * @return human-readable valid Tweet message
-     */
-    public static String generateTweetMessage(final boolean isDataStale,
-            final TrafficLight statusUncapped)
-        {
-        if(null == statusUncapped) { throw new IllegalArgumentException(); }
-        final String statusMessage = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
-        final String tweetMessage = ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage.trim() :
-            ("Grid status " + statusUncapped);
-        return(tweetMessage);
-        }
+            w.println("<timestamp>"+summary.timestamp+"</timestamp>");
+
+            w.write("<grid_carbon_intensity>");
+            w.write(String.valueOf(Math.round((isDataStale ? summary.histAveIntensity : summary.currentIntensity) * (1 + summary.totalGridLosses))));
+            w.write("</grid_carbon_intensity>");
+            w.println();
+
+            w.write("<transmission_losses>");
+            w.write(String.valueOf(Math.round(100 * summary.totalGridLosses)));
+            w.write("</transmission_losses>");
+            w.println();
+
+            w.println("<latest>");
+            w.println("<carbon_intensity>"+ summary.currentIntensity +"</carbon_intensity>");
+            w.println("<timestamp>"+ summary.timestamp +"</timestamp>");
+            w.println("<generation>"+ summary.currentMW+"</generation>");
+            w.println("<rolling_average_period>"+((summary.histWindowSize+1800000) / 3600000)+"</rolling_average_period>");
+            w.println("<rolling_average_carbon_intensity>"+ summary.histAveIntensity+"</rolling_average_carbon_intensity>");
+            w.println("</latest>");
+
+            w.println("<minimum>");
+            w.println("<carbon_intensity>"+ summary.histMinIntensity +"</carbon_intensity>");
+            w.println("<timestamp>"+ summary.minIntensityRecordTimestamp +"</timestamp>");
+            w.println("</minimum>");
+
+            w.println("<maximum>");
+            w.println("<carbon_intensity>"+ summary.histMaxIntensity +"</carbon_intensity>");
+            w.println("<timestamp>"+ summary.maxIntensityRecordTimestamp +"</timestamp>");
+            w.println("</maximum>");
 
 
-    /**Implement the 'traffic lights' command line option.
-     */
-    static void doTrafficLights(final String[] args) throws IOException
-        {
-        final long startTime = System.currentTimeMillis();
+            // Intensity (and generation) by hour of day.
+            final int newSlot = FUELINST.CurrentSummary.getGMTHourOfDay(startTime);
+            w.println("<generation_intensity>");
+            w.println("<average>"+summary.histAveIntensity+"</average>");
+            w.println("<current>"+summary.currentIntensity+"</current>");
 
-        System.out.println("Generating traffic-light summary "+Arrays.asList(args)+"...");
-
-        final String outputHTMLFileName = (args.length < 2) ? null : args[1];
-        final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
-        // Base/prefix onto which to append specific extensions.
-        final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
-
-        final File cacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
-
-        final CurrentSummary summary = FUELINSTUtils.computeCurrentSummary(cacheFile);
-
-        // Dump a summary of the current status re fuel.
-        System.out.println(summary);
-
-        if(outputHTMLFileName != null)
-            {
-            // Is the data stale?
-            final boolean isDataStale = summary.useByTime < startTime;
-
-            // Status to use to drive traffic-light measure.
-            // If the data is current then use the latest data point,
-            // else extract a suitable historical value to use in its place.
-            final int hourOfDayHistorical = CurrentSummary.getGMTHourOfDay(startTime);
-            final TrafficLight statusHistorical = summary.selectColour(summary.histAveIntensityByHourOfDay.get(hourOfDayHistorical));
-            final TrafficLight statusHistoricalCapped = (TrafficLight.GREEN != statusHistorical) ? statusHistorical : TrafficLight.YELLOW;
-            final TrafficLight statusUncapped = (!isDataStale) ? summary.status : statusHistorical;
-            final TrafficLight status = (!isDataStale) ? summary.status :
-                (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
-
-            // Handle the flag files that can be tested by remote servers.
-            try { FUELINSTUtils.doFlagFiles(baseFileName, status, statusUncapped, summary.currentStorageDrawdownMW); }
-            catch(final IOException e) { e.printStackTrace(); }
-
-            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
-
-            // Update the HTML page.
-            try {
-                FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary, isDataStale,
-                    hourOfDayHistorical, status, td);
-                }
-            catch(final IOException e) { e.printStackTrace(); }
-
-            // Update the (mobile-friendly) XHTML page.
-            try {
-                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
-                    (outputHTMLFileName + ".xml");
-                if(null != outputXMLFileName)
-                    {
-                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary, isDataStale,
-                        hourOfDayHistorical, status);
-                    }
-                }
-            catch(final IOException e) { e.printStackTrace(); }
-
-            // Update the (mobile-friendly) XHTML page.
-            try {
-                final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
-                    (outputHTMLFileName + ".xhtml");
-                if(null != outputXHTMLFileName)
-                    {
-                    FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary, isDataStale,
-                        hourOfDayHistorical, status);
-                    }
-                }
-            catch(final IOException e) { e.printStackTrace(); }
-
-            // Update Twitter if it is set up
-            // and if this represents a change from the previous status.
-            // We may have different messages when we're working from historical data
-            // because real-time / live data is not available.
-            try
+            // Always start at midnight GMT if the data is stale.
+            final int startSlot = isDataStale ? 0 : (1 + Math.max(0, newSlot)) % 24;
+//            final int maxHourlyIntensity = summary.histAveIntensityByHourOfDay.max0();
+            for(int h = 0; h < 24; ++h)
                 {
-                if(td != null)
-                    {
-                    // Compute name of file in which to cache last status we sent to Twitter.
-                    final String TwitterCacheFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
-                        (outputHTMLFileName + ".twittercache");
-                    // Attempt to update the displayed Twitter status as necessary
-                    // only if we think the status changed since we last sent it
-                    // and it has actually changed compared to what is at Twitter...
-                    // If we can't get a hand-crafted message then we create a simple one on the fly...
-                    // We use different messages for live and historical (stale) data.
-                    final String tweetMessage = FUELINSTUtils.generateTweetMessage(isDataStale, statusUncapped);
-                    TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName), tweetMessage);
-                    }
-                }
-            catch(final IOException e) { e.printStackTrace(); }
-            }
-        }
+                final StringBuffer sbh = new StringBuffer(2);
+                final int displayHourGMT = (h + startSlot) % 24;
+                sbh.append(displayHourGMT);
+                if(sbh.length() < 2) { sbh.insert(0, '0'); }
+                final Integer hIntensity = summary.histAveIntensityByHourOfDay.get(displayHourGMT);
 
-    /**Compute current status of fuel intensity; never null, but may be empty/default if data not available.
-         * If cacheing is enabled, then this may revert to cache in case of
-         * difficulty retrieving new data.
-         *
-         * @param cacheFile  if non-null, file to cache (parsed) data in between calls in case of data-source problems
-         * @throws IOException in case of data corruption
-         */
-        public static FUELINST.CurrentSummary computeCurrentSummary(final File cacheFile)
-            throws IOException
-            {
-            // Get as much set up as we can before pestering the data source...
-            final Map<String, String> rawProperties = MainProperties.getRawProperties();
-            final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
-            if(null == dataURL)
-                { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
-            final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
-            if(null == template)
-                { throw new IllegalStateException("Property undefined for FUELINST row field names: " + FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES); }
-            final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
-            if(configuredIntensities.isEmpty())
-                { throw new IllegalStateException("Properties undefined for fuel intensities: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX + "*"); }
-            final String maxIntensityAgeS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_MAX_AGE);
-            if(null == maxIntensityAgeS)
-                { throw new IllegalStateException("Property undefined for FUELINST acceptable age (s): " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_AGE); }
-            final long maxIntensityAge = Math.round(1000 * Double.parseDouble(maxIntensityAgeS));
-            final String distLossS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS);
-            if(null == distLossS)
-                { throw new IllegalStateException("Property undefined for FUELINST distribution loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS); }
-            final float distLoss = Float.parseFloat(distLossS);
-            if(!(distLoss >= 0) && (distLoss <= 1))
-                { throw new IllegalStateException("Bad value outside range [0.0,1.0] for FUELINST distribution loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_DIST_LOSS); }
-            final String tranLossS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS);
-            if(null == tranLossS)
-                { throw new IllegalStateException("Property undefined for FUELINST transmission loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS); }
-            final float tranLoss = Float.parseFloat(tranLossS);
-            if(!(tranLoss >= 0) && (tranLoss <= 1))
-                { throw new IllegalStateException("Bad value outside range [0.0,1.0] for FUELINST transmission loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS); }
-            // Extract Set of zero-or-more 'storage'/'fuel' types/names.
-            final String storageTypesS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_STORAGE_TYPES);
-            final Set<String> storageTypes = ((null == storageTypesS) || storageTypesS.isEmpty()) ? Collections.<String>emptySet() :
-                new HashSet<String>(Arrays.asList(storageTypesS.trim().split(",")));
-
-            final List<List<String>> parsedBMRCSV;
-
-            // Fetch and parse the CSV file from the data source.
-            // Return an empty summary instance in case of IO error here.
-            URL url = null;
-            try
-                {
-                // Set up URL connection to fetch the data.
-                url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
-                final URLConnection conn = url.openConnection();
-                conn.setAllowUserInteraction(false);
-                conn.setUseCaches(true); // Ensure that we get non-stale values each time.
-                conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
-                conn.setReadTimeout(60000); // Set a long-ish read timeout.
-
-                final InputStreamReader is = new InputStreamReader(conn.getInputStream());
-                try { parsedBMRCSV = DataUtils.parseBMRCSV(is, null); }
-                finally { is.close(); }
-                }
-            catch(final IOException e)
-                {
-                // Could not get data, so status is unknown.
-                System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
-                // Try to retrieve from cache...
-                FUELINST.CurrentSummary cached = null;
-                try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(cacheFile, FUELINSTUtils.GZIP_CACHE); }
-                catch(final IOException err) { /* Fall through... */ }
-                catch(final Exception err) { e.printStackTrace(); }
-                if(null != cached)
-                    {
-                    System.err.println("WARNING: using previous response from cache...");
-                    return(cached);
-                    }
-                // Return empty place-holder value.
-                return(new FUELINST.CurrentSummary());
-                }
-
-            final int rawRowCount = parsedBMRCSV.size();
-            System.out.println("Record/row count of CSV FUELINST data: " + rawRowCount + " from source: " + url);
-
-            // All intensity sample values from good records (assuming roughly equally spaced).
-            final List<Integer> allIntensitySamples = new ArrayList<Integer>(rawRowCount);
-
-            // Compute summary.
-            final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
-            int goodRecordCount = 0;
-            int totalIntensity = 0;
-            long firstGoodRecordTimestamp = 0;
-            long lastGoodRecordTimestamp = 0;
-            long minIntensityRecordTimestamp = 0;
-            long maxIntensityRecordTimestamp = 0;
-            int minIntensity = Integer.MAX_VALUE;
-            int maxIntensity = Integer.MIN_VALUE;
-            int currentIntensity = 0;
-            long currentMW = 0;
-            long currentStorageDrawdownMW = 0;
-            Map<String,Integer> currentGenerationByFuel = Collections.emptyMap();
-            final int[] sampleCount = new int[FUELINST.HOURS_PER_DAY]; // Count of all good timestamped records.
-            final long[] totalIntensityByHourOfDay = new long[FUELINST.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
-            final long[] totalGenerationByHourOfDay = new long[FUELINST.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
-            final long[] totalZCGenerationByHourOfDay = new long[FUELINST.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
-            final long[] totalStorageDrawdownByHourOfDay = new long[FUELINST.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
-            for(final List<String> row : parsedBMRCSV)
-                {
-                // Extract fuel values for this row and compute a weighted intensity...
-                final Map<String, String> namedFields = DataUtils.extractNamedFieldsByPositionFromRow(template, row);
-                if(!"FUELINST".equals(namedFields.get("type")))
-                    { throw new IOException("Expected FUELINST data but got: " + namedFields.get("type")); }
-                final Map<String,Integer> generationByFuel = new HashMap<String,Integer>();
-                long thisMW = 0; // Total MW generation in this slot.
-                long thisStorageDrawdownMW = 0; // Total MW storage draw-down in this slot.
-                long thisZCGenerationMW = 0; // Total zero-carbon generation in this slot.
-                // Retain any field that is all caps so that we can display it.
-                for(final String name : namedFields.keySet())
-                    {
-                    // Skip if something other than a valid fuel name.
-                    if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(name).matches()) { continue; }
-                    // Store the MW for this fuel.
-                    final int fuelMW = Integer.parseInt(namedFields.get(name), 10);
-                    if(fuelMW < 0) { throw new IOException("Bad (-ve) fuel generation MW value: "+row); }
-                    thisMW += fuelMW;
-                    generationByFuel.put(name, fuelMW);
-                    // Slices of generation/demand.
-                    if(storageTypes.contains(name)) { thisStorageDrawdownMW += fuelMW; }
-                    final Float fuelInt = configuredIntensities.get(name);
-                    if((null != fuelInt) && (fuelInt <= 0)) { thisZCGenerationMW += fuelMW; }
-                    }
-                // Compute weighted intensity as gCO2/kWh for simplicity of representation.
-                // 'Bad' fuels such as coal are ~1000, natural gas is <400, wind and nuclear are roughly 0.
-                final int weightedIntensity = Math.round(1000 * FUELINSTUtils.computeWeightedIntensity(configuredIntensities, generationByFuel, MIN_FUEL_TYPES_IN_MIX));
-                // Reject bad (-ve) records.
-                if(weightedIntensity < 0)
-                    {
-                    System.err.println("Skipping non-positive weighed intensity record at " + namedFields.get("timestamp"));
-                    continue;
-                    }
-
-                allIntensitySamples.add(weightedIntensity);
-
-                currentMW = thisMW;
-                currentIntensity = weightedIntensity; // Last (good) record we process is the 'current' one as they are in date order.
-                currentGenerationByFuel = generationByFuel;
-                currentStorageDrawdownMW = thisStorageDrawdownMW; // Last (good) record is 'current'.
-
-                ++goodRecordCount;
-                totalIntensity += weightedIntensity;
-
-                // Extract timestamp field as defined in the template, format YYYYMMDDHHMMSS.
-                final String rawTimestamp = namedFields.get("timestamp");
-                long recordTimestamp = 0; // Will be non-zero after a successful parse.
-                if(null == rawTimestamp)
-                    { System.err.println("missing FUELINST row timestamp"); }
+                w.println("<sample>");
+                w.println("<hour>"+sbh+"</hour>");
+                if((null == hIntensity) || (0 == hIntensity))
+                    { w.println("<carbon_intensity></carbon_intensity>"); continue; /* Skip empty slot. */ }
                 else
+                    { w.println("<carbon_intensity>"+ String.valueOf(hIntensity)+"</carbon_intensity>"); }
+                w.println("</sample>");
+                }
+            w.println("</generation_intensity>");
+
+            w.println("<generation>");
+            // Compute the maximum generation in any of the hourly slots
+            // to give us maximum scaling of the displayed bars.
+            final int maxGenerationMW = summary.histAveGenerationByHourOfDay.max0();
+            for(int h = 0; h < 24; ++h)
+                {
+                final int displayHourGMT = (h + startSlot) % 24;
+                final StringBuffer sbh = new StringBuffer(2);
+                sbh.append(displayHourGMT);
+                if(sbh.length() < 2) { sbh.insert(0, '0'); }
+
+                final Integer hGeneration = summary.histAveGenerationByHourOfDay.get(displayHourGMT);
+                if((null == hGeneration) || (0 == hGeneration)) { continue; /* Skip empty slot. */ }
+//                final int height = (GCOMP_PX_MAX*hGeneration) / Math.max(1, maxGenerationMW);
+                final int scaledToGW = (hGeneration + 500) / 1000;
+
+                w.println("<sample>");
+                w.println("<hour>"+sbh+"</hour>");
+                w.println("<all>"+String.valueOf(scaledToGW)+"</all>");
+
+                final int hZCGeneration = summary.histAveZCGenerationByHourOfDay.get0(displayHourGMT);
+                if(0 != hZCGeneration)
                     {
-                    try
-                        {
-                        final Date d = timestampParser.parse(rawTimestamp);
-                        recordTimestamp = d.getTime();
-                        lastGoodRecordTimestamp = recordTimestamp;
-                        if(firstGoodRecordTimestamp == 0) { firstGoodRecordTimestamp = recordTimestamp; }
-
-                        // Extract raw GMT hour from YYYYMMDDHH...
-                        final int hour = Integer.parseInt(rawTimestamp.substring(8, 10), 10);
-    //System.out.println("H="+hour+": int="+weightedIntensity+", MW="+currentMW+" time="+d);
-                        ++sampleCount[hour];
-                        // Accumulate intensity by hour...
-                        totalIntensityByHourOfDay[hour] += weightedIntensity;
-                        // Accumulate generation by hour...
-                        totalGenerationByHourOfDay[hour] += currentMW;
-                        // Note zero-carbon generation.
-                        totalZCGenerationByHourOfDay[hour] += thisZCGenerationMW;
-                        // Note storage draw-down, if any.
-                        totalStorageDrawdownByHourOfDay[hour] += thisStorageDrawdownMW;
-                        }
-                    catch(final ParseException e)
-                        {
-                        System.err.println("Unable to parse FUELINST record timestamp " + rawTimestamp + ": " + e.getMessage());
-                        }
+                    if(hZCGeneration >= maxGenerationMW/8) { w.println("<zero_carbon>"+String.valueOf((hZCGeneration + 500) / 1000)+"</zero_carbon>"); }
                     }
-
-                if(weightedIntensity < minIntensity)
-                    { minIntensity = weightedIntensity; minIntensityRecordTimestamp = recordTimestamp; }
-                if(weightedIntensity > maxIntensity)
-                    { maxIntensity = weightedIntensity; maxIntensityRecordTimestamp = recordTimestamp; }
+                w.println("</sample>");
                 }
+            w.println("</generation>");
 
-            // Note if the intensity dropped/improved in the final samples.
-            TrafficLight recentChange = null;
-            if(allIntensitySamples.size() > 1)
+            // TODO: Show cumulative MWh and tCO2.
+
+            // FIXME: DHD20090608: I suggest leaving the fuel names as-is (upper case) in the XML as those are the 'formal' Elexon names; convert for display if need be.
+            // FIXME: DHD20090608: As fuel names may not always be XML-token-safe, maybe <fuel name="NNN">amount</fuel> would be better?
+
+            if(!isDataStale)
                 {
-                final Integer prev = allIntensitySamples.get(allIntensitySamples.size() - 2);
-                final Integer last = allIntensitySamples.get(allIntensitySamples.size() - 1);
-                if(prev < last) { recentChange = TrafficLight.RED; }
-                else if(prev > last) { recentChange = TrafficLight.GREEN; }
-                else { recentChange = TrafficLight.YELLOW; }
+                w.println("<fuel_mix>");
+                w.println("<timestamp>"+summary.timestamp+"</timestamp>");
+                final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary.currentGenerationMWByFuelMW);
+                for(final String fuel : power.keySet()) { w.println("<"+fuel.toLowerCase()+">"+power.get(fuel)+"</"+fuel.toLowerCase()+">"); }
+                w.println("</fuel_mix>");
                 }
 
-            // Compute traffic light status: defaults to 'unknown'.
-            TrafficLight status = null;
+            w.println("<fuel_intensities>");
+            w.println("<timestamp>"+summary.timestamp+"</timestamp>");
+            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities());
+            for(final String fuel : intensities.keySet()) { w.println("<"+fuel.toLowerCase()+">"+intensities.get(fuel)+"</"+fuel.toLowerCase()+">"); }
+            w.println("</fuel_intensities>");
 
-            final int aveIntensity = totalIntensity / Math.max(goodRecordCount, 1);
+            w.println("</results>");
 
-            // Always set the outputs and let the caller decide what to do with aged data.
-            int lowerThreshold = 0;
-            int upperThreshold = 0;
-            final int allSamplesSize = allIntensitySamples.size();
-            if(allSamplesSize > 3) // Only useful above some minimal set size.
-                {
-                // Normally we expect bmreports to give us 24hrs' data.
-                // RED will be where the current value is in the upper quartile of the last 24hrs' intensities,
-                // GREEN when in the lower quartile (and below the mean to be safe), so is fairly conservative,
-                // YELLOW otherwise.
-                // as long as we're on better-than-median intensity compared to the last 24 hours.
-                final List<Integer> sortedIntensitySamples = new ArrayList<Integer>(allIntensitySamples);
-                Collections.sort(sortedIntensitySamples);
-                upperThreshold = sortedIntensitySamples.get(allSamplesSize-1 - (allSamplesSize / 4));
-                lowerThreshold = Math.min(sortedIntensitySamples.get(allSamplesSize / 4), aveIntensity);
-                if(currentIntensity > upperThreshold) { status = TrafficLight.RED; }
-                else if(currentIntensity < lowerThreshold) { status = TrafficLight.GREEN; }
-                else { status = TrafficLight.YELLOW; }
-                }
-            else { System.err.println("Newest data point too old"); }
-
-            // Compute mean intensity by time slot.
-            final List<Integer> aveIntensityByHourOfDay = new ArrayList<Integer>(24);
-            for(int h = 0; h < 24; ++h)
-                { aveIntensityByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalIntensityByHourOfDay[h] / sampleCount[h]))); }
-
-            // Compute mean generation by time slot.
-            final List<Integer> aveGenerationByHourOfDay = new ArrayList<Integer>(24);
-            for(int h = 0; h < 24; ++h)
-                { aveGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalGenerationByHourOfDay[h] / sampleCount[h]))); }
-
-            // Compute mean zero-carbon generation by time slot.
-            final List<Integer> aveZCGenerationByHourOfDay = new ArrayList<Integer>(24);
-            for(int h = 0; h < 24; ++h)
-                { aveZCGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalZCGenerationByHourOfDay[h] / sampleCount[h]))); }
-
-            // Compute mean draw-down from storage by time slot.
-            final List<Integer> aveStorageDrawdownByHourOfDay = new ArrayList<Integer>(24);
-            for(int h = 0; h < 24; ++h)
-                { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h]))); }
-
-            // Construct summary status...
-            final FUELINST.CurrentSummary result =
-                new FUELINST.CurrentSummary(status, recentChange,
-                                      lastGoodRecordTimestamp, lastGoodRecordTimestamp + maxIntensityAge,
-                                      currentMW,
-                                      currentIntensity,
-                                      currentGenerationByFuel,
-                                      currentStorageDrawdownMW,
-                                      minIntensity,
-                                      minIntensityRecordTimestamp,
-                                      aveIntensity,
-                                      maxIntensity,
-                                      maxIntensityRecordTimestamp, (lastGoodRecordTimestamp - firstGoodRecordTimestamp),
-                                      goodRecordCount,
-                                      lowerThreshold, upperThreshold,
-                                      aveIntensityByHourOfDay,
-                                      aveGenerationByHourOfDay,
-                                      aveZCGenerationByHourOfDay,
-                                      aveStorageDrawdownByHourOfDay,
-                                      tranLoss + distLoss);
-
-            // If cacheing is enabled then persist this result, compressed.
-            if(null != cacheFile)
-                { DataUtils.serialiseToFile(result, cacheFile, FUELINSTUtils.GZIP_CACHE, true); }
-
-            return(result);
+            w.flush();
             }
+        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
 
-    /**If true then reject points with too few fuel types in mix since this is likely an error. */
-    final static int MIN_FUEL_TYPES_IN_MIX = 2;
-
-    /**Compute variability % of a set as a function of its min and max values; always in range [0,100]. */
-    static int computeVariability(final List<FUELINSTHistorical.TimestampedNonNegInt> intensities)
-        {
-        if(null == intensities) { throw new IllegalArgumentException(); }
-        int min = Integer.MAX_VALUE;
-        int max = 0;
-        for(final FUELINSTHistorical.TimestampedNonNegInt ti : intensities)
-            {
-            if(ti.value > max) { max = ti.value; }
-            if(ti.value < min) { min = ti.value; }
-            }
-        return(computeVariability(min, max));
+        // Attempt atomic replacement of XML page...
+        DataUtils.replacePublishedFile(outputXMLFileName, baos.toByteArray());
         }
-
-    /**Given a set of relative fuel usages and carbon intensities, computes an overall intensity; never null.
-     * This computes an intensity in the same units as the supplied values.
-     * Fuels whose keys are not in the intensities Map will be ignored.
-     * <p>
-     * Inputs must not be altered while this is in progress.
-     * <p>
-     * This will not attempt to alter its inputs.
-     *
-     * @param intensities  Map from fuel name to CO2 per unit of energy; never null
-     * @param generationByFuel  Map from fuel name to power being generated from that fuel; never null
-     * @param minFuelTypesInMix  minimum number of fuel types in mix else return -1; non-negative
-     *
-     * @return weighted intensity of specified fuel mix for fuels with known intensity,
-     *         or -1 if too few fuels in mix
-     */
-    public static float computeWeightedIntensity(final Map<String, Float> intensities,
-                                                 final Map<String, Integer> generationByFuel,
-                                                 final int minFuelTypesInMix)
-        {
-        if(null == intensities) { throw new IllegalArgumentException(); }
-        if(null == generationByFuel) { throw new IllegalArgumentException(); }
-        if(minFuelTypesInMix < 0) { throw new IllegalArgumentException(); }
-
-        // Compute set of keys common to both Maps.
-        final Set<String> commonKeys = new HashSet<String>(intensities.keySet());
-        commonKeys.retainAll(generationByFuel.keySet());
-        // If too few fuels in the mix then quickly return -1 as a distinguished value.
-        if(commonKeys.size() < minFuelTypesInMix) { return(-1); }
-
-        int nonZeroFuelCount = 0;
-        float totalGeneration = 0;
-        float totalCO2 = 0;
-
-        for(final String fuelName : commonKeys)
-            {
-            final float power = generationByFuel.get(fuelName);
-            if(power < 0) { throw new IllegalArgumentException(); }
-            if(power == 0) { continue; }
-            ++nonZeroFuelCount;
-            totalGeneration += power;
-            totalCO2 += power * intensities.get(fuelName);
-            }
-
-        // If too few (non-zero) fuels in the mix then quickly return -1 as a distinguished value.
-        if(nonZeroFuelCount < minFuelTypesInMix) { return(-1); }
-
-        final float weightedIntensity = (totalGeneration == 0) ? 0 : totalCO2 / totalGeneration;
-        return(weightedIntensity);
-        }
-
-    /**Extract (immutable) intensity map from configuration information; never null but may be empty.
-     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
-     */
-    public static Map<String, Float> getConfiguredIntensities()
-        {
-        final Map<String, Float> result = new HashMap<String, Float>();
-
-        // Have to scan through all keys, which may be inefficient...
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        for(final String key : rawProperties.keySet())
-            {
-            if(!key.startsWith(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
-            // TODO: verify that fuel name is all upper-case ASCII and of reasonable length, else reject.
-            final String fuelname = key.substring(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX.length());
-            // Reject non-parsable and illegal (eg -ve) values.
-            final Float intensity;
-            try { intensity = new Float(rawProperties.get(key)); }
-            catch(final NumberFormatException e)
-                {
-                System.err.println("Unable to parse kgCO2/kWh intensity value for " + key);
-                continue;
-                }
-            if(!(intensity >= 0) || Float.isInfinite(intensity) || Float.isNaN(intensity))
-                {
-                System.err.println("Invalid (non-positive) kgCO2/kWh intensity value for " + key);
-                continue;
-                }
-            result.put(fuelname, intensity);
-            }
-
-        return(Collections.unmodifiableMap(result));
-        }
-
-    /**Extract (immutable) intensity map from configuration information; never null but may be empty.
-     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
-     */
-    public static Map<String, String> getConfiguredFuelNames()
-        {
-        final Map<String, String> result = new HashMap<String, String>();
-
-        // Have to scan through all keys, which may be inefficient...
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        for(final String key : rawProperties.keySet())
-            {
-            if(!key.startsWith(FUELINST.FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
-            final String fuelname = key.substring(FUELINST.FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX.length());
-            final String descriptiveName = rawProperties.get(key).trim();
-            if(descriptiveName.isEmpty()) { continue; }
-            result.put(fuelname, descriptiveName);
-            }
-
-        return(Collections.unmodifiableMap(result));
-        }
-
-    /**If true, compress (GZIP) any persisted state. */
-    static final boolean GZIP_CACHE = true;
-
-    /**Get a parser for the BM timestamps in at least FUELINST data; never null.
-     * A returned instance is not safe to share between threads.
-     */
-    public static SimpleDateFormat getTIBCOTimestampParser()
-        {
-        final SimpleDateFormat sDF = new SimpleDateFormat(FUELINSTUtils.TIBCOTIMESTAMP_FORMAT);
-        sDF.setTimeZone(FUELINST.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
-        return sDF;
-        }
-
-    /**Get a parser for the BM timestamps in at least FUELINST data; never null.
-     * A returned instance is not safe to share between threads.
-     */
-    public static SimpleDateFormat getCSVTimestampParser()
-        {
-        final SimpleDateFormat sDF = new SimpleDateFormat(FUELINSTUtils.CSVTIMESTAMP_FORMAT);
-        sDF.setTimeZone(FUELINST.GMT_TIME_ZONE); // All BM timestamps are GMT/UTC.
-        return sDF;
-        }
-
-    /**Immutable regex pattern for matching a valid fuel name (all upper-case ASCII); non-null. */
-    public static final Pattern FUEL_NAME_REGEX = Pattern.compile("[A-Z]+");
-
-    /**SimpleDateFormat pattern to parse TIBCO FUELINST timestamp down to seconds (all assumed GMT/UTC); not null.
-     * Example TIBCO timestamp: 2009:03:09:23:57:30:GMT
-     * Note that SimpleDateFormat is not immutable nor thread-safe.
-     */
-    static final String TIBCOTIMESTAMP_FORMAT = "yyyy:MM:dd:HH:mm:ss:zzz";
-
-    /**SimpleDateFormat pattern to parse CSV FUELINST timestamp down to seconds (all assumed GMT/UTC); not null.
-     * Note that SimpleDateFormat is not immutable nor thread-safe.
-     */
-    static final String CSVTIMESTAMP_FORMAT = "yyyyMMddHHmmss";
-
     }

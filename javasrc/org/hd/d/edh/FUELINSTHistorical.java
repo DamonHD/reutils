@@ -56,148 +56,30 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-/**Handle FUELINST data.
+/**Handle FUELINST historical data.
  */
 public final class FUELINSTHistorical
     {
-
-    /**Immutable store of non-negative int value, eg carbon intensity (gCO2/kWh), for a specific time point.
-     */
-    public static final class TimestampedNonNegInt
-        {
-        /**Timestamp; non-zero. */
-        public final long timestamp;
-        /**Int value, eg intensity in gCO2/kWh; non-negative. */
-        public final int value;
-
-        /**Construct directly from numeric values.
-         * @param timestamp  non-zero timestamp
-         * @param value  eg intensity in gCO2/kWh, non-negative
-         */
-        public TimestampedNonNegInt(final long timestamp, final int value)
-            {
-            if(timestamp == 0) { throw new IllegalArgumentException(); }
-            if(value < 0) { throw new IllegalArgumentException(); }
-            this.timestamp = timestamp;
-            this.value = value;
-            }
-
-        /**Construct from TIBCO-style timestamp and numeric intensity.
-         * @param timestamp  TIBCO-style timestamp, never null
-         * @param value  eg intensity in gCO2/kWh, non-negative
-         * @throws ParseException  if the timestamp cannot be parsed
-         */
-        public TimestampedNonNegInt(final String timestamp, final int value)
-            throws ParseException
-            {
-            this(FUELINSTUtils.getTIBCOTimestampParser().parse(timestamp).getTime(), value);
-            }
-
-        /**Render as a human-readable string; never null. */
-        @Override public String toString()
-            { return(String.valueOf(value) + " @ " + (new Date(timestamp))); }
-        }
-
-    /**The field name of the timestamp to use from the FUELINST message in TIBCO format; non-null.
-     * The two choices are "TS" (period start?) and "TP" (period end?).
-     */
-    private final static String TIMESTAMP_FIELD = "TP";
-
-    /**The field name of the fuel type from the FUELINST message in TIBCO format; non-null. */
-    private final static String FUELTYPE_FIELD = "FT";
-
-    /**The field name of the fuel generation (MW) from the FUELINST message in TIBCO format; non-null. */
-    private final static String FUELGEN_FIELD = "FG";
-
-    /**Convert an in-order list of TIBCO FUELINST messages to an immutable intensities List; never null.
-     * This assumes that related messages, ie with the same timestamp, are adjacent.
-     * <p>
-     * This implicitly assumes that samples are taken at regular intervals.
-     * <p>
-     * Does not attempt to alter its input.
-     */
-    public static List<TimestampedNonNegInt> msgsToIntensity(final List<Map<String,String>> msgs)
-        throws ParseException
-        {
-        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
-        if(configuredIntensities.isEmpty())
-            { throw new IllegalStateException("Properties undefined for fuel intensities: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX + "*"); }
-
-        final List<TimestampedNonNegInt> result = new ArrayList<TimestampedNonNegInt>(msgs.size() / 8);
-
-        String prevTimestamp = ""; // Force new computation on first value...
-        final Map<String, Integer> generationByFuel = new HashMap<String, Integer>(2 * configuredIntensities.size());
-
-        for(int record = msgs.size(); --record >= 0; )
-            {
-            final boolean atEnd = (record == 0);
-            final Map<String, String> mappings = atEnd ?  null : msgs.get(record);
-            final String timestamp = atEnd ? null : mappings.get(TIMESTAMP_FIELD);
-            if(!atEnd && (null == timestamp))
-                { throw new ParseException("Missing timestamp field "+TIMESTAMP_FIELD, record); }
-            // Time to close off previous intensity calculation
-            if(atEnd || !prevTimestamp.equals(timestamp))
-                {
-                // Check if we had some/enough fuel values collected.
-                if(generationByFuel.size() >= FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX)
-                    {
-                    final int weightedIntensity = Math.round(1000 * FUELINSTUtils.computeWeightedIntensity(configuredIntensities, generationByFuel, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX));
-                    // Check that we have a real intensity value.
-                    if(weightedIntensity >= 0)
-                        {
-                        final TimestampedNonNegInt timestampedIntensity = new TimestampedNonNegInt(prevTimestamp, weightedIntensity);
-                        result.add(timestampedIntensity);
-                        }
-                    }
-                else if(!"".equals(prevTimestamp))
-                    {
-                    System.err.println("Rejecting suspicious data (fuel count "+generationByFuel.size()+") at time " + prevTimestamp);
-                    }
-                // Clear out old fuel values.
-                generationByFuel.clear();
-                // Set the new timestamp if any...
-                if(!atEnd) { prevTimestamp = timestamp; }
-                }
-
-            if(!atEnd)
-                {
-                // Add current fuel generation mapping
-                // *iff* the fuel usage is non-zero.
-                final String fuelGen = mappings.get(FUELGEN_FIELD);
-                if(null == fuelGen)
-                    { throw new ParseException("Missing fuel generation field "+FUELGEN_FIELD, record); }
-                final int fg = Integer.parseInt(fuelGen, 10); // Expect it to be an integer in the data...
-                if(fg == 0) { continue; }
-                if(fg < 0)
-                    { throw new ParseException("Invalid (-ve) fuel generation field "+FUELGEN_FIELD, record); }
-                final String fuelType = mappings.get(FUELTYPE_FIELD);
-                if(null == fuelType)
-                    { throw new ParseException("Missing fuel type field "+FUELTYPE_FIELD, record); }
-                generationByFuel.put(fuelType, fg);
-                }
-            }
-
-        return(Collections.unmodifiableList(result)); // Keep result immutable.
-        }
+    private FUELINSTHistorical() { /* Prevent creation of an instance. */ }
 
     /**Interface to allow bucketing of data by time by various criteria.
      * Any implementation of this interface should be immutable.
      */
     public interface BucketAlg
         {
-        /**Returns the human-readable title of this bucket mechanism; never null. */
-        public String getTitle();
+        /**Returns true if the result is of capped size however big (and over whatever period) the data set. */
+        public boolean cappedSize();
 
         /**Returns the bucket for this timestamp one of a small enumeration of values; never null.
          * These values should sort lexically in the order for them to be displayed.
          */
         public String getBucket(final long timestamp);
 
-        /**Returns true if the result is of capped size however big (and over whatever period) the data set. */
-        public boolean cappedSize();
-
         /**Returns sub-bucket to use, if any, within main bucket; null if none. */
         public BucketAlg getSubBucketAlg();
+
+        /**Returns the human-readable title of this bucket mechanism; never null. */
+        public String getTitle();
         }
 
     /**Class to bucket data.
@@ -299,6 +181,54 @@ public final class FUELINSTHistorical
         public synchronized void setReadOnly() { this.readOnly = true; }
         }
 
+    /**Immutable store of non-negative int value, eg carbon intensity (gCO2/kWh), for a specific time point.
+     */
+    public static final class TimestampedNonNegInt
+        {
+        /**Timestamp; non-zero. */
+        public final long timestamp;
+        /**Int value, eg intensity in gCO2/kWh; non-negative. */
+        public final int value;
+
+        /**Construct directly from numeric values.
+         * @param timestamp  non-zero timestamp
+         * @param value  eg intensity in gCO2/kWh, non-negative
+         */
+        public TimestampedNonNegInt(final long timestamp, final int value)
+            {
+            if(timestamp == 0) { throw new IllegalArgumentException(); }
+            if(value < 0) { throw new IllegalArgumentException(); }
+            this.timestamp = timestamp;
+            this.value = value;
+            }
+
+        /**Construct from TIBCO-style timestamp and numeric intensity.
+         * @param timestamp  TIBCO-style timestamp, never null
+         * @param value  eg intensity in gCO2/kWh, non-negative
+         * @throws ParseException  if the timestamp cannot be parsed
+         */
+        public TimestampedNonNegInt(final String timestamp, final int value)
+            throws ParseException
+            {
+            this(FUELINSTUtils.getTIBCOTimestampParser().parse(timestamp).getTime(), value);
+            }
+
+        /**Render as a human-readable string; never null. */
+        @Override public String toString()
+            { return(String.valueOf(value) + " @ " + (new Date(timestamp))); }
+        }
+
+    /**The field name of the timestamp to use from the FUELINST message in TIBCO format; non-null.
+     * The two choices are "TS" (period start?) and "TP" (period end?).
+     */
+    private final static String TIMESTAMP_FIELD = "TP";
+
+    /**The field name of the fuel type from the FUELINST message in TIBCO format; non-null. */
+    private final static String FUELTYPE_FIELD = "FT";
+
+    /**The field name of the fuel generation (MW) from the FUELINST message in TIBCO format; non-null. */
+    private final static String FUELGEN_FIELD = "FG";
+
     /**Immutable functor to bucket by year and day-of-year (GMT), ie unique day; non-null.
      * This is suitable for looking for daily variability within other (larger) bucket sizes.
      * <p>
@@ -306,85 +236,85 @@ public final class FUELINSTHistorical
      * so needs to be handled differently to capped-size buckets.
      */
     public static final BucketAlg BUCKET_BY_YEAR_AND_DAY_GMT = new BucketAlg(){
+        public boolean cappedSize() { return(false); }
         public String getBucket(final long timestamp)
             {
-            final Calendar c = new GregorianCalendar(FUELINST.GMT_TIME_ZONE);
+            final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
             c.setTimeInMillis(timestamp);
             // TODO: fix for correct lexical sort...
             return(String.valueOf(c.get(Calendar.YEAR)) + "-" + String.valueOf(c.get(Calendar.DAY_OF_YEAR)));
             }
-        public String getTitle() { return("Day"); }
-        public boolean cappedSize() { return(false); }
         /**Sub-buckets don't really make sense for this... */
         public BucketAlg getSubBucketAlg() { return(null); }
+        public String getTitle() { return("Day"); }
         };
 
     /**Immutable functor to bucket all data into a single bucket; non-null. */
     public static final BucketAlg BUCKET_SINGLETON = new BucketAlg(){
-        public String getBucket(final long timestamp) { return("ALL"); }
-        public String getTitle() { return("ALL"); }
         public boolean cappedSize() { return(true); }
+        public String getBucket(final long timestamp) { return("ALL"); }
         public BucketAlg getSubBucketAlg() { return(BUCKET_BY_YEAR_AND_DAY_GMT); }
+        public String getTitle() { return("ALL"); }
         };
 
     /**Immutable functor to bucket by week/weekend (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_WEEKEND_GMT = new BucketAlg(){
+        public boolean cappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
-            final Calendar c = new GregorianCalendar(FUELINST.GMT_TIME_ZONE);
+            final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
             c.setTimeInMillis(timestamp);
             final int d = c.get(Calendar.DAY_OF_WEEK);
             final boolean isWeekend = (d == Calendar.SATURDAY) || (d == Calendar.SUNDAY);
             return(isWeekend ? "Weekend" : "Week");
             }
-        public String getTitle() { return("Week/Weekend"); }
-        public boolean cappedSize() { return(true); }
         public BucketAlg getSubBucketAlg() { return(BUCKET_BY_YEAR_AND_DAY_GMT); }
+        public String getTitle() { return("Week/Weekend"); }
         };
 
     /**Immutable functor to bucket by hour of day (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_HOUR_GMT = new BucketAlg(){
+        public boolean cappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
-            final Calendar c = new GregorianCalendar(FUELINST.GMT_TIME_ZONE);
+            final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
             c.setTimeInMillis(timestamp);
             final int h = c.get(Calendar.HOUR_OF_DAY);
             if(h < 10) { return("0" + h); }
             return(String.valueOf(h));
             }
-        public String getTitle() { return("Hour-of-Day (GMT)"); }
-        public boolean cappedSize() { return(true); }
         /**Sub-buckets don't really make sense for this... */
         public BucketAlg getSubBucketAlg() { return(null); }
+        public String getTitle() { return("Hour-of-Day (GMT)"); }
         };
 
     /**Immutable functor to bucket by month (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_MONTH_GMT = new BucketAlg(){
+        public boolean cappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
-            final Calendar c = new GregorianCalendar(FUELINST.GMT_TIME_ZONE);
+            final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
             c.setTimeInMillis(timestamp);
             final int m = 1 + c.get(Calendar.MONTH);
             if(m < 10) { return("0" + m); }
             return(String.valueOf(m));
             }
-        public String getTitle() { return("Month"); }
-        public boolean cappedSize() { return(true); }
         public BucketAlg getSubBucketAlg() { return(BUCKET_BY_YEAR_AND_DAY_GMT); }
+        public String getTitle() { return("Month"); }
         };
 
     /**Immutable functor to bucket by month (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_YEAR_GMT = new BucketAlg(){
+        public boolean cappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
-            final Calendar c = new GregorianCalendar(FUELINST.GMT_TIME_ZONE);
+            final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
             c.setTimeInMillis(timestamp);
             final int m = c.get(Calendar.YEAR);
             return(String.valueOf(m));
             }
-        public String getTitle() { return("Year"); }
-        public boolean cappedSize() { return(true); }
         public BucketAlg getSubBucketAlg() { return(BUCKET_BY_YEAR_AND_DAY_GMT); }
+        public String getTitle() { return("Year"); }
         };
 
     /**If true then allow (discard) duplicate samples, else throw an exception and stop. */
@@ -684,5 +614,76 @@ public final class FUELINSTHistorical
         DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
 
         System.out.println("Report run took "+(System.currentTimeMillis() - startTime)+"ms.");
+        }
+
+    /**Convert an in-order list of TIBCO FUELINST messages to an immutable intensities List; never null.
+     * This assumes that related messages, ie with the same timestamp, are adjacent.
+     * <p>
+     * This implicitly assumes that samples are taken at regular intervals.
+     * <p>
+     * Does not attempt to alter its input.
+     */
+    public static List<TimestampedNonNegInt> msgsToIntensity(final List<Map<String,String>> msgs)
+        throws ParseException
+        {
+        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
+        if(configuredIntensities.isEmpty())
+            { throw new IllegalStateException("Properties undefined for fuel intensities: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX + "*"); }
+
+        final List<TimestampedNonNegInt> result = new ArrayList<TimestampedNonNegInt>(msgs.size() / 8);
+
+        String prevTimestamp = ""; // Force new computation on first value...
+        final Map<String, Integer> generationByFuel = new HashMap<String, Integer>(2 * configuredIntensities.size());
+
+        for(int record = msgs.size(); --record >= 0; )
+            {
+            final boolean atEnd = (record == 0);
+            final Map<String, String> mappings = atEnd ?  null : msgs.get(record);
+            final String timestamp = atEnd ? null : mappings.get(TIMESTAMP_FIELD);
+            if(!atEnd && (null == timestamp))
+                { throw new ParseException("Missing timestamp field "+TIMESTAMP_FIELD, record); }
+            // Time to close off previous intensity calculation
+            if(atEnd || !prevTimestamp.equals(timestamp))
+                {
+                // Check if we had some/enough fuel values collected.
+                if(generationByFuel.size() >= FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX)
+                    {
+                    final int weightedIntensity = Math.round(1000 * FUELINSTUtils.computeWeightedIntensity(configuredIntensities, generationByFuel, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX));
+                    // Check that we have a real intensity value.
+                    if(weightedIntensity >= 0)
+                        {
+                        final TimestampedNonNegInt timestampedIntensity = new TimestampedNonNegInt(prevTimestamp, weightedIntensity);
+                        result.add(timestampedIntensity);
+                        }
+                    }
+                else if(!"".equals(prevTimestamp))
+                    {
+                    System.err.println("Rejecting suspicious data (fuel count "+generationByFuel.size()+") at time " + prevTimestamp);
+                    }
+                // Clear out old fuel values.
+                generationByFuel.clear();
+                // Set the new timestamp if any...
+                if(!atEnd) { prevTimestamp = timestamp; }
+                }
+
+            if(!atEnd)
+                {
+                // Add current fuel generation mapping
+                // *iff* the fuel usage is non-zero.
+                final String fuelGen = mappings.get(FUELGEN_FIELD);
+                if(null == fuelGen)
+                    { throw new ParseException("Missing fuel generation field "+FUELGEN_FIELD, record); }
+                final int fg = Integer.parseInt(fuelGen, 10); // Expect it to be an integer in the data...
+                if(fg == 0) { continue; }
+                if(fg < 0)
+                    { throw new ParseException("Invalid (-ve) fuel generation field "+FUELGEN_FIELD, record); }
+                final String fuelType = mappings.get(FUELTYPE_FIELD);
+                if(null == fuelType)
+                    { throw new ParseException("Missing fuel type field "+FUELTYPE_FIELD, record); }
+                generationByFuel.put(fuelType, fg);
+                }
+            }
+
+        return(Collections.unmodifiableList(result)); // Keep result immutable.
         }
     }
