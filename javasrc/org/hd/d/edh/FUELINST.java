@@ -681,6 +681,7 @@ public final class FUELINST
             // RED will be where the current value is in the upper quartile of the last 24hrs' intensities,
             // GREEN when in the lower quartile (and below the mean to be safe), so is fairly conservative,
             // YELLOW otherwise.
+            // as long as we're on better-than-median intensity compared to the last 24 hours.
             final List<Integer> sortedIntensitySamples = new ArrayList<Integer>(allIntensitySamples);
             Collections.sort(sortedIntensitySamples);
             upperThreshold = sortedIntensitySamples.get(allSamplesSize-1 - (allSamplesSize / 4));
@@ -1184,7 +1185,7 @@ public final class FUELINST
             w.println();
             // Footnotes
             if(usedLessGreen)
-                { w.println("<p>Hours that are basically <span style=\"color:green\">green</span>, but drawing down on grid-connected storage with its attendant losses, and suggesting that no excess generation is available, ie that are marginally green, are coloured <span style=\"color:"+LESS_GREEN_STORAGE_DRAWDOWN+"\">"+LESS_GREEN_STORAGE_DRAWDOWN+"</span>.</p>"); }
+                { w.println("<p>Hours that are basically <span style=\"color:green\">green</span>, but are using grid-connected storage with its attendant losses and suggesting that little or no excess non-dispatchable generation is available, ie that are marginally green, are shaded <span style=\"color:"+LESS_GREEN_STORAGE_DRAWDOWN+"\">"+LESS_GREEN_STORAGE_DRAWDOWN+"</span>.</p>"); }
 
             // TODO: Show cumulative MWh and tCO2.
 
