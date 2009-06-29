@@ -324,6 +324,8 @@ public final class FUELINST
         /**Generates outputs from the arguments and the current summary.
          * When called from the command-line the supplied args
          * will be the trailing/optional parameters after initial parsing.
+         * <p>
+         * The arguments will not include any leading 'FUELINST' and class-name tag.
          *
          * @param args   arguments/parameters; never null but may be empty
          * @param summary  summary of current/historical FUELINST stats; never null

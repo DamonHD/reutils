@@ -521,15 +521,19 @@ public final class FUELINSTUtils
             { if(outputFlagFile.delete()) { System.out.println("Flag file deleted: "+outputFlagFile); } }
         }
 
+
     /**Implement the 'traffic lights' command line option.
+     * @param args  optional (though usual) trailing argument (output HTML file name); never null
      */
     static void doTrafficLights(final String[] args) throws IOException
         {
+        if(null == args) { throw new IllegalArgumentException(); }
+
         final long startTime = System.currentTimeMillis();
 
         System.out.println("Generating traffic-light summary "+Arrays.asList(args)+"...");
 
-        final String outputHTMLFileName = (args.length < 2) ? null : args[1];
+        final String outputHTMLFileName = (args.length < 1) ? null : args[0];
         final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
         // Base/prefix onto which to append specific extensions.
         final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);

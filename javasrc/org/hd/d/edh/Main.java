@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.util.Arrays;
+
 
 /**Main (command-line) entry-point for the data handler.
  *
@@ -92,7 +94,8 @@ public final class Main
                 }
             else if("trafficLights".equals(command))
                 {
-                FUELINSTUtils.doTrafficLights(args);
+                // Pass in trailing args (if any).
+                FUELINSTUtils.doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
                 return; // Completed.
                 }
             }
