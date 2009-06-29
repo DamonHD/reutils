@@ -3,6 +3,8 @@ RE Utils
 Various utilities for off-line and on-line/realtime processing of
 Renewable Energy data.
 
+Please read RELEASES.txt for details of changes.
+
 
 
 
