@@ -325,13 +325,32 @@ public final class FUELINST
          * When called from the command-line the supplied args
          * will be the trailing/optional parameters after initial parsing.
          * <p>
-         * The arguments will not include any leading 'FUELINST' and class-name tag.
+         * The arguments will not include any leading 'trafficLights' and class-name tag.
          *
          * @param args   arguments/parameters; never null but may be empty
-         * @param summary  summary of current/historical FUELINST stats; never null
          * @throws IOException  in case of difficulty generating the output(s)
          */
-        public void doTrafficLights(final String[] args, final CurrentSummary summary) throws IOException;
+        public void doTrafficLights(final String[] args) throws IOException;
         }
 
+    /**Default implementation of traffic-lights code, generating HTML, XHTML and various flags.
+     */
+    public static final class TrafficLightsDEFAULT implements TrafficLightsInterface
+        {
+        /**Generates outputs from the arguments and the current summary.
+         * When called from the command-line the supplied args
+         * will be the trailing/optional parameters after initial parsing.
+         * <p>
+         * The arguments will not include any leading 'trafficLights' and class-name tag.
+         *
+         * @param args   arguments/parameters; never null but may be empty
+         * @throws IOException  in case of difficulty generating the output(s)
+         */
+        public void doTrafficLights(final String[] args)
+            throws IOException
+            {
+            // Delegate to static utilities method!
+            FUELINSTUtils.doTrafficLights(args);
+            }
+        }
     }

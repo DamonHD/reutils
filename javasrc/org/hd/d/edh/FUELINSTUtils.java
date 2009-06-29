@@ -522,10 +522,12 @@ public final class FUELINSTUtils
         }
 
 
+
     /**Implement the 'traffic lights' command line option.
      * @param args  optional (though usual) trailing argument (output HTML file name); never null
      */
-    static void doTrafficLights(final String[] args) throws IOException
+    static void doTrafficLights(final String[] args)
+        throws IOException
         {
         if(null == args) { throw new IllegalArgumentException(); }
 
@@ -540,6 +542,7 @@ public final class FUELINSTUtils
 
         final File cacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
 
+        // Retrieve summary.
         final CurrentSummary summary = FUELINSTUtils.computeCurrentSummary(cacheFile);
 
         // Dump a summary of the current status re fuel.

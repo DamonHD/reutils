@@ -104,7 +104,7 @@ public final class Main
             else if("trafficLights".equals(command))
                 {
                 // Pass in trailing args (if any), leading 'trafficLights' is omitted.
-                FUELINSTUtils.doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
+                (new FUELINST.TrafficLightsDEFAULT()).doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
                 return; // Completed.
                 }
             }
