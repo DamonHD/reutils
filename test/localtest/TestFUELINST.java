@@ -114,7 +114,7 @@ public final class TestFUELINST extends TestCase
                 assertNotNull("Generated Tweet must not be null", message);
 System.out.println("LENGTH="+message.length()+": "+message);
                 assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
-                assertTrue("Generate Tweet must not be over-long", message.length() <= TwitterUtils.MAX_TWEET_CHARS);
+                assertTrue("Generated Tweet must not be over-long", message.length() <= TwitterUtils.MAX_TWEET_CHARS);
                 }
             }
         }
