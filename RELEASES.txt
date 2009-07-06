@@ -21,7 +21,7 @@ For long-term data analysis show fraction of hear hour/day/month in bottom 1/3, 
 
 Store a week's worth of data for better predictions on most days except holidays such as Xmas and have special treatment for them.
 
-
+Change sendTweet to send depending on status colour change only, eg not text change
 
 
 
