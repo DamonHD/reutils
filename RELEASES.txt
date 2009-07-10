@@ -15,23 +15,19 @@ Cache the raw properties after first loading and parsing for efficiency.
 
 Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive output is not allowed to go green in absence of live data.
 
-Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon).
+Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon) with optional comment/explanation.
 
 For long-term data analysis show fraction of hear hour/day/month in bottom 1/3, 1/4 intensity, no PS, green/supergreen, etc.
 
 Store a week's worth of data for better predictions on most days except holidays such as Xmas and have special treatment for them.
 
-Change sendTweet to send depending on status colour change only, eg not text change
+Change sendTweet to send depending on status colour change only, eg not text change to avoid spurious messages when switching between live and predictive modes.
 
 
 
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-DHD20090629: Refactored to allow easy use of non-default external trafficLights implementation.
-DHD20090629: Reduced 'green' section to bottom quartile but may need configurable threshold.
-DHD20090628: Marking on traffic-lights HTML output as 'marginally green' in hours that use (pumped) storage.
-DHD20090628: Trying to ensure that flags are globally readable after creation (avoids 403 errors).
 
 
 
@@ -41,6 +37,18 @@ DHD20090628: Trying to ensure that flags are globally readable after creation (a
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20090710:
+    freezepoint name: V0.1.5
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.4
+    DHD20090629: Refactored to allow easy use of non-default external trafficLights implementation.
+    DHD20090629: Reduced 'green' section to bottom quartile but may need configurable threshold.
+    DHD20090628: Marking on traffic-lights HTML output as 'marginally green' in hours that use (pumped) storage.
+    DHD20090628: Trying to ensure that flags are globally readable after creation (avoids 403 errors).
+
 
 20090628:
     freezepoint name: V0.1.4
