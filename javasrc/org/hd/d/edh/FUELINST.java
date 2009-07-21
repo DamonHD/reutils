@@ -70,7 +70,7 @@ public final class FUELINST
     public static final String FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS = "intensity.loss.transmission";
 
     /**Field name for set of 'fuel' types/names for storage sources on the grid; not null. */
-    public static final String FUELINST_MAIN_PROPNAME_STORAGE_TYPES = "intensity.storageTypes";
+    public static final String FUELINST_MAIN_PROPNAME_STORAGE_TYPES = "intensity.category.storage";
 
     /**Immutable summary by hour (GMT) of a single Integer parameter.
      * Behaves as if a List of Integer with exactly 24 slots.
