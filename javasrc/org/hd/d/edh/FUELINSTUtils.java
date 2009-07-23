@@ -51,6 +51,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import org.hd.d.edh.FUELINST.CurrentSummary;
@@ -719,6 +720,39 @@ public final class FUELINSTUtils
         return(Collections.unmodifiableMap(result));
         }
 
+    /**Fall-back category to assign un-categories fuels to; single token not null nor empty. */
+    public static final String UNCATEGORISED_FUELS = "uncategorised";
+
+    /**Extract fuel use (in MW) by category from the current summary given the fuels-by-category table; never null but may be empty.
+     * TODO: construct 'uncategeorised' component automatically
+     * <p>
+     * TODO: validate args and check for overflow during computation
+     */
+    public static Map<String,Integer> getFuelMWByCategory(final Map<String,Integer> currentGenerationMWByFuelMW, final Map<String,Set<String>> fuelByCategory)
+        {
+        final Map<String,Integer> result = new HashMap<String, Integer>(fuelByCategory.size()*2 + 3);
+
+        // Construct each category's total generation....
+        for(final Map.Entry<String, Set<String>> c : fuelByCategory.entrySet())
+            {
+            final String category = c.getKey();
+            final Set<String> fuels = c.getValue();
+
+            int total = 0;
+            for(final String fuel : fuels)
+                {
+                final Integer q = currentGenerationMWByFuelMW.get(fuel);
+                if(q == null) { continue; }
+                total += q;
+                }
+
+            result.put(category, total);
+            }
+
+        return(Collections.unmodifiableMap(result));
+        }
+
+
     /**Get a parser for the BM timestamps in at least FUELINST data; never null.
      * A returned instance is not safe to share between threads.
      */
@@ -942,6 +976,27 @@ public final class FUELINSTUtils
                     w.write("<p>Current draw-down from storage is ");
                         w.write(Long.toString(summary.currentStorageDrawdownMW));
                         w.write("MW.</p>");
+                    w.println();
+                    }
+
+                // Show fuels broken down by category, if categories are assigned.
+                final Map<String, Set<String>> byCategory = getFuelsByCategory();
+                if(!byCategory.isEmpty())
+                    {
+                    final Map<String,Integer> byCat = getFuelMWByCategory(summary.currentGenerationMWByFuelMW, byCategory);
+                    w.write("<p>Generation by fuel category: ");
+                    final SortedMap<String,Integer> powerbyCat = new TreeMap<String, Integer>(byCat);
+                    for(final String category : powerbyCat.keySet())
+                        {
+                        w.write("<dt>"); w.write(category); w.write("</dt>");
+                        w.write("<dd>");
+                        // Write MW under this category.
+                        w.write(String.valueOf(powerbyCat.get(category))); w.write("MW");
+                        // Write sorted fuel list...
+                        w.write(" "); w.write((new ArrayList<String>(new TreeSet<String>(byCategory.get(category)))).toString()); w.write("");
+                        w.write("</dd>");
+                        }
+                    w.write("</dl></p>");
                     w.println();
                     }
                 }
