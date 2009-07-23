@@ -45,10 +45,10 @@ import java.util.Map;
  */
 public final class FUELINST
     {
-    /**Prefix in main properties of fuel intensity information; never null. */
+    /**Prefix (including trailing '.') in main properties of fuel intensity information; not null. */
     public static final String FUEL_INTENSITY_MAIN_PROPNAME_PREFIX = "intensity.fuel.";
 
-    /**Prefix in main properties of fuel name information (for non-obvious code names); never null. */
+    /**Prefix (including trailing '.') in main properties of fuel name information (for non-obvious code names); not null. */
     public static final String FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX = "intensity.fuelname.";
 
     /**URL of source of 'current' FUELINST data (and up to 24h of history); not null.
@@ -68,6 +68,9 @@ public final class FUELINST
 
     /**Field name for fractional loss in grid transmission in range [0.0,1.0]; not null. */
     public static final String FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS = "intensity.loss.transmission";
+
+    /**Field name prefix (including trailing '.') for sets/categories of 'fuel' types/names on the grid; not null. */
+    public static final String FUELINST_MAIN_PROPPREFIX_STORAGE_TYPES = "intensity.category.";
 
     /**Field name for set of 'fuel' types/names for storage sources on the grid; not null. */
     public static final String FUELINST_MAIN_PROPNAME_STORAGE_TYPES = "intensity.category.storage";
