@@ -178,7 +178,7 @@ public final class FUELINSTHistorical
         public synchronized boolean isReadOnly() { return(readOnly); }
 
         /**Once called the data cannot be updated again. */
-        public synchronized void setReadOnly() { this.readOnly = true; }
+        public synchronized void setReadOnly() { readOnly = true; }
         }
 
     /**Immutable store of non-negative int value, eg carbon intensity (gCO2/kWh), for a specific time point.

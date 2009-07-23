@@ -72,8 +72,8 @@ public final class FUELINST
     /**Field name prefix (including trailing '.') for sets/categories of 'fuel' types/names on the grid; not null. */
     public static final String FUELINST_MAIN_PROPPREFIX_STORAGE_TYPES = "intensity.category.";
 
-    /**Field name for set of 'fuel' types/names for storage sources on the grid; not null. */
-    public static final String FUELINST_MAIN_PROPNAME_STORAGE_TYPES = "intensity.category.storage";
+    /**Distinguished fuel category name for for storage sources; not null. */
+    public static final String FUELINST_CATNAME_STORAGE = "storage";
 
     /**Immutable summary by hour (GMT) of a single Integer parameter.
      * Behaves as if a List of Integer with exactly 24 slots.
@@ -93,6 +93,7 @@ public final class FUELINST
         private final Integer[] data = new Integer[FUELINSTUtils.HOURS_PER_DAY];
 
         /**Fixed size. */
+        @Override
         public int size() { return(FUELINSTUtils.HOURS_PER_DAY); }
 
         /* (non-Javadoc)

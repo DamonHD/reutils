@@ -138,10 +138,12 @@ public final class FUELINSTUtils
         final float tranLoss = Float.parseFloat(tranLossS);
         if(!(tranLoss >= 0) && (tranLoss <= 1))
             { throw new IllegalStateException("Bad value outside range [0.0,1.0] for FUELINST transmission loss: " + FUELINST.FUELINST_MAIN_PROPNAME_MAX_TRAN_LOSS); }
-        // Extract Set of zero-or-more 'storage'/'fuel' types/names.
-        final String storageTypesS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_STORAGE_TYPES);
-        final Set<String> storageTypes = ((null == storageTypesS) || storageTypesS.isEmpty()) ? Collections.<String>emptySet() :
-            new HashSet<String>(Arrays.asList(storageTypesS.trim().split(",")));
+        // Extract all fuel categories.
+        final Map<String, Set<String>> fuelsByCategory = getFuelsByCategory();
+        // Extract Set of zero-or-more 'storage'/'fuel' types/names; never null but may be empty.
+        final Set<String> storageTypes = (fuelsByCategory.containsKey(FUELINST.FUELINST_CATNAME_STORAGE) ?
+                fuelsByCategory.get(FUELINST.FUELINST_CATNAME_STORAGE) :
+                Collections.<String>emptySet());
 
         final List<List<String>> parsedBMRCSV;
 
@@ -657,6 +659,28 @@ public final class FUELINSTUtils
             final String descriptiveName = rawProperties.get(key).trim();
             if(descriptiveName.isEmpty()) { continue; }
             result.put(fuelname, descriptiveName);
+            }
+
+        return(Collections.unmodifiableMap(result));
+        }
+
+    /**Extract (immutable) map from fuel category to set of fuel names; never null but may be empty.
+     * The result only contains keys with non-empty fuelname sets.
+     */
+    public static Map<String, Set<String>> getFuelsByCategory()
+        {
+        final Map<String, Set<String>> result = new HashMap<String, Set<String>>();
+
+        // Have to scan through all keys, which may be inefficient...
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        for(final String key : rawProperties.keySet())
+            {
+            if(!key.startsWith(FUELINST.FUELINST_MAIN_PROPPREFIX_STORAGE_TYPES)) { continue; }
+            final String category = key.substring(FUELINST.FUELINST_MAIN_PROPPREFIX_STORAGE_TYPES.length());
+            final String fuelnames = rawProperties.get(key).trim();
+            if(fuelnames.isEmpty()) { continue; }
+            final HashSet<String> fuels = new HashSet<String>(Arrays.asList(fuelnames.trim().split(",")));
+            result.put(category, Collections.unmodifiableSet(fuels));
             }
 
         return(Collections.unmodifiableMap(result));
