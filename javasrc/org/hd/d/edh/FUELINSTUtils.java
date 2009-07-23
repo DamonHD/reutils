@@ -725,11 +725,12 @@ public final class FUELINSTUtils
 
     /**Extract fuel use (in MW) by category from the current summary given the fuels-by-category table; never null but may be empty.
      * TODO: construct 'uncategeorised' component automatically
-     * <p>
-     * TODO: validate args and check for overflow during computation
      */
     public static Map<String,Integer> getFuelMWByCategory(final Map<String,Integer> currentGenerationMWByFuelMW, final Map<String,Set<String>> fuelByCategory)
         {
+        if(null == currentGenerationMWByFuelMW) { throw new IllegalArgumentException(); }
+        if(null == fuelByCategory) { throw new IllegalArgumentException(); }
+
         final Map<String,Integer> result = new HashMap<String, Integer>(fuelByCategory.size()*2 + 3);
 
         // Construct each category's total generation....
@@ -738,15 +739,19 @@ public final class FUELINSTUtils
             final String category = c.getKey();
             final Set<String> fuels = c.getValue();
 
-            int total = 0;
+            long total = 0;
             for(final String fuel : fuels)
                 {
                 final Integer q = currentGenerationMWByFuelMW.get(fuel);
+                if(q < 0) { throw new IllegalArgumentException("invalid negative per-fuel MW value"); }
                 if(q == null) { continue; }
                 total += q;
                 }
 
-            result.put(category, total);
+            // Check for overflow.
+            if(total > Integer.MAX_VALUE) { throw new ArithmeticException("overflow"); }
+
+            result.put(category, (int) total);
             }
 
         return(Collections.unmodifiableMap(result));
