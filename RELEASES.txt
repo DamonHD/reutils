@@ -38,6 +38,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20090723:
+    freezepoint name: V0.1.6
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.5
+    DHD20090723: Supporting utilities to sort out generation by category.
+
+
 20090710:
     freezepoint name: V0.1.5
     branch name: HEAD
