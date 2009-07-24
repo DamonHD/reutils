@@ -11,7 +11,7 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
-Incorporate fudge-factors and/or summary by hour by hour by fuel wih methods to calc adjusted thresholds, etc.
+Incorporate fudge-factors and/or summary by hour by hour by fuel with methods to calc adjusted thresholds, etc, and poss create new summary object?
 
 Cache the raw properties after first loading and parsing for efficiency.
 
