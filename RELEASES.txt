@@ -11,6 +11,8 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
+Incorporate fudge-factors and/or summary by hour by hour by fuel wih methods to calc adjusted thresholds, etc.
+
 Cache the raw properties after first loading and parsing for efficiency.
 
 Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive output is not allowed to go green in absence of live data.
