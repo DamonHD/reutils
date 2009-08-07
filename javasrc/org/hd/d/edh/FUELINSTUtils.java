@@ -819,7 +819,7 @@ public final class FUELINSTUtils
 
             if(summary.histMinIntensity < summary.histMaxIntensity)
                 {
-                w.println("<p align=\"center\">You might have saved as much as <big><big><big><strong>"+FUELINSTUtils.computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"%</strong></big></big></big> carbon emissions by chosing the best time to run your washing and other major loads.</p>");
+                w.println("<p align=\"center\">You might have saved as much as <big><big><big><strong>"+FUELINSTUtils.computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"%</strong></big></big></big> carbon emissions by choosing the best time to run your washing and other major loads.</p>");
                 }
 
             // Note any recent change/delta iff the data is not stale.
