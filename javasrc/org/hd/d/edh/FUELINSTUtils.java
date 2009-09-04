@@ -1020,7 +1020,7 @@ public final class FUELINSTUtils
             final SortedMap<String,String> fullFuelNames = new TreeMap<String,String>(FUELINSTUtils.getConfiguredFuelNames());
             if(!fullFuelNames.isEmpty())
                 {
-                w.write("<p>Key to fuel types/names:<dl>");
+                w.write("<p>Key to fuel codes:<dl>");
                     for(final String fuel : fullFuelNames.keySet())
                         {
                         w.write("<dt>"); w.write(fuel); w.write("</dt>");
