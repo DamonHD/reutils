@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
+import java.util.Date;
+
 import junit.framework.TestCase;
 
 import org.hd.d.edh.TwitterUtils;
@@ -50,5 +52,7 @@ public final class TestTwitter extends TestCase
             // print our user's status with no exception.
             System.out.println("Current status of "+td.username+": " + td.handle.getStatus(td.username));
             }
+
+//        td.handle.setStatus("After the pip it will be: " + (new Date()));
         }
     }
