@@ -193,7 +193,8 @@ public final class TwitterUtils
         if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
         // Don't try to resend unless different from previous status string that we generated/cached...
-        if((null != TwitterCacheFileName) && TwitterCacheFileName.canRead())
+        final boolean twitterCacheFileExists = (null != TwitterCacheFileName) && TwitterCacheFileName.canRead();
+        if(twitterCacheFileExists)
             {
             try
                 {
@@ -208,7 +209,7 @@ public final class TwitterUtils
         // and quietly veto this message (though log it) if the last update was too recent.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
         final String minIntervalS = rawProperties.get(PNAME_TWITTER_MIN_GAP_MINS);
-        if((null != minIntervalS) && !minIntervalS.isEmpty())
+        if(twitterCacheFileExists && (null != minIntervalS) && !minIntervalS.isEmpty())
             {
             try
                 {
