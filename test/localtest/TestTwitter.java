@@ -44,6 +44,7 @@ public final class TestTwitter extends TestCase
     /**Test very basic access to our selected Twitter user.
      */
     public static void testBasics()
+        throws Exception
         {
         final TwitterDetails td = TwitterUtils.getTwitterHandle(true);
         if(null != td)
@@ -54,5 +55,6 @@ public final class TestTwitter extends TestCase
             }
 
 //        td.handle.setStatus("After the pip it will be: " + (new Date()));
+//        TwitterUtils.setTwitterStatusIfChanged(td, null, "Pip: "+(new Date()));
         }
     }
