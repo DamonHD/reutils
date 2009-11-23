@@ -40,6 +40,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20091123:
+    freezepoint name: V0.1.7
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.6
+    DHD20091123: Making Twitter feed more robust by retweeting until we can see the required status.
+
+
 20090723:
     freezepoint name: V0.1.6
     branch name: HEAD
