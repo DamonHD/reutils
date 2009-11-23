@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 
 import winterwell.jtwitter.Twitter;
@@ -229,9 +230,10 @@ public final class TwitterUtils
                 if(minInterval > 0)
                     {
                     final long minIntervalmS = minInterval * 60 * 1000L;
-                    if(TwitterCacheFileName.lastModified() + minIntervalmS > System.currentTimeMillis())
+                    final long lastSent = TwitterCacheFileName.lastModified();
+                    if(lastSent + minIntervalmS > System.currentTimeMillis())
                         {
-                        System.err.println("WARNING: sent previous tweet too recently so skipping sending this one: " + statusMessage);
+                        System.err.println("WARNING: sent previous tweet too recently (<"+minIntervalS+"m, last "+(new Date(lastSent))+") so skipping sending this one: " + statusMessage);
                         return;
                         }
                     }
@@ -242,10 +244,23 @@ public final class TwitterUtils
 
         // Don't send a repeat/redundant message to Twitter... Save follower money and patience...
         // If this fails with an exception then we won't update our cached status message either...
-        if(!statusMessage.equals(td.handle.getStatus(td.username)))
+        final String statusBefore = td.handle.getStatus(td.username).getText();
+        if(!statusMessage.equals(statusBefore))
             {
-            System.out.println("INFO: sending tweet for username "+td.username+": "+statusMessage);
             td.handle.setStatus(statusMessage);
+            System.out.println("INFO: sent tweet for username "+td.username+": '"+statusMessage+"'");
+            }
+        else
+            {
+            System.out.println("INFO: not resending unchanged status/tweet for username "+td.username+": '"+statusMessage+"'");
+            return; // Don't update cache.
+            }
+
+        final String statusAfter = td.handle.getStatus(td.username).getText();
+        if(!statusMessage.equals(statusAfter))
+            {
+            System.err.println("WARNING: status not updated at Twitter: '"+statusAfter+"'");
+            return; // Don't update cache.
             }
 
         // Now try to cache the status message (uncompressed, since it will be small) if we can.

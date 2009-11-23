@@ -41,6 +41,16 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 20091123:
+    freezepoint name: V0.1.8
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.7
+    DHD20091123: Fixing bug in status checking against Twitter.
+    DHD20091123: More logging about why tweets not being sent.
+
+
+20091123:
     freezepoint name: V0.1.7
     branch name: HEAD
     Deployed where: earth.org.uk
