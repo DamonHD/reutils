@@ -171,6 +171,12 @@ public final class TwitterUtils
             }
         }
 
+    /**If true then resend tweet when different to current Twitter status.
+     * More robust than only sending when our message changes because Twitter can lose messages,
+     * but will result in any manual tweet followed up by retweet of previous status.
+     */
+    private static final boolean SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT = true;
+
     /**Attempt to update the displayed Twitter status if necessary.
      * Send a new Tweet only if we think the message/status changed since we last sent one,
      * and if it no longer matches what is actually at Twitter,
@@ -192,16 +198,20 @@ public final class TwitterUtils
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
-        // Don't try to resend unless different from previous status string that we generated/cached...
+        // Possibly don't try to resend unless different from previous tweet that we generated/cached
+        // or else send if different to current Twitter status (more robust)...
         final boolean twitterCacheFileExists = (null != TwitterCacheFileName) && TwitterCacheFileName.canRead();
-        if(twitterCacheFileExists)
+        if(!SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT)
             {
-            try
+            if(twitterCacheFileExists)
                 {
-                final String lastStatus = (String) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
-                if(statusMessage.equals(lastStatus)) { return; }
+                try
+                    {
+                    final String lastStatus = (String) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
+                    if(statusMessage.equals(lastStatus)) { return; }
+                    }
+                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
                 }
-            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
             }
 
         // If there is a minimum interval between Tweets specified
