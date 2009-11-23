@@ -47,7 +47,7 @@ public final class TwitterUtils
     /**Prevent creation of an instance. */
     private TwitterUtils() { }
 
-    /**Maximum Twitter message length (Tweet) in (ASCII) characters. */
+    /**Maximum Twitter message length (tweet) in (ASCII) characters. */
     public static final int MAX_TWEET_CHARS = 140;
 
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
@@ -178,7 +178,7 @@ public final class TwitterUtils
     private static final boolean SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT = true;
 
     /**Attempt to update the displayed Twitter status if necessary.
-     * Send a new Tweet only if we think the message/status changed since we last sent one,
+     * Send a new tweet only if we think the message/status changed since we last sent one,
      * and if it no longer matches what is actually at Twitter,
      * so as to eliminate spurious Tweets.
      * <p>
@@ -231,7 +231,7 @@ public final class TwitterUtils
                     final long minIntervalmS = minInterval * 60 * 1000L;
                     if(TwitterCacheFileName.lastModified() + minIntervalmS > System.currentTimeMillis())
                         {
-                        System.err.println("WARNING: sent previous Tweet too recently so skipping sending this one: " + statusMessage);
+                        System.err.println("WARNING: sent previous tweet too recently so skipping sending this one: " + statusMessage);
                         return;
                         }
                     }
@@ -243,7 +243,10 @@ public final class TwitterUtils
         // Don't send a repeat/redundant message to Twitter... Save follower money and patience...
         // If this fails with an exception then we won't update our cached status message either...
         if(!statusMessage.equals(td.handle.getStatus(td.username)))
-            { td.handle.setStatus(statusMessage); }
+            {
+            System.out.println("INFO: sending tweet for username "+td.username+": "+statusMessage);
+            td.handle.setStatus(statusMessage);
+            }
 
         // Now try to cache the status message (uncompressed, since it will be small) if we can.
         if(null != TwitterCacheFileName)
