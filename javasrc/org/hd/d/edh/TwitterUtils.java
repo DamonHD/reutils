@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Map;
 
 import winterwell.jtwitter.Twitter;
+import winterwell.jtwitter.Twitter.Status;
 
 
 
@@ -242,13 +243,14 @@ public final class TwitterUtils
             catch(final NumberFormatException e) { e.printStackTrace(); }
             }
 
+        final Status statusBefore = td.handle.getStatus(td.username);
         // Don't send a repeat/redundant message to Twitter... Save follower money and patience...
         // If this fails with an exception then we won't update our cached status message either...
-        final String statusBefore = td.handle.getStatus(td.username).getText();
-        if(!statusMessage.equals(statusBefore))
+        final String statusBeforeText = (null == statusBefore) ? null : statusBefore.getText();
+        if(!statusMessage.equals(statusBeforeText))
             {
             td.handle.setStatus(statusMessage);
-            System.out.println("INFO: sent tweet for username "+td.username+": '"+statusMessage+"'");
+            System.out.println("INFO: sent tweet for username "+td.username+": '"+statusMessage+"', was "+statusBeforeText);
             }
         else
             {
@@ -256,10 +258,11 @@ public final class TwitterUtils
             return; // Don't update cache.
             }
 
-        final String statusAfter = td.handle.getStatus(td.username).getText();
-        if(!statusMessage.equals(statusAfter))
+        final Status statusAfter = td.handle.getStatus(td.username);
+        final String statusAfterText = (null == statusAfter) ? null : statusAfter.getText();
+        if(!statusMessage.equals(statusAfterText))
             {
-            System.err.println("WARNING: status not updated at Twitter: '"+statusAfter+"'");
+            System.err.println("WARNING: status not updated at Twitter: '"+statusAfterText+"'");
             return; // Don't update cache.
             }
 
