@@ -165,7 +165,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <javac srcdir="${core.src.dir}"
             destdir="${build.dir.opt}/${tmp.workdir}/${core}"
             classpath="${cp.opt.basic}"
-            debug="off"
+            debug="on"
             deprecation="on"
             optimize="on">
             <include name="**/*.java"/>
