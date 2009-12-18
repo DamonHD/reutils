@@ -49,8 +49,10 @@ public final class TwitterUtils
     /**Prevent creation of an instance. */
     private TwitterUtils() { }
 
-    /**Maximum Twitter message length (tweet) in (ASCII) characters. */
-    public static final int MAX_TWEET_CHARS = 140;
+    /**Maximum Twitter message length (tweet) in (ASCII) characters.
+     * This allows some elbow room for trailing automatic/variable content.
+     */
+    public static final int MAX_TWEET_CHARS = 134;
 
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
     public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES = "Twitter.trafficlight.status.";
@@ -173,11 +175,16 @@ public final class TwitterUtils
             }
         }
 
-    /**If true then resend tweet when different to current Twitter status.
+    /**If true then resend tweet only when different to current Twitter status.
      * More robust than only sending when our message changes because Twitter can lose messages,
      * but will result in any manual tweet followed up by retweet of previous status.
      */
     private static final boolean SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT = true;
+
+    /**Character used to separate (trailing) variable part from main part of message.
+     * Generally whitespace would also be inserted to avoid confusion. 
+     */
+    private static final char TWEET_TAIL_SEP = '|';
 
     /**Attempt to update the displayed Twitter status if necessary.
      * Send a new tweet only if we think the message/status changed since we last sent one,
@@ -216,7 +223,7 @@ public final class TwitterUtils
                 }
             }
 
-        // If there is a minimum interval between Tweets specified
+        // If there is a minimum interval between tweets specified
         // then check when our cache of the last one sent was updated
         // and quietly veto this message (though log it) if the last update was too recent.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -247,10 +254,13 @@ public final class TwitterUtils
         // Don't send a repeat/redundant message to Twitter... Save follower money and patience...
         // If this fails with an exception then we won't update our cached status message either...
         final String statusBeforeText = (null == statusBefore) ? null : statusBefore.getText();
-        if(!statusMessage.equals(statusBeforeText))
+        if((null == statusBeforeText) || !removeTrailingPart(statusMessage).equals(removeTrailingPart(statusBeforeText)))
             {
-            td.handle.setStatus(statusMessage);
-            System.out.println("INFO: sent tweet for username "+td.username+": '"+statusMessage+"', was "+statusBeforeText);
+            // Append time...
+            final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
+            final String fullMessage = statusMessage + ' ' + TWEET_TAIL_SEP + time;
+            td.handle.setStatus(fullMessage);
+            System.out.println("INFO: sent tweet for username "+td.username+": '"+statusMessage+"' with trailer '"+time+"', was "+statusBeforeText);
             }
         else
             {
@@ -272,5 +282,22 @@ public final class TwitterUtils
             try { DataUtils.serialiseToFile(statusMessage, TwitterCacheFileName, false, true); }
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
             }
+        }
+    
+    /**Removes any trailing automatic/variable part from the tweet, leaving the core.
+     *
+     * @param tweet  full tweet, or null
+     * @return  null if tweet message is null,
+     *     else message stripped of trailing portion if present and trimmed of whitespace.
+     */
+    public static String removeTrailingPart(final String tweet)
+        {
+        // No tweet at all, return null.
+        if(null == tweet) { return(null); }
+        // No trailing segment; return trimmed.
+        final int lastSep = tweet.lastIndexOf(TWEET_TAIL_SEP);
+        if(-1 == lastSep) { return(tweet.trim()); }
+        // Return sans trailer.
+        return(tweet.substring(0, lastSep).trim());
         }
     }

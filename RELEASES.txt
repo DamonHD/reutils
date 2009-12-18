@@ -40,6 +40,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20091218:
+    freezepoint name: V0.1.10
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.9
+    DHD20091218: Added time trailer to end of tweets.
+
+
 20091212:
     freezepoint name: V0.1.9
     branch name: HEAD
