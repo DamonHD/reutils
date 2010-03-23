@@ -837,14 +837,11 @@ public final class FUELINSTUtils
             // but only if we believe that we actually have write access to be doing updates...
             if(td != null)
                 {
-                int followers = -1;
-                try { followers = td.handle.getFollowers().size(); } catch(final Exception e) { e.printStackTrace(); }
                 w.print("<p>Follow this grid status on Twitter <a href=\"http://twitter.com/");
                 w.print(td.username);
                 w.print("\">@");
                 w.print(td.username);
                 w.print("</a>");
-                if(followers > 1) { w.print("; "+followers+" currently following"); }
                 w.println(".</p>");
                 }
 

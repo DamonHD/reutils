@@ -151,7 +151,11 @@ public final class TwitterUtils
         final File f = new File(passwordFilename);
         if(!f.canRead())
             {
-            if(!quiet) { System.err.println("Cannot open pass file for reading: " + f); }
+            if(!quiet)
+                {
+                System.err.println("Cannot open pass file for reading: " + f);
+                try { System.err.println("  Canonical path: " + f.getCanonicalPath()); } catch(final IOException e) { }
+                }
             return(null);
             }
 
