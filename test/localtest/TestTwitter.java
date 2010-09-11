@@ -29,12 +29,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
-import java.util.Date;
-
 import junit.framework.TestCase;
 
 import org.hd.d.edh.TwitterUtils;
 import org.hd.d.edh.TwitterUtils.TwitterDetails;
+
+import winterwell.jtwitter.OAuthSignpostClient;
+import winterwell.jtwitter.Twitter;
 
 /**Twitter tests.
  *
@@ -56,5 +57,24 @@ public final class TestTwitter extends TestCase
 
 //        td.handle.setStatus("After the pip it will be: " + (new Date()));
 //        TwitterUtils.setTwitterStatusIfChanged(td, null, "Pip: "+(new Date()));
+        }
+    
+    /**Test user-mediated extraction of auth token.
+     */
+    public static void testOOBTokenAccess()
+        {
+        OAuthSignpostClient client = new OAuthSignpostClient(OAuthSignpostClient.JTWITTER_OAUTH_KEY, OAuthSignpostClient.JTWITTER_OAUTH_SECRET, "oob");
+        final Twitter jtwit = new Twitter("DamonHD", client);
+        // open the authorisation page in the user's browser
+        // This is a convenience method for directing the user to client.authorizeUrl()
+        client.authorizeDesktop();
+        // get the pin
+        final String v = client.askUser("Please enter the verification PIN from Twitter");
+        client.setAuthorizationCode(v);
+        // Optional: store the authorisation token details
+        final String[] accessToken = client.getAccessToken();
+        for(final String s : accessToken) { System.out.println(s); }
+        // use the API!
+        jtwit.setStatus("Testing auth...");
         }
     }
