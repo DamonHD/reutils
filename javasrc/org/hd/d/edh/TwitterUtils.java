@@ -63,11 +63,11 @@ public final class TwitterUtils
     /**Property name for Twitter user; not null. */
     public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
 
-    /**Property name for file containing Twitter password; not null. */
-    public static final String PNAME_TWITTER_PASSWORD_FILENAME = "Twitter.passfile";
+    /**Property name for file containing Twitter OAuth tokens; not null. */
+    public static final String PNAME_TWITTER_AUTHTOK_FILENAME = "Twitter.authtokenfile";
 
-    /**Property name for alternate file containing Twitter password; not null. */
-    public static final String PNAME_TWITTER_PASSWORD_FILENAME2 = "Twitter.passfile2";
+    /**Property name for alternate file containing Twitter OAuth tokens; not null. */
+    public static final String PNAME_TWITTER_AUTHTOK_FILENAME2 = "Twitter.authtokenfile2";
 
     /**Property name for minimum gap between Tweets in minutes (non-negative); not null. */
     public static final String PNAME_TWITTER_MIN_GAP_MINS = "Twitter.minGapMins";
@@ -121,8 +121,8 @@ public final class TwitterUtils
 
         // Try first the primary password file, then the alternate if need be.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String pass1 = getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME), allowReadOnly);
-        final String pass = (pass1 != null) ? pass1 : getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME2), allowReadOnly);
+        final String pass1 = getPasswordFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME), allowReadOnly);
+        final String pass = (pass1 != null) ? pass1 : getPasswordFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME2), allowReadOnly);
 
         // If we have no password then we are definitely read-only.
         final boolean noWriteAccess = (pass == null);
