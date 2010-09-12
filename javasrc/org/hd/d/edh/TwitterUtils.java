@@ -33,9 +33,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.Twitter.Status;
 
@@ -63,11 +66,11 @@ public final class TwitterUtils
     /**Property name for Twitter user; not null. */
     public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
 
-    /**Property name for file containing Twitter password; not null. */
-    public static final String PNAME_TWITTER_PASSWORD_FILENAME = "Twitter.passfile";
+    /**Property name for file containing Twitter OAuth tokens; not null. */
+    public static final String PNAME_TWITTER_AUTHTOK_FILENAME = "Twitter.authtokenfile";
 
-    /**Property name for alternate file containing Twitter password; not null. */
-    public static final String PNAME_TWITTER_PASSWORD_FILENAME2 = "Twitter.passfile2";
+    /**Property name for alternate file containing Twitter OAuth tokens; not null. */
+    public static final String PNAME_TWITTER_AUTHTOK_FILENAME2 = "Twitter.authtokenfile2";
 
     /**Property name for minimum gap between Tweets in minutes (non-negative); not null. */
     public static final String PNAME_TWITTER_MIN_GAP_MINS = "Twitter.minGapMins";
@@ -121,15 +124,18 @@ public final class TwitterUtils
 
         // Try first the primary password file, then the alternate if need be.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String pass1 = getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME), allowReadOnly);
-        final String pass = (pass1 != null) ? pass1 : getPasswordFromFile(rawProperties.get(PNAME_TWITTER_PASSWORD_FILENAME2), allowReadOnly);
+        final String[] authtokens1 = getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME), allowReadOnly);
+        final String[] authtokens = (authtokens1 != null) ? authtokens1 : getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME2), allowReadOnly);
 
         // If we have no password then we are definitely read-only.
-        final boolean noWriteAccess = (pass == null);
+        final boolean noWriteAccess = (authtokens == null);
         // If definitely read-only and that is not acceptable then return null.
         if(noWriteAccess && !allowReadOnly) { return(null); }
 
-        return(new TwitterDetails(tUsername, new Twitter(tUsername, pass), noWriteAccess));
+        // Build new client...
+        final OAuthSignpostClient client = new OAuthSignpostClient(OAuthSignpostClient.JTWITTER_OAUTH_KEY, OAuthSignpostClient.JTWITTER_OAUTH_SECRET, authtokens[0], authtokens[1]);
+
+        return(new TwitterDetails(tUsername, new Twitter(tUsername, client), noWriteAccess));
         }
 
     /**Extract a (non-empty) password from the specified file, or null if none or if the filename is bad.
@@ -179,6 +185,63 @@ public final class TwitterUtils
             }
         }
 
+
+    /**Extract a (non-empty) set of non-empty auth tokens from the specified file, or null if none or if the filename is bad.
+     * This does not throw an exception if it cannot find or open the specified file
+     * (or the file name is null or empty)
+     * of it the file does not contain a password; for all these cases null is returned.
+     * <p>
+     * Each token must be on a separate line.
+     * <p>
+     * There must be at least two token else this will return null.
+     *
+     * @param tokensFilename  name of file containing auth tokens or null/empty if none
+     * @param quiet  if true then keep quiet about file errors
+     * @return non-null, non-empty password
+     */
+    private static String[] getAuthTokensFromFile(final String tokensFilename, final boolean quiet)
+        {
+        // Null/empty file name results in quiet return of null.
+        if((null == tokensFilename) || tokensFilename.trim().isEmpty()) { return(null); }
+
+        final File f = new File(tokensFilename);
+        if(!f.canRead())
+            {
+            if(!quiet)
+                {
+                System.err.println("Cannot open pass file for reading: " + f);
+                try { System.err.println("  Canonical path: " + f.getCanonicalPath()); } catch(final IOException e) { }
+                }
+            return(null);
+            }
+
+        try
+            {
+            final List<String> result = new ArrayList<String>();
+            final BufferedReader r =  new BufferedReader(new FileReader(f));
+            try
+                {
+                String line;
+                while(null != (line = r.readLine()))
+                    {
+                    final String trimmed = line.trim();
+                    if(trimmed.isEmpty()) { return(null); } // Give up with *any* blank token.
+                    result.add(trimmed);
+                    }
+                if(result.size() < 2) { return(null); } // Give up if not (at least) two tokens.
+                // Return non-null non-empty token(s).
+                return(result.toArray(new String[result.size()]));
+                }
+            finally { r.close(); /* Release resources. */ }
+            }
+        // In case of error whinge but continue.
+        catch(final Exception e)
+            {
+            if(!quiet) { e.printStackTrace(); }
+            return(null);
+            }
+        }
+
     /**If true then resend tweet only when different to current Twitter status.
      * More robust than only sending when our message changes because Twitter can lose messages,
      * but will result in any manual tweet followed up by retweet of previous status.
@@ -186,7 +249,7 @@ public final class TwitterUtils
     private static final boolean SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT = true;
 
     /**Character used to separate (trailing) variable part from main part of message.
-     * Generally whitespace would also be inserted to avoid confusion. 
+     * Generally whitespace would also be inserted to avoid confusion.
      */
     private static final char TWEET_TAIL_SEP = '|';
 
@@ -287,7 +350,7 @@ public final class TwitterUtils
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
             }
         }
-    
+
     /**Removes any trailing automatic/variable part from the tweet, leaving the core.
      *
      * @param tweet  full tweet, or null
