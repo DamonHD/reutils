@@ -38,7 +38,6 @@ import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
 
 /**Twitter tests.
- *
  */
 public final class TestTwitter extends TestCase
     {
@@ -58,18 +57,19 @@ public final class TestTwitter extends TestCase
 //        td.handle.setStatus("After the pip it will be: " + (new Date()));
 //        TwitterUtils.setTwitterStatusIfChanged(td, null, "Pip: "+(new Date()));
         }
-    
+
 //    /**Test user-mediated extraction of auth token.
+//     * Also useful for gathering new secrets manually...
 //     */
 //    public static void testOOBTokenAccess()
 //        {
-//        OAuthSignpostClient client = new OAuthSignpostClient(OAuthSignpostClient.JTWITTER_OAUTH_KEY, OAuthSignpostClient.JTWITTER_OAUTH_SECRET, "oob");
-//        final Twitter jtwit = new Twitter("DamonHD", client);
+//        final OAuthSignpostClient client = new OAuthSignpostClient(OAuthSignpostClient.JTWITTER_OAUTH_KEY, OAuthSignpostClient.JTWITTER_OAUTH_SECRET, "oob");
+//        final Twitter jtwit = new Twitter("EarthOrgUK", client);
 //        // open the authorisation page in the user's browser
 //        // This is a convenience method for directing the user to client.authorizeUrl()
 //        client.authorizeDesktop();
 //        // get the pin
-//        final String v = client.askUser("Please enter the verification PIN from Twitter");
+//        final String v = OAuthSignpostClient.askUser("Please enter the verification PIN from Twitter");
 //        client.setAuthorizationCode(v);
 //        // Optional: store the authorisation token details
 //        final String[] accessToken = client.getAccessToken();

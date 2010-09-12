@@ -249,7 +249,7 @@ public final class TwitterUtils
     private static final boolean SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT = true;
 
     /**Character used to separate (trailing) variable part from main part of message.
-     * Generally whitespace would also be inserted to avoid confusion. 
+     * Generally whitespace would also be inserted to avoid confusion.
      */
     private static final char TWEET_TAIL_SEP = '|';
 
@@ -350,7 +350,7 @@ public final class TwitterUtils
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
             }
         }
-    
+
     /**Removes any trailing automatic/variable part from the tweet, leaving the core.
      *
      * @param tweet  full tweet, or null
