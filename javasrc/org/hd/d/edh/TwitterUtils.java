@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.Twitter.Status;
 
@@ -131,6 +132,9 @@ public final class TwitterUtils
         // If definitely read-only and that is not acceptable then return null.
         if(noWriteAccess && !allowReadOnly) { return(null); }
 
+        // Build new client...
+        final OAuthSignpostClient client = new OAuthSignpostClient(OAuthSignpostClient.JTWITTER_OAUTH_KEY, OAuthSignpostClient.JTWITTER_OAUTH_SECRET, authtokens[0], authtokens[1]);
+
         return(new TwitterDetails(tUsername, new Twitter(tUsername, client), noWriteAccess));
         }
 
@@ -188,6 +192,8 @@ public final class TwitterUtils
      * of it the file does not contain a password; for all these cases null is returned.
      * <p>
      * Each token must be on a separate line.
+     * <p>
+     * There must be at least two token else this will return null.
      *
      * @param tokensFilename  name of file containing auth tokens or null/empty if none
      * @param quiet  if true then keep quiet about file errors
@@ -222,7 +228,7 @@ public final class TwitterUtils
                     if(trimmed.isEmpty()) { return(null); } // Give up with *any* blank token.
                     result.add(trimmed);
                     }
-                if(result.isEmpty()) { return(null); } // Give up if zero tokens.
+                if(result.size() < 2) { return(null); } // Give up if not (at least) two tokens.
                 // Return non-null non-empty token(s).
                 return(result.toArray(new String[result.size()]));
                 }
