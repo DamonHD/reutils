@@ -40,13 +40,21 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20110124:
+    freezepoint name: V1.0.0
+    branch name: HEAD
+    Deployed where: public site as export of SVN repository
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.11
+    DHD20110124: Prepared as V1.0.0 for initial public release.
+
 20091218:
-    freezepoint name: V0.1.10
+    freezepoint name: V0.1.11
     branch name: HEAD
     Deployed where: earth.org.uk
     Changes since last freezepoint (developer/mgr initials and brief description):
-    Previous significant freezepoint: V0.1.9
-    DHD20091218: Added time trailer to end of tweets.
+    Previous significant freezepoint: V0.1.10
+    DHD20100912: Switched to OAuth authentication for tweets.
 
 
 20091212:
