@@ -40,6 +40,14 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20110124:
+    freezepoint name: V1.0.0
+    branch name: HEAD
+    Deployed where: public site as export of SVN repository
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V0.1.11
+    DHD20110124: Prepared as V1.0.0 for initial public release.
+
 20091218:
     freezepoint name: V0.1.11
     branch name: HEAD
