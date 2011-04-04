@@ -991,7 +991,7 @@ public final class FUELINSTUtils
                     for(final String category : powerbyCat.keySet())
                         {
                         final Integer genMW = powerbyCat.get(category);
-                        final int percent = (int) ((100 * genMW) / Math.max(1, summary.currentMW));
+                        final int percent = Math.round((100.0f * genMW) / Math.max(1, summary.currentMW));
                         w.write("<dt>"); w.write(category); w.write(" @ "); w.write(Integer.toString(percent)); w.write("%</dt>");
                         w.write("<dd>");
                         // Write MW under this category.

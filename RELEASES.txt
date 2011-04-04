@@ -41,11 +41,20 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 20110404:
-    freezepoint name: V1.0.1
+    freezepoint name: V1.0.2
     branch name: HEAD
     Deployed where: earth.org.uk
     Changes since last freezepoint (developer/mgr initials and brief description):
     Previous significant freezepoint: V1.0.1
+    DHD20110404: Fixed rounding of percentage by fuel category.
+
+
+20110404:
+    freezepoint name: V1.0.1
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.0
     DHD20110404: Showing percentage by fuel category.
     DHD20110404: INTNED details.
 
