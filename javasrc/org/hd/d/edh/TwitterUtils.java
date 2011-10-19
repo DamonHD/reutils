@@ -39,9 +39,8 @@ import java.util.List;
 import java.util.Map;
 
 import winterwell.jtwitter.OAuthSignpostClient;
+import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
-import winterwell.jtwitter.Twitter.Status;
-
 
 
 /**Twitter Utilities.
@@ -320,11 +319,11 @@ public final class TwitterUtils
         final Status statusBefore = td.handle.getStatus(td.username);
         // Don't send a repeat/redundant message to Twitter... Save follower money and patience...
         // If this fails with an exception then we won't update our cached status message either...
+        final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
         final String statusBeforeText = (null == statusBefore) ? null : statusBefore.getText();
         if((null == statusBeforeText) || !removeTrailingPart(statusMessage).equals(removeTrailingPart(statusBeforeText)))
             {
             // Append time...
-            final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
             final String fullMessage = statusMessage + ' ' + TWEET_TAIL_SEP + time;
             td.handle.setStatus(fullMessage);
             System.out.println("INFO: sent tweet for username "+td.username+": '"+statusMessage+"' with trailer '"+time+"', was "+statusBeforeText);
@@ -337,7 +336,7 @@ public final class TwitterUtils
 
         final Status statusAfter = td.handle.getStatus(td.username);
         final String statusAfterText = (null == statusAfter) ? null : statusAfter.getText();
-        if(!statusMessage.equals(statusAfterText))
+        if(!statusAfterText.endsWith(time))
             {
             System.err.println("WARNING: status not updated at Twitter: '"+statusAfterText+"'");
             return; // Don't update cache.
