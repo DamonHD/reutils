@@ -40,6 +40,24 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20111020:
+    freezepoint name: V1.0.4
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.3
+    DHD20111020: Fixing more problems arising from tweet shortening (URL rewriting).
+
+
+20111019:
+    freezepoint name: V1.0.3
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.2
+    DHD20111019: Upgraded to jTwitter V2.3.5 and fixed problem with tweet shortening.
+
+
 20110404:
     freezepoint name: V1.0.2
     branch name: HEAD
