@@ -351,6 +351,8 @@ public final class TwitterUtils
         }
 
     /**Removes any trailing automatic/variable part from the tweet, leaving the core.
+     * The 'trailing part' starts at the last occurrence of the TWEET_TAIL_SEP,
+     * or the first occurrence of http:// because of Twitter link rewriting.
      *
      * @param tweet  full tweet, or null
      * @return  null if tweet message is null,
@@ -360,10 +362,13 @@ public final class TwitterUtils
         {
         // No tweet at all, return null.
         if(null == tweet) { return(null); }
-        // No trailing segment; return trimmed.
+        // Trim to last TWEET_TAIL_SEP, if any.
         final int lastSep = tweet.lastIndexOf(TWEET_TAIL_SEP);
-        if(-1 == lastSep) { return(tweet.trim()); }
-        // Return sans trailer.
-        return(tweet.substring(0, lastSep).trim());
+        String cut = (-1 == lastSep) ? tweet : tweet.substring(0, lastSep);
+        // Trim to first "http:".
+        final int firstHttp = cut.indexOf("http:");
+        cut = (-1 == firstHttp) ? cut : tweet.substring(0, firstHttp);
+        // Trim residual whitespace.
+        return(cut.trim());
         }
     }
