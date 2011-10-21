@@ -40,6 +40,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20111021:
+    freezepoint name: V1.0.5
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.4
+    DHD20111021: Removing text indicating latest intensity delta, as mainly noise.
+
+
 20111020:
     freezepoint name: V1.0.4
     branch name: HEAD
