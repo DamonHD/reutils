@@ -41,6 +41,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20120109:
+    freezepoint name: V1.0.6
+    branch name: HEAD
+    Deployed where: NOWHERE
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.5
+    DHD20120109: Including in historical FUELINST report the generation intensities used.
+
+
 20111021:
     freezepoint name: V1.0.5
     branch name: HEAD
