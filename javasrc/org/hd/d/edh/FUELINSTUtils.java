@@ -723,6 +723,9 @@ public final class FUELINSTUtils
     /**Fall-back category to assign un-categories fuels to; single token not null nor empty. */
     public static final String UNCATEGORISED_FUELS = "uncategorised";
 
+    /**If true, show recent changes in intensity, though they can be very noisy. */
+    private static final boolean SHOW_INTENSITY_DELTA = false;
+
     /**Extract fuel use (in MW) by category from the current summary given the fuels-by-category table; never null but may be empty.
      * TODO: construct 'uncategeorised' component automatically
      */
@@ -823,7 +826,7 @@ public final class FUELINSTUtils
                 }
 
             // Note any recent change/delta iff the data is not stale.
-            if(!isDataStale)
+            if(SHOW_INTENSITY_DELTA && !isDataStale)
                 {
                 if(summary.recentChange == TrafficLight.GREEN)
                     { w.println("<p style=\"color: green\">Good: carbon intensity (CO2 per kWh) is currently dropping.</p>"); }

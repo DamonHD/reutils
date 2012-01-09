@@ -19,12 +19,11 @@ Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive o
 
 Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon) with optional comment/explanation.
 
-For long-term data analysis show fraction of hear hour/day/month in bottom 1/3, 1/4 intensity, no PS, green/supergreen, etc.
+For long-term data analysis show fraction of year hour/day/month in bottom 1/3, 1/4 intensity, no PS, green/supergreen, etc.
 
 Store a week's worth of data for better predictions on most days except holidays such as Xmas and have special treatment for them.
 
 Change sendTweet to send depending on status colour change only, eg not text change to avoid spurious messages when switching between live and predictive modes.
-
 
 
 SIGNIFICANT CHANGES SINCE LAST RELEASE
@@ -39,6 +38,42 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20120109:
+    freezepoint name: V1.0.6
+    branch name: HEAD
+    Deployed where: NOWHERE
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.5
+    DHD20120109: Including in historical FUELINST report the generation intensities used.
+
+
+20111021:
+    freezepoint name: V1.0.5
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.4
+    DHD20111021: Removing text indicating latest intensity delta, as mainly noise.
+
+
+20111020:
+    freezepoint name: V1.0.4
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.3
+    DHD20111020: Fixing more problems arising from tweet shortening (URL rewriting).
+
+
+20111019:
+    freezepoint name: V1.0.3
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.2
+    DHD20111019: Upgraded to jTwitter V2.3.5 and fixed problem with tweet shortening.
+
 
 20110404:
     freezepoint name: V1.0.2
