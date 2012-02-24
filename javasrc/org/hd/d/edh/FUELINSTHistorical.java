@@ -320,8 +320,7 @@ public final class FUELINSTHistorical
     /**If true then allow (discard) duplicate samples, else throw an exception and stop. */
     private static final boolean DISCARD_DUP_SAMPLES = true;
 
-    /**Do a historical analysis of TIBCO daily data dumps.
-     */
+    /**Do a historical analysis of TIBCO daily data dumps. */
     public static void doHistoricalAnalysis(final String[] args)
         throws IOException, ParseException
         {
@@ -598,6 +597,16 @@ public final class FUELINSTHistorical
 
                 w.println("</table>");
                 }
+
+            w.println("<h3>Generation Fuel Intensities Used</h3>");
+            final SortedMap<String,Float> fuelIntensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities());
+            for(final String fuel : fuelIntensities.keySet())
+                {
+                w.write(' '); w.write(fuel);
+                w.write("="+fuelIntensities.get(fuel));
+                }
+            w.write(".</p>");
+            w.println();
 
             w.println("<h3>Methodology</h3>");
             w.println(rawProperties.get("methodology.HTML"));

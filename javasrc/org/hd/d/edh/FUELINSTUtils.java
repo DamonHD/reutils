@@ -723,12 +723,15 @@ public final class FUELINSTUtils
     /**Fall-back category to assign un-categories fuels to; single token not null nor empty. */
     public static final String UNCATEGORISED_FUELS = "uncategorised";
 
+    /**If true, show recent changes in intensity, though they can be very noisy. */
+    private static final boolean SHOW_INTENSITY_DELTA = false;
+
     /**Extract fuel use (in MW) by category from the current summary given the fuels-by-category table; never null but may be empty.
      * TODO: construct 'uncategeorised' component automatically
      */
-    public static Map<String,Integer> getFuelMWByCategory(final Map<String,Integer> currentGenerationMWByFuelMW, final Map<String,Set<String>> fuelByCategory)
+    public static Map<String,Integer> getFuelMWByCategory(final Map<String,Integer> currentGenerationMWByFuel, final Map<String,Set<String>> fuelByCategory)
         {
-        if(null == currentGenerationMWByFuelMW) { throw new IllegalArgumentException(); }
+        if(null == currentGenerationMWByFuel) { throw new IllegalArgumentException(); }
         if(null == fuelByCategory) { throw new IllegalArgumentException(); }
 
         final Map<String,Integer> result = new HashMap<String, Integer>(fuelByCategory.size()*2 + 3);
@@ -742,9 +745,9 @@ public final class FUELINSTUtils
             long total = 0;
             for(final String fuel : fuels)
                 {
-                final Integer q = currentGenerationMWByFuelMW.get(fuel);
+                final Integer q = currentGenerationMWByFuel.get(fuel);
+                if(null == q) { System.err.println("no per-fuel MW value for "+fuel); continue; }
                 if(q < 0) { throw new IllegalArgumentException("invalid negative per-fuel MW value"); }
-                if(q == null) { continue; }
                 total += q;
                 }
 
@@ -823,7 +826,7 @@ public final class FUELINSTUtils
                 }
 
             // Note any recent change/delta iff the data is not stale.
-            if(!isDataStale)
+            if(SHOW_INTENSITY_DELTA && !isDataStale)
                 {
                 if(summary.recentChange == TrafficLight.GREEN)
                     { w.println("<p style=\"color: green\">Good: carbon intensity (CO2 per kWh) is currently dropping.</p>"); }
