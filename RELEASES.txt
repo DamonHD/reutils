@@ -39,6 +39,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20120224:
+    freezepoint name: V1.0.7
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.6
+    DHD20120224: Adding support for INTEW (and not breaking before actually in FUELINST feed).
+
+
 20120109:
     freezepoint name: V1.0.6
     branch name: HEAD

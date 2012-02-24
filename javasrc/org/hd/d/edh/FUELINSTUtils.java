@@ -729,9 +729,9 @@ public final class FUELINSTUtils
     /**Extract fuel use (in MW) by category from the current summary given the fuels-by-category table; never null but may be empty.
      * TODO: construct 'uncategeorised' component automatically
      */
-    public static Map<String,Integer> getFuelMWByCategory(final Map<String,Integer> currentGenerationMWByFuelMW, final Map<String,Set<String>> fuelByCategory)
+    public static Map<String,Integer> getFuelMWByCategory(final Map<String,Integer> currentGenerationMWByFuel, final Map<String,Set<String>> fuelByCategory)
         {
-        if(null == currentGenerationMWByFuelMW) { throw new IllegalArgumentException(); }
+        if(null == currentGenerationMWByFuel) { throw new IllegalArgumentException(); }
         if(null == fuelByCategory) { throw new IllegalArgumentException(); }
 
         final Map<String,Integer> result = new HashMap<String, Integer>(fuelByCategory.size()*2 + 3);
@@ -745,9 +745,9 @@ public final class FUELINSTUtils
             long total = 0;
             for(final String fuel : fuels)
                 {
-                final Integer q = currentGenerationMWByFuelMW.get(fuel);
+                final Integer q = currentGenerationMWByFuel.get(fuel);
+                if(null == q) { System.err.println("no per-fuel MW value for "+fuel); continue; }
                 if(q < 0) { throw new IllegalArgumentException("invalid negative per-fuel MW value"); }
-                if(q == null) { continue; }
                 total += q;
                 }
 
