@@ -25,6 +25,9 @@ Store a week's worth of data for better predictions on most days except holidays
 
 Change sendTweet to send depending on status colour change only, eg not text change to avoid spurious messages when switching between live and predictive modes.
 
+*** STORE RESULTS AS COMPUTED ALONG WITH INPUT DATA/INTENSITIES TO ALLOW RECONSTRUCTION AS-IS IN FUTURE (once-per-day store for HH intervals for the whole day probably OK)
+
+
 
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
