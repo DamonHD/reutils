@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.util.List;
+
 
 
 /**Statistics utilities.
@@ -37,6 +39,19 @@ public final class StatUtils
     {
     /**Prevent creation of an instance. */
     private StatUtils() { }
+
+
+    /**Calculate Pearson's correlation' using List<Double> args. */
+    public static double ComputePearsonCorrelation(final List<Double> values1, final List<Double> values2)
+        {
+        if(null == values1) { throw new IllegalArgumentException(); }
+        if(null == values2) { throw new IllegalArgumentException(); }
+        final double v1[] = new double[values1.size()];
+        for(int i = v1.length; --i >= 0; ) { v1[i] = values1.get(i); }
+        final double v2[] = new double[values2.size()];
+        for(int i = v2.length; --i >= 0; ) { v2[i] = values2.get(i); }
+        return(ComputePearsonCorrelation(v1, v2));
+        }
 
     /**Calculate Pearson's correlation. */
     public static double ComputePearsonCorrelation(final double[] values1, final double[] values2)

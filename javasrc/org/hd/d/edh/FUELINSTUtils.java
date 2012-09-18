@@ -352,6 +352,11 @@ public final class FUELINSTUtils
         // Compute (crude) correlation between fuel use and intensity.
         final Map<String,Double> correlationIntensityToFuel = new HashMap<String,Double>(currentGenerationByFuel.size());
 
+        // Do this by hour slot at the moment; though using the raw input points may be better.
+        for(final String fuel : currentGenerationByFuel.keySet())
+            {
+            
+            }
 
         // TODO
 

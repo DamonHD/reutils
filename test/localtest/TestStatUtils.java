@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
 import org.hd.d.edh.StatUtils;
@@ -46,5 +48,9 @@ public final class TestStatUtils extends TestCase
                 1.0, StatUtils.ComputePearsonCorrelation(new double[]{0,1,2}, new double[]{0.0,0.1,0.2}));
         final double corrp1 = StatUtils.ComputePearsonCorrelation(new double[]{0,1,2}, new double[]{0.0,0.05,0.2});
         assertTrue((corrp1 > 0) && (corrp1 < 1));
+
+        // Test List<Double> overload.
+        assertEquals(1.0, StatUtils.ComputePearsonCorrelation(Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)}), Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)})));
+        assertEquals(-1.0, StatUtils.ComputePearsonCorrelation(Arrays.asList(new Double[]{Double.valueOf(1),Double.valueOf(0)}), Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)})));
         }
     }
