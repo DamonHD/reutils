@@ -208,6 +208,10 @@ public final class FUELINSTUtils
         final long[] totalGenerationByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
         final long[] totalZCGenerationByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
         final long[] totalStorageDrawdownByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
+        // Sample-by-sample list of map of generation by fuel type (in MW) and from "" to weighted intensity (gCO2/kWh).
+        final List<Map<String, Integer>> sampleBySampleGenForCorr = new ArrayList<Map<String,Integer>>(parsedBMRCSV.size());
+        // Compute (crude) correlation between fuel use and intensity.
+        final Map<String,Double> correlationIntensityToFuel = new HashMap<String,Double>(currentGenerationByFuel.size());
         for(final List<String> row : parsedBMRCSV)
             {
             // Extract fuel values for this row and compute a weighted intensity...
@@ -244,6 +248,15 @@ public final class FUELINSTUtils
                 }
 
             allIntensitySamples.add(weightedIntensity);
+
+            // For computing correlations...
+            // Add entry only iff both a valid weighted intensity and at least one by-fuel number.
+            if(!generationByFuel.isEmpty())
+                {
+                final Map<String, Integer> corrEntry = new HashMap<String, Integer>(generationByFuel);
+                corrEntry.put("", weightedIntensity);
+                sampleBySampleGenForCorr.add(corrEntry);
+                }
 
             currentMW = thisMW;
             currentIntensity = weightedIntensity; // Last (good) record we process is the 'current' one as they are in date order.
@@ -348,22 +361,6 @@ public final class FUELINSTUtils
         final List<Integer> aveStorageDrawdownByHourOfDay = new ArrayList<Integer>(24);
         for(int h = 0; h < 24; ++h)
             { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h]))); }
-
-        // Compute (crude) correlation between fuel use and intensity.
-        final Map<String,Double> correlationIntensityToFuel = new HashMap<String,Double>(currentGenerationByFuel.size());
-
-        // Do this by hour slot at the moment; though using the raw input points may be better.
-        for(final String fuel : currentGenerationByFuel.keySet())
-            {
-            
-            }
-
-        // TODO
-
-
-
-
-
 
         // Construct summary status...
         final FUELINST.CurrentSummary result =
