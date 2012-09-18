@@ -35,7 +35,6 @@ import org.hd.d.edh.FUELINST.TrafficLightsInterface;
 
 
 /**Main (command-line) entry-point for the data handler.
- *
  */
 public final class Main
     {
