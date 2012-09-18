@@ -361,7 +361,7 @@ public final class FUELINSTHistorical
             if(!f.exists() || !f.isFile() || !f.canRead() || (f.length() == 0))
                 { throw new IOException("specified input file is not plain file and/or not readable: "+f); }
             }
-        System.out.println("Files to process: "+files.size());
+        System.out.println("Count of files to process: "+files.size());
 
         // Gather all FUELINST messages and convert them to timestamped intensities,
         // based on the TP (end timestamp), FT (fuel type) and FG (generation MW) fields.
