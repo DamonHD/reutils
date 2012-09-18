@@ -208,10 +208,11 @@ public final class FUELINSTUtils
         final long[] totalGenerationByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
         final long[] totalZCGenerationByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
         final long[] totalStorageDrawdownByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
+        // Set of all usable fuel types encountered.
+        final Set<String> usableFuels = new HashSet<String>();
         // Sample-by-sample list of map of generation by fuel type (in MW) and from "" to weighted intensity (gCO2/kWh).
         final List<Map<String, Integer>> sampleBySampleGenForCorr = new ArrayList<Map<String,Integer>>(parsedBMRCSV.size());
         // Compute (crude) correlation between fuel use and intensity.
-        final Map<String,Double> correlationIntensityToFuel = new HashMap<String,Double>(currentGenerationByFuel.size());
         for(final List<String> row : parsedBMRCSV)
             {
             // Extract fuel values for this row and compute a weighted intensity...
@@ -235,7 +236,9 @@ public final class FUELINSTUtils
                 // Slices of generation/demand.
                 if(storageTypes.contains(name)) { thisStorageDrawdownMW += fuelMW; }
                 final Float fuelInt = configuredIntensities.get(name);
-                if((null != fuelInt) && (fuelInt <= 0)) { thisZCGenerationMW += fuelMW; }
+                final boolean usableFuel = null != fuelInt;
+                if(usableFuel) { usableFuels.add(name); }
+                if(usableFuel && (fuelInt <= 0)) { thisZCGenerationMW += fuelMW; }
                 }
             // Compute weighted intensity as gCO2/kWh for simplicity of representation.
             // 'Bad' fuels such as coal are ~1000, natural gas is <400, wind and nuclear are roughly 0.
@@ -361,6 +364,38 @@ public final class FUELINSTUtils
         final List<Integer> aveStorageDrawdownByHourOfDay = new ArrayList<Integer>(24);
         for(int h = 0; h < 24; ++h)
             { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h]))); }
+
+        // Compute fuel/intensity correlation.
+        final Map<String,Double> correlationIntensityToFuel = new HashMap<String,Double>(usableFuels.size());
+        if(!sampleBySampleGenForCorr.isEmpty())
+            {
+            // Compute correlation by fuel, where there are enough samples.
+            for(final String fuel : usableFuels)
+                {
+                final List<Double> fuelMW = new ArrayList<Double>(sampleBySampleGenForCorr.size());
+                final List<Double> gridIntensity = new ArrayList<Double>(sampleBySampleGenForCorr.size());
+
+                for(int i = sampleBySampleGenForCorr.size(); --i >= 0; )
+                    {
+                    final Map<String, Integer> s = sampleBySampleGenForCorr.get(i);
+                    // Only use matching pairs of intensity and MW values to keep lists matching by position.
+                    if(s.containsKey("") && s.containsKey(fuel))
+                        {
+                        fuelMW.add(s.get(fuel).doubleValue());
+                        gridIntensity.add(s.get("").doubleValue());
+                        }
+                    }
+
+                // Do not attempt unless enough samples.
+                if(fuelMW.size() > 1)
+                    {
+                    final double corr = StatUtils.ComputePearsonCorrelation(gridIntensity, fuelMW);
+                    // Retain correlation only if sane / finite.
+                    if(!Double.isNaN(corr) && !Double.isInfinite(corr))
+                        { correlationIntensityToFuel.put(fuel, corr); }
+                    }
+                }
+            }
 
         // Construct summary status...
         final FUELINST.CurrentSummary result =
