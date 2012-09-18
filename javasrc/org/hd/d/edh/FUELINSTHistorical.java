@@ -376,7 +376,7 @@ public final class FUELINSTHistorical
             final Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(f)));
             try
                 {
-                final List<Pair<Long, Map<String, Integer>>> l = msgsToTimestampedGenByFuel(DataUtils.extractTIBCOMessages(r, "BMRA.SYSTEM.FUELINST", fieldKeys));
+                final List<Pair<Long, Map<String, Integer>>> l = msgsToTimestampedGenByFuel(DataUtils.extractTIBCOMessages(r, "BMRA.SYSTEM.FUELINST", fieldKeys), true);
                 genByFuel.addAll(l);
                 intensities.addAll(timestampedGenByFuelToIntensity(l));
                 }
@@ -691,8 +691,11 @@ public final class FUELINSTHistorical
      * Does not attempt to alter its input.
      * <p>
      * Each map will have at least one fuel value (indeed, at least MIN_FUEL_TYPES_IN_MIX values, as a sanity filter).
+     * 
+     * @param dropNonPositive  if true then ignore all non-positive FUELINST values;
+     *     this results in the same behaviour as up to at least end 2011 for interconnectors which never showed negative flows
      */
-    public static List<Tuple.Pair<Long, Map<String,Integer>>> msgsToTimestampedGenByFuel(final List<Map<String,String>> msgs)
+    public static List<Tuple.Pair<Long, Map<String,Integer>>> msgsToTimestampedGenByFuel(final List<Map<String,String>> msgs, final boolean dropNonPositive)
         throws ParseException
         {
         final List<Tuple.Pair<Long, Map<String,Integer>>> result = new ArrayList<Tuple.Pair<Long, Map<String,Integer>>>(msgs.size() / 8);
@@ -730,14 +733,17 @@ public final class FUELINSTHistorical
             if(!atEnd)
                 {
                 // Add current fuel generation mapping
-                // *iff* the fuel usage is non-zero.
+                // *iff* the fuel usage is non-zero/non-positive
                 final String fuelGen = mappings.get(FUELGEN_FIELD);
                 if(null == fuelGen)
                     { throw new ParseException("Missing fuel generation field "+FUELGEN_FIELD, record); }
                 final int fg = Integer.parseInt(fuelGen, 10); // Expect it to be an integer in the data...
                 if(fg == 0) { continue; }
                 if(fg < 0)
-                    { throw new ParseException("Invalid (-ve) fuel generation field "+FUELGEN_FIELD, record); }
+                    {
+                    if(dropNonPositive) { continue; }
+                    throw new ParseException("Invalid (-ve) fuel generation value in field "+FUELGEN_FIELD+" in map "+record, record);
+                    }
                 final String fuelType = mappings.get(FUELTYPE_FIELD);
                 if(null == fuelType)
                     { throw new ParseException("Missing fuel type field "+FUELTYPE_FIELD, record); }

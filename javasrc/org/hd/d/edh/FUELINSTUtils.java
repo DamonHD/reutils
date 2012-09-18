@@ -230,7 +230,7 @@ public final class FUELINSTUtils
                 if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(name).matches()) { continue; }
                 // Store the MW for this fuel.
                 final int fuelMW = Integer.parseInt(namedFields.get(name), 10);
-                if(fuelMW < 0) { throw new IOException("Bad (-ve) fuel generation MW value: "+row); }
+                if(fuelMW < 0) { continue; } // NB: -ve INTerconnector values in TIBCO data as of 2012 // { throw new IOException("Bad (-ve) fuel generation MW value: "+row); }
                 thisMW += fuelMW;
                 generationByFuel.put(name, fuelMW);
                 // Slices of generation/demand.
@@ -769,14 +769,14 @@ public final class FUELINSTUtils
         return(Collections.unmodifiableMap(result));
         }
 
-    /**Fall-back category to assign un-categories fuels to; single token not null nor empty. */
+    /**Fall-back category to assign uncategorised fuels to; single token not null nor empty. */
     public static final String UNCATEGORISED_FUELS = "uncategorised";
 
     /**If true, show recent changes in intensity, though they can be very noisy. */
     private static final boolean SHOW_INTENSITY_DELTA = false;
 
     /**Extract fuel use (in MW) by category from the current summary given the fuels-by-category table; never null but may be empty.
-     * TODO: construct 'uncategeorised' component automatically
+     * TODO: construct 'uncategorised' component automatically
      */
     public static Map<String,Integer> getFuelMWByCategory(final Map<String,Integer> currentGenerationMWByFuel, final Map<String,Set<String>> fuelByCategory)
         {
