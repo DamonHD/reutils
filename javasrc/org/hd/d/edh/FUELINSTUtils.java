@@ -349,6 +349,17 @@ public final class FUELINSTUtils
         for(int h = 0; h < 24; ++h)
             { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h]))); }
 
+        // Compute (crude) correlation between fuel use and intensity.
+        final Map<String,Double> correlationIntensityToFuel = new HashMap<String,Double>(currentGenerationByFuel.size());
+
+
+        // TODO
+
+
+
+
+
+
         // Construct summary status...
         final FUELINST.CurrentSummary result =
             new FUELINST.CurrentSummary(status, recentChange,
@@ -368,7 +379,8 @@ public final class FUELINSTUtils
                                   aveGenerationByHourOfDay,
                                   aveZCGenerationByHourOfDay,
                                   aveStorageDrawdownByHourOfDay,
-                                  tranLoss + distLoss);
+                                  tranLoss + distLoss,
+                                  correlationIntensityToFuel);
 
         // If cacheing is enabled then persist this result, compressed.
         if(null != cacheFile)
@@ -734,7 +746,7 @@ public final class FUELINSTUtils
         if(null == currentGenerationMWByFuel) { throw new IllegalArgumentException(); }
         if(null == fuelByCategory) { throw new IllegalArgumentException(); }
 
-        final Map<String,Integer> result = new HashMap<String, Integer>(fuelByCategory.size()*2 + 3);
+        final Map<String,Integer> result = new HashMap<String, Integer>((fuelByCategory.size()*2) + 3);
 
         // Construct each category's total generation....
         for(final Map.Entry<String, Set<String>> c : fuelByCategory.entrySet())
@@ -939,7 +951,7 @@ public final class FUELINSTUtils
                     if(0 != hZCGeneration)
                         {
                         w.write("<li style=\"background-color:green;height:"+((GCOMP_PX_MAX*hZCGeneration) / Math.max(1, maxGenerationMW))+"px;left:0px;\">");
-                        if(hZCGeneration >= maxGenerationMW/8) { w.write(String.valueOf((hZCGeneration + 500) / 1000)); }
+                        if(hZCGeneration >= (maxGenerationMW/8)) { w.write(String.valueOf((hZCGeneration + 500) / 1000)); }
                         w.write("</li>");
                         }
 //                    final int hDrawdown = summary.histAveStorageDrawdownByHourOfDay.get0(displayHourGMT);
@@ -1221,7 +1233,7 @@ public final class FUELINSTUtils
                 final int hZCGeneration = summary.histAveZCGenerationByHourOfDay.get0(displayHourGMT);
                 if(0 != hZCGeneration)
                     {
-                    if(hZCGeneration >= maxGenerationMW/8) { w.println("<zero_carbon>"+String.valueOf((hZCGeneration + 500) / 1000)+"</zero_carbon>"); }
+                    if(hZCGeneration >= (maxGenerationMW/8)) { w.println("<zero_carbon>"+String.valueOf((hZCGeneration + 500) / 1000)+"</zero_carbon>"); }
                     }
                 w.println("</sample>");
                 }

@@ -207,6 +207,10 @@ public final class FUELINST
 
         /**Total grid distribution and transmission losses in range [0.0,1.0]. */
         public final float totalGridLosses;
+        
+        /**Current/latest intensity correlation with fuel type, immutable; may be empty but not null. */
+        public final Map<String,Double> correlationIntensityToFuel;
+
 
         /**Construct a default (empty) instance.
          * Could be made private an accessed via a public static field...
@@ -215,7 +219,8 @@ public final class FUELINST
             {
             this(null, null, 0L, 0L, 0L, 0, Collections.<String,Integer>emptyMap(), 0L, 0, 0L, 0, 0, 0L, 0L, 0, 0, 0,
                     null, null, null, null,
-                    0f);
+                    0f,
+                    Collections.<String,Double>emptyMap());
             }
 
         /**Construct an instance.
@@ -238,7 +243,8 @@ public final class FUELINST
                 final List<Integer> histAveGenerationByHourOfDay,
                 final List<Integer> histAveZCGenerationByHourOfDay,
                 final List<Integer> histAveStorageDrawdownByHourOfDay,
-                final float totalGridLosses)
+                final float totalGridLosses,
+                final Map<String,Double> correlationIntensityToFuel)
             {
             this.status = status;
             this.recentChange = recentChange;
@@ -264,6 +270,8 @@ public final class FUELINST
             this.histAveZCGenerationByHourOfDay = new SummaryByHour(histAveZCGenerationByHourOfDay); // Defensive copy.
             this.histAveStorageDrawdownByHourOfDay = new SummaryByHour(histAveStorageDrawdownByHourOfDay); // Defensive copy.
             this.totalGridLosses = totalGridLosses;
+            if(correlationIntensityToFuel == null) { throw new IllegalArgumentException(); }
+            this.correlationIntensityToFuel = Collections.unmodifiableMap(new HashMap<String, Double>(correlationIntensityToFuel)); // Defensive copy.
             }
 
         /**Select the traffic-light colour for a given intensity (gCO2/kWh); never null.
