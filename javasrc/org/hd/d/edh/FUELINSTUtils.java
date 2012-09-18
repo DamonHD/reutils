@@ -366,7 +366,7 @@ public final class FUELINSTUtils
             { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h]))); }
 
         // Compute fuel/intensity correlation.
-        final Map<String,Double> correlationIntensityToFuel = new HashMap<String,Double>(usableFuels.size());
+        final Map<String,Float> correlationIntensityToFuel = new HashMap<String,Float>(usableFuels.size());
         if(!sampleBySampleGenForCorr.isEmpty())
             {
             // Compute correlation by fuel, where there are enough samples.
@@ -389,7 +389,7 @@ public final class FUELINSTUtils
                 // Do not attempt unless enough samples.
                 if(fuelMW.size() > 1)
                     {
-                    final double corr = StatUtils.ComputePearsonCorrelation(gridIntensity, fuelMW);
+                    final float corr = (float) StatUtils.ComputePearsonCorrelation(gridIntensity, fuelMW);
                     // Retain correlation only if sane / finite.
                     if(!Double.isNaN(corr) && !Double.isInfinite(corr))
                         { correlationIntensityToFuel.put(fuel, corr); }
@@ -1063,6 +1063,16 @@ public final class FUELINSTUtils
                 {
                 w.write(' '); w.write(fuel);
                 w.write("="+intensities.get(fuel));
+                }
+            w.write(".</p>");
+            w.println();
+
+            w.write("<p>Correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
+            final SortedMap<String,Float> goodness = new TreeMap<String, Float>(summary.correlationIntensityToFuel);
+            for(final String fuel : goodness.keySet())
+                {
+                w.write(' '); w.write(fuel);
+                w.write("="+goodness.get(fuel));
                 }
             w.write(".</p>");
             w.println();
