@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2011, Damon Hart-Davis
+Copyright (c) 2008-2012, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 
-/**Data Utilities.
+/**Data utilities.
  * Handles the bmreports style of CSV (with an initial HDR row and a trailing FTR row),
  * along with TIBCO data and other records.
  */
