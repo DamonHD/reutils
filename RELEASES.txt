@@ -32,7 +32,6 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-    DHD20120918: Computing correlation between fuel type MW and overall grid intensity.
 
 
 
@@ -42,6 +41,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20120918:
+    freezepoint name: V1.0.8
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.7
+    DHD20120918: Computing rolling correlation between fuel type MW and overall grid intensity over last 24h.
+
 
 20120224:
     freezepoint name: V1.0.7

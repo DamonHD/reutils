@@ -1067,12 +1067,10 @@ public final class FUELINSTUtils
             w.write(".</p>");
             w.println();
 
-            w.write("<p>Correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
+            w.write("<p>Rolling correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
             final SortedMap<String,Float> goodness = new TreeMap<String, Float>(summary.correlationIntensityToFuel);
             for(final String fuel : goodness.keySet())
                 {
-//                w.write(' '); w.write(fuel);
-//                w.write("="+goodness.get(fuel));
                 w.format(" %s=%.4f", fuel, goodness.get(fuel));
                 }
             w.write(".</p>");
