@@ -391,7 +391,7 @@ public final class FUELINSTUtils
                     {
                     final float corr = (float) StatUtils.ComputePearsonCorrelation(gridIntensity, fuelMW);
                     // Retain correlation only if sane / finite.
-                    if(!Double.isNaN(corr) && !Double.isInfinite(corr))
+                    if(!Float.isNaN(corr) && !Float.isInfinite(corr))
                         { correlationIntensityToFuel.put(fuel, corr); }
                     }
                 }
