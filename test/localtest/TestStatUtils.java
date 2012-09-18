@@ -30,7 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package localtest;
 
 import junit.framework.TestCase;
-import org.hd.d.edh.*;
+
+import org.hd.d.edh.StatUtils;
 
 /**Test stats routines. */
 public final class TestStatUtils extends TestCase
@@ -41,5 +42,8 @@ public final class TestStatUtils extends TestCase
         assertTrue(Double.isNaN(StatUtils.ComputePearsonCorrelation(new double[1], new double[1])));
         assertEquals(1.0, StatUtils.ComputePearsonCorrelation(new double[]{0,1}, new double[]{0,1}));
         assertEquals(-1.0, StatUtils.ComputePearsonCorrelation(new double[]{0,1}, new double[]{1,0}));
+        assertEquals(1.0, StatUtils.ComputePearsonCorrelation(new double[]{0,1,2}, new double[]{0.0,0.1,0.2}));
+        final double corrp1 = StatUtils.ComputePearsonCorrelation(new double[]{0,1,2}, new double[]{0.0,0.05,0.2});
+        assertTrue((corrp1 > 0) && (corrp1 < 1));
         }
     }
