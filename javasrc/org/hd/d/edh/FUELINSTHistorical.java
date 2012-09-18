@@ -625,7 +625,83 @@ public final class FUELINSTHistorical
         System.out.println("Report run took "+(System.currentTimeMillis() - startTime)+"ms.");
         }
 
-    /**Convert an in-order list of TIBCO FUELINST messages to an immutable intensities List; never null.
+    /**Convert an in-order list of TIBCO FUELINST messages to an immutable timestamped generation-by-fuel List; never null nor containing nulls nor empty maps.
+     * This assumes that related messages, ie with the same timestamp, are adjacent.
+     * <p>
+     * This implicitly assumes that samples are taken at regular intervals.
+     * <p>
+     * Does not attempt to alter its input.
+     * <p>
+     * Each map will have at least one fuel value (indeed, at least MIN_FUEL_TYPES_IN_MIX values, as a sanity filter).
+     */
+    public static List<Tuple.Pair<Long, Map<String,Integer>>> msgsToTimestampedGenByFuel(final List<Map<String,String>> msgs)
+        throws ParseException
+        {
+        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
+        if(configuredIntensities.isEmpty())
+            { throw new IllegalStateException("Properties undefined for fuel intensities: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX + "*"); }
+
+        final List<Tuple.Pair<Long, Map<String,Integer>>> result = new ArrayList<Tuple.Pair<Long, Map<String,Integer>>>(msgs.size() / 8);
+
+        String prevTimestamp = ""; // Force new computation on first value...
+        final Map<String, Integer> generationByFuel = new HashMap<String, Integer>(2 * configuredIntensities.size());
+
+        for(int record = msgs.size(); --record >= 0; )
+            {
+            final boolean atEnd = (record == 0);
+            final Map<String, String> mappings = atEnd ?  null : msgs.get(record);
+            final String timestamp = atEnd ? null : mappings.get(TIMESTAMP_FIELD);
+            if(!atEnd && (null == timestamp))
+                { throw new ParseException("Missing timestamp field "+TIMESTAMP_FIELD, record); }
+            // Time to close off previous intensity calculation
+            if(atEnd || !prevTimestamp.equals(timestamp))
+                {
+                // Check if we had some/enough fuel values collected.
+                if(generationByFuel.size() >= FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX)
+                    {
+                    final int weightedIntensity = Math.round(1000 * FUELINSTUtils.computeWeightedIntensity(configuredIntensities, generationByFuel, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX));
+                    // Check that we have a real intensity value.
+                    if(weightedIntensity >= 0)
+                        {
+                        final long ts = FUELINSTUtils.getTIBCOTimestampParser().parse(prevTimestamp).getTime();
+                        final HashMap<String, Integer> e = new HashMap<String, Integer>(generationByFuel); // Immutable copy.
+                        result.add(new Tuple.Pair<Long, Map<String, Integer>>(ts, Collections.unmodifiableMap(e)));
+                        }
+                    }
+                else if(!"".equals(prevTimestamp))
+                    {
+                    System.err.println("Rejecting suspicious data (fuel count "+generationByFuel.size()+") at time " + prevTimestamp);
+                    }
+                // Clear out old fuel values.
+                generationByFuel.clear();
+                // Set the new timestamp if any...
+                if(!atEnd) { prevTimestamp = timestamp; }
+                }
+
+            if(!atEnd)
+                {
+                // Add current fuel generation mapping
+                // *iff* the fuel usage is non-zero.
+                final String fuelGen = mappings.get(FUELGEN_FIELD);
+                if(null == fuelGen)
+                    { throw new ParseException("Missing fuel generation field "+FUELGEN_FIELD, record); }
+                final int fg = Integer.parseInt(fuelGen, 10); // Expect it to be an integer in the data...
+                if(fg == 0) { continue; }
+                if(fg < 0)
+                    { throw new ParseException("Invalid (-ve) fuel generation field "+FUELGEN_FIELD, record); }
+                final String fuelType = mappings.get(FUELTYPE_FIELD);
+                if(null == fuelType)
+                    { throw new ParseException("Missing fuel type field "+FUELTYPE_FIELD, record); }
+                generationByFuel.put(fuelType, fg);
+                }
+            }
+
+        return(Collections.unmodifiableList(result)); // Keep result immutable.
+        }
+
+
+
+    /**Convert an in-order list of TIBCO FUELINST messages to an immutable timestamped grid-intensities List; never null.
      * This assumes that related messages, ie with the same timestamp, are adjacent.
      * <p>
      * This implicitly assumes that samples are taken at regular intervals.
