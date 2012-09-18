@@ -1071,8 +1071,9 @@ public final class FUELINSTUtils
             final SortedMap<String,Float> goodness = new TreeMap<String, Float>(summary.correlationIntensityToFuel);
             for(final String fuel : goodness.keySet())
                 {
-                w.write(' '); w.write(fuel);
-                w.write("="+goodness.get(fuel));
+//                w.write(' '); w.write(fuel);
+//                w.write("="+goodness.get(fuel));
+                w.format(" %s=%.4f", fuel, goodness.get(fuel));
                 }
             w.write(".</p>");
             w.println();
