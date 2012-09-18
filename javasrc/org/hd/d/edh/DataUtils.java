@@ -77,7 +77,7 @@ public final class DataUtils
      * Note that message field values may contain embedded line-ends but not embedded commas,
      * and a line ending with '}' ends a message.
      * <p>
-     * Does most of the donkeywork of parsing.
+     * Does most of the donkey-work of parsing.
      * <p>
      * Key values are automatically intern()ed to save space
      * as likely to be repeated between records.
@@ -487,7 +487,7 @@ public final class DataUtils
      * This atomically replaces the target file if possible.
      *
      * @param gzipped  if true, the file is written GZIP-compressed
-     *     to (usually) save signifcant space
+     *     to (usually) save significant space
      * @param quiet  if true, only outputs errors
      *
      * @throws IOException  if something bad happens
