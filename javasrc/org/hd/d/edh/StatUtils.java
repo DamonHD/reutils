@@ -111,7 +111,7 @@ public final class StatUtils
     /**Given map of (evenly-spaced) sample times to fuel MW and intensities, computes correlations between fuel, demand and intensity; never null.
      * @param fuelinst  map from timestamp to pairs of maps of fuel to (float) intensity (tCO2/MWh) and to (int) MW generation; never null
      * @param minFuelTypesInMix  minimum number of fuel types in mix at each sample else ignore; non-negative
-     * @return tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand; immutable, non-null, not containing nulls
+     * @return tuple of map of fuel MW correlation to demand, map of fuel MW correlation to grid intensity, and correlation of intensity to demand; immutable, non-null, not containing nulls
      */
     public static Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinst, final int minFuelTypesInMix)
         {
@@ -151,7 +151,7 @@ public final class StatUtils
             PairsDemandVsIntensity.add(new Tuple.Pair<Integer, Float>(demand, weightedIntensity));
             }
 
-        System.out.println(PairsDemandVsIntensity);
+//        System.out.println(PairsDemandVsIntensity);
         final float cdi = (float) ComputePearsonCorrelation(PairsDemandVsIntensity);
 
         final Map<String,Float> m1 = Collections.emptyMap();
