@@ -169,11 +169,15 @@ public final class StatUtils
                 }
             }
 
-//        System.out.println(PairsDemandVsIntensity);
         final float cdi = (float) ComputePearsonCorrelation(PairsDemandVsIntensity);
 
-        final Map<String,Float> m1 = new HashMap<String,Float>();
-        final Map<String,Float> m2 = new HashMap<String,Float>();
-        return(new Tuple.Triple<Map<String,Float>, Map<String,Float>, Float>(Collections.unmodifiableMap(m1), Collections.unmodifiableMap(m2), cdi));
+        final Map<String,Float> cfd = new HashMap<String,Float>();
+        for(final String fuelName : PairsFuelVsDemand.keySet())
+            { cfd.put(fuelName, (float) ComputePearsonCorrelation(PairsFuelVsDemand.get(fuelName))); }
+        final Map<String,Float> cfi = new HashMap<String,Float>();
+        for(final String fuelName : PairsFuelVsIntensity.keySet())
+            { cfd.put(fuelName, (float) ComputePearsonCorrelation(PairsFuelVsIntensity.get(fuelName))); }
+
+        return(new Tuple.Triple<Map<String,Float>, Map<String,Float>, Float>(Collections.unmodifiableMap(cfd), Collections.unmodifiableMap(cfi), cdi));
         }
     }
