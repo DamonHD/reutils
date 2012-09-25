@@ -172,8 +172,8 @@ public final class StatUtils
 //        System.out.println(PairsDemandVsIntensity);
         final float cdi = (float) ComputePearsonCorrelation(PairsDemandVsIntensity);
 
-        final Map<String,Float> m1 = Collections.emptyMap();
-        final Map<String,Float> m2 = Collections.emptyMap();
-        return(new Tuple.Triple<Map<String,Float>, Map<String,Float>, Float>(m1, m2, cdi));
+        final Map<String,Float> m1 = new HashMap<String,Float>();
+        final Map<String,Float> m2 = new HashMap<String,Float>();
+        return(new Tuple.Triple<Map<String,Float>, Map<String,Float>, Float>(Collections.unmodifiableMap(m1), Collections.unmodifiableMap(m2), cdi));
         }
     }
