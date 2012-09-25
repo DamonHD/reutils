@@ -127,7 +127,7 @@ public final class MainProperties
         {
         final long now = System.currentTimeMillis();
 
-        if(now - lastRecheck <= MIN_RECHECK_MS)
+        if((now - lastRecheck) <= MIN_RECHECK_MS)
             {
             // Not time for a recheck yet...
             return;

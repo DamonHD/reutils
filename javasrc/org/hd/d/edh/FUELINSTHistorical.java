@@ -691,7 +691,7 @@ public final class FUELINSTHistorical
      * Does not attempt to alter its input.
      * <p>
      * Each map will have at least one fuel value (indeed, at least MIN_FUEL_TYPES_IN_MIX values, as a sanity filter).
-     * 
+     *
      * @param dropNonPositive  if true then ignore all non-positive FUELINST values;
      *     this results in the same behaviour as up to at least end 2011 for interconnectors which never showed negative flows
      */

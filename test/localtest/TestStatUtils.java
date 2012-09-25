@@ -30,10 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package localtest;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.hd.d.edh.StatUtils;
+import org.hd.d.edh.Tuple;
 
 /**Test stats routines. */
 public final class TestStatUtils extends TestCase
@@ -58,5 +62,10 @@ public final class TestStatUtils extends TestCase
     public static void testComputeFuelCorrelations()
         {
         try { StatUtils.computeFuelCorrelations(null); fail("should reject null arg"); } catch(final IllegalArgumentException e) { /* expected */ }
+
+        final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinst1 = new HashMap<Long, Tuple.Pair<Map<String,Float>,Map<String,Integer>>>();
+        try { StatUtils.computeFuelCorrelations(fuelinst1); fail("should reject empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
+
+        fuelinst1.put(0L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(Collections.<String,Float>emptyMap(), Collections.<String,Integer>emptyMap()));
         }
     }

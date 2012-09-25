@@ -305,7 +305,7 @@ public final class TwitterUtils
                     {
                     final long minIntervalmS = minInterval * 60 * 1000L;
                     final long lastSent = TwitterCacheFileName.lastModified();
-                    if(lastSent + minIntervalmS > System.currentTimeMillis())
+                    if((lastSent + minIntervalmS) > System.currentTimeMillis())
                         {
                         System.err.println("WARNING: sent previous tweet too recently (<"+minIntervalS+"m, last "+(new Date(lastSent))+") so skipping sending this one: " + statusMessage);
                         return;

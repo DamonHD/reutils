@@ -34,9 +34,6 @@ import junit.framework.TestCase;
 import org.hd.d.edh.TwitterUtils;
 import org.hd.d.edh.TwitterUtils.TwitterDetails;
 
-import winterwell.jtwitter.OAuthSignpostClient;
-import winterwell.jtwitter.Twitter;
-
 /**Twitter tests.
  */
 public final class TestTwitter extends TestCase
