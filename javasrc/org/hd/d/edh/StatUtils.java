@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -92,6 +93,15 @@ public final class StatUtils
     public Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Integer>, Map<String,Integer>>> fuelinst)
         {
         if(null == fuelinst) { throw new IllegalArgumentException(); }
+
+        // Demand vs intensity pairs.
+        final List<Tuple.Pair<Integer, Integer>> PairsDemandIntensity = new ArrayList<Tuple.Pair<Integer, Integer>>(fuelinst.size());
+
+        // Iterate through the unique points in any order...
+        for(final long timestamp : fuelinst.keySet())
+            {
+
+            }
 
         throw new RuntimeException("NOT IMPLEMENTED");
         }
