@@ -143,14 +143,30 @@ public final class StatUtils
                 }
 
             int demand = 0;
-            for(final Integer fuelMW : datum.second.values())
+            final List<String> goodFuels = new ArrayList<String>(datum.second.size());
+            for(final String fuelName : datum.second.keySet())
                 {
+                final Integer fuelMW = datum.second.get(fuelName);
                 if(null == fuelMW) { throw new IllegalArgumentException("bad (null) fuelMW value"); }
                 if(fuelMW <= 0) { continue; } // Skip -ve generation (eg exporting interconnectors).
                 demand += fuelMW;
+                goodFuels.add(fuelName);
                 }
 
+            // Make demand/intensity entry.
             PairsDemandVsIntensity.add(new Tuple.Pair<Integer, Float>(demand, weightedIntensity));
+
+            // Now make entries by fuel type.
+            for(final String fuelName : goodFuels)
+                {
+                if(!PairsFuelVsDemand.containsKey(fuelName))
+                    { PairsFuelVsDemand.put(fuelName, new ArrayList<Tuple.Pair<Integer, Integer>>(fuelinst.size())); }
+                PairsFuelVsDemand.get(fuelName).add(new Tuple.Pair<Integer, Integer>(datum.second.get(fuelName), demand));
+
+                if(!PairsFuelVsIntensity.containsKey(fuelName))
+                    { PairsFuelVsIntensity.put(fuelName, new ArrayList<Tuple.Pair<Integer, Float>>(fuelinst.size())); }
+                PairsFuelVsIntensity.get(fuelName).add(new Tuple.Pair<Integer, Float>(datum.second.get(fuelName), weightedIntensity));
+                }
             }
 
 //        System.out.println(PairsDemandVsIntensity);
