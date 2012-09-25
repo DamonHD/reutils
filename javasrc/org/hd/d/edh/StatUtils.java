@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.util.List;
+import java.util.Map;
 
 
 
@@ -83,5 +84,15 @@ public final class StatUtils
         final double cov_x_y = sum_coproduct / length;
         final double result = cov_x_y / (pop_sd_x * pop_sd_y);
         return(result);
+        }
+
+    /**Given map of (evenly-spaced) sample times to fuel MW and intensities, compute correlations between fuel, demand and intensity; never null.
+     *
+     * @param fuelinst
+     * @return (non-null, not containing nulls) tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand.
+     */
+    public Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Integer>, Map<String,Integer>>> fuelinst)
+        {
+        throw new RuntimeException("NOT IMPLEMENTED");
         }
     }
