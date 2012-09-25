@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ public final class StatUtils
             values1[i] = pair.first.doubleValue();
             values2[i] = pair.second.doubleValue();
             }
+        System.out.println("values1="+Arrays.toString(values1)+", values2="+Arrays.toString(values2));
         return(ComputePearsonCorrelation(values1, values2));
         }
 
@@ -151,7 +153,7 @@ public final class StatUtils
             PairsDemandVsIntensity.add(new Tuple.Pair<Integer, Float>(demand, weightedIntensity));
             }
 
-//        System.out.println(PairsDemandVsIntensity);
+        System.out.println(PairsDemandVsIntensity);
         final float cdi = (float) ComputePearsonCorrelation(PairsDemandVsIntensity);
 
         final Map<String,Float> m1 = Collections.emptyMap();

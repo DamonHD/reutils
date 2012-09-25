@@ -47,12 +47,14 @@ public final class TestStatUtils extends TestCase
         {
         assertTrue(Double.isNaN(StatUtils.ComputePearsonCorrelation(new double[1], new double[1])));
         assertEquals(1.0, StatUtils.ComputePearsonCorrelation(new double[]{0,1}, new double[]{0,1}));
-        assertEquals(1.0, StatUtils.ComputePearsonCorrelation(new double[]{60000,0.91}, new double[]{60000,0.91}));
         assertEquals(-1.0, StatUtils.ComputePearsonCorrelation(new double[]{0,1}, new double[]{1,0}));
         assertEquals("the two value sets need not be of same magnitude",
                 1.0, StatUtils.ComputePearsonCorrelation(new double[]{0,1,2}, new double[]{0.0,0.1,0.2}));
         final double corrp1 = StatUtils.ComputePearsonCorrelation(new double[]{0,1,2}, new double[]{0.0,0.05,0.2});
         assertTrue((corrp1 > 0) && (corrp1 < 1));
+
+        // All identical data point pairs same as a single point...
+        assertTrue(Double.isNaN(StatUtils.ComputePearsonCorrelation(new double[]{60000,60000}, new double[]{0.91,0.91})));
 
         // Test List<Double> overload.
         assertEquals(1.0, StatUtils.ComputePearsonCorrelation(Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)}), Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)})));
@@ -82,6 +84,6 @@ public final class TestStatUtils extends TestCase
         fuelinst1.put(2L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(m1i, m1p));
         final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r2 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
         assertNotNull(r2);
-//        assertEquals("with two identical real points demand/intensity correlation should be +1", 1.0f, r2.third.floatValue(), 1e-6);
+        assertTrue("with two identical real points demand/intensity correlation should be NaN", Float.isNaN(r2.third.floatValue()));
         }
     }
