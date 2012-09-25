@@ -89,7 +89,7 @@ public final class StatUtils
         }
 
     /**Given map of (evenly-spaced) sample times to fuel MW and intensities, computes correlations between fuel, demand and intensity; never null.
-     * @param fuelinst  map from timestamp to pairs of maps of fuel to (float) intensity (g/kWh) and to (int) MW generation; never null
+     * @param fuelinst  map from timestamp to pairs of maps of fuel to (float) intensity (tCO2/MWh) and to (int) MW generation; never null
      * @return tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand; immutable, non-null, not containing nulls
      */
     public Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinst)
@@ -97,13 +97,13 @@ public final class StatUtils
         if(null == fuelinst) { throw new IllegalArgumentException(); }
 
         // Demand vs intensity pairs.
-        final List<Tuple.Pair<Integer, Integer>> PairsDemandVsIntensity = new ArrayList<Tuple.Pair<Integer, Integer>>(fuelinst.size());
+        final List<Tuple.Pair<Integer, Float>> PairsDemandVsIntensity = new ArrayList<Tuple.Pair<Integer, Float>>(fuelinst.size());
 
         // Fuel MW vs demand pairs.
         final Map<String, List<Tuple.Pair<Integer, Integer>>> PairsFuelVsDemand = new HashMap<String, List<Tuple.Pair<Integer, Integer>>>();
 
         // Fuel MW vs intensity pairs.
-        final Map<String, List<Tuple.Pair<Integer, Integer>>> PairsFuelVsIntensity = new HashMap<String, List<Tuple.Pair<Integer, Integer>>>();
+        final Map<String, List<Tuple.Pair<Integer, Float>>> PairsFuelVsIntensity = new HashMap<String, List<Tuple.Pair<Integer, Float>>>();
 
         // Iterate through the unique points in any order...
         for(final Long timestamp : fuelinst.keySet())
@@ -111,7 +111,23 @@ public final class StatUtils
             final Tuple.Pair<Map<String,Float>, Map<String,Integer>> datum = fuelinst.get(timestamp);
             if((null == datum) || (null == datum.first) || (null == datum.second)) { throw new IllegalArgumentException("null/missing data points"); }
 
-            final float demand = FUELINSTUtils.computeWeightedIntensity(datum.first, datum.second, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX);
+            final float weightedIntensity = FUELINSTUtils.computeWeightedIntensity(datum.first, datum.second, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX);
+            // Reject bad (-ve) records.
+            if(weightedIntensity < 0)
+                {
+                System.err.println("Skipping non-positive weighed intensity record at " + timestamp);
+                continue;
+                }
+
+            int demand = 0;
+            for(final Integer fuelMW : datum.second.values())
+                {
+                if(null == fuelMW) { throw new IllegalArgumentException("bad (null) fuelMW value"); }
+                if(fuelMW <= 0) { continue; }
+                demand += fuelMW;
+                }
+
+            PairsDemandVsIntensity.add(new Tuple.Pair<Integer, Float>(demand, weightedIntensity));
             }
 
         throw new RuntimeException("NOT IMPLEMENTED");
