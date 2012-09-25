@@ -89,9 +89,10 @@ public final class StatUtils
         }
 
     /**Given map of (evenly-spaced) sample times to fuel MW and intensities, computes correlations between fuel, demand and intensity; never null.
+     * @param fuelinst  map from timestamp to pairs of maps of fuel to (float) intensity (g/kWh) and to (int) MW generation; never null
      * @return tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand; immutable, non-null, not containing nulls
      */
-    public Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Integer>, Map<String,Integer>>> fuelinst)
+    public Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinst)
         {
         if(null == fuelinst) { throw new IllegalArgumentException(); }
 
@@ -107,10 +108,10 @@ public final class StatUtils
         // Iterate through the unique points in any order...
         for(final Long timestamp : fuelinst.keySet())
             {
-            final Tuple.Pair<Map<String,Integer>, Map<String,Integer>> datum = fuelinst.get(timestamp);
+            final Tuple.Pair<Map<String,Float>, Map<String,Integer>> datum = fuelinst.get(timestamp);
             if((null == datum) || (null == datum.first) || (null == datum.second)) { throw new IllegalArgumentException("null/missing data points"); }
 
-
+            final float demand = FUELINSTUtils.computeWeightedIntensity(datum.first, datum.second, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX);
             }
 
         throw new RuntimeException("NOT IMPLEMENTED");
