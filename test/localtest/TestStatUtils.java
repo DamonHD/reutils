@@ -67,5 +67,6 @@ public final class TestStatUtils extends TestCase
         try { StatUtils.computeFuelCorrelations(fuelinst1); fail("should reject empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
 
         fuelinst1.put(0L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(Collections.<String,Float>emptyMap(), Collections.<String,Integer>emptyMap()));
+        try { StatUtils.computeFuelCorrelations(fuelinst1); fail("should reject effectively-empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
         }
     }

@@ -76,7 +76,7 @@ public final class StatUtils
         return(ComputePearsonCorrelation(v1, v2));
         }
 
-    /**Calculate Pearson's correlation. */
+    /**Calculate Pearson's correlation between a vector of unordered pairs. */
     public static double ComputePearsonCorrelation(final double[] values1, final double[] values2)
         {
         if(null == values1) { throw new IllegalArgumentException(); }
