@@ -97,7 +97,7 @@ public final class TestStatUtils extends TestCase
         fuelinst1.put(3L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(m3i, m3p));
         final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r3 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
         assertNotNull(r3);
-        assertEquals("with two lower-intensity fuel covering extra demand correlation should be -1", -1f, r3.third.floatValue(), 1e-6);
+        assertEquals("with two lower-intensity fuel covering extra demand correlation should be ~-1", -1f, r3.third.floatValue(), 1e-6);
         assertEquals(2, r3.first.size());
         assertEquals(2, r3.second.size());
         assertTrue(Float.isNaN(r3.first.get("COAL")));
@@ -105,6 +105,21 @@ public final class TestStatUtils extends TestCase
         assertTrue(Float.isNaN(r3.second.get("COAL")));
         assertTrue(Float.isNaN(r3.second.get("CCGT")));
 
-        System.out.println(r3);
+        final HashMap<String, Float> m4i = new HashMap<String,Float>(m3i);
+        final HashMap<String, Integer> m4p = new HashMap<String,Integer>(m3p);
+        m4p.put("COAL", 41000);
+        m4p.put("CCGT", 19000);
+        fuelinst1.put(4L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(m4i, m4p));
+        // Expecting r4 = <{CCGT=NaN, COAL=0.57735026},{CCGT=-1.0, COAL=-0.54738283},-0.9993432>
+        final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r4 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
+        assertNotNull(r4);
+        assertEquals(-0.9993432f, r4.third.floatValue(), 1e-6);
+        assertEquals(2, r4.first.size());
+        assertEquals(2, r4.second.size());
+        assertTrue(Float.isNaN(r4.first.get("CCGT")));
+        assertEquals(0.57735026f, r4.first.get("COAL"), 1e-6);
+        assertEquals(-1f, r4.second.get("CCGT"), 1e-6);
+        assertEquals(-0.54738283f, r4.second.get("COAL"), 1e-6);
+        //System.out.println(r4);
         }
     }
