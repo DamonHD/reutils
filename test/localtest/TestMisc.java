@@ -107,8 +107,8 @@ public final class TestMisc extends TestCase
         assertTrue("YELLOW must be better than RED", TrafficLight.YELLOW.betterThan(TrafficLight.RED));
         assertTrue("GREEN must be better than YELLOW", TrafficLight.GREEN.betterThan(TrafficLight.YELLOW));
         assertTrue("GREEN must be better than RED", TrafficLight.GREEN.betterThan(TrafficLight.RED));
-        assertTrue("RED must not be better than GREEN", !TrafficLight.RED.betterThan(TrafficLight.GREEN));
-        assertTrue("RED must not be better than YELLOW", !TrafficLight.RED.betterThan(TrafficLight.YELLOW));
-        assertTrue("YELLOW must not be better than GREEN", !TrafficLight.YELLOW.betterThan(TrafficLight.GREEN));
+        assertFalse("RED must not be better than GREEN", TrafficLight.RED.betterThan(TrafficLight.GREEN));
+        assertFalse("RED must not be better than YELLOW", TrafficLight.RED.betterThan(TrafficLight.YELLOW));
+        assertFalse("YELLOW must not be better than GREEN", TrafficLight.YELLOW.betterThan(TrafficLight.GREEN));
         }
     }
