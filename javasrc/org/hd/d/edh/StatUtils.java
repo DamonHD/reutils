@@ -86,10 +86,10 @@ public final class StatUtils
         return(result);
         }
 
-    /**Given map of (evenly-spaced) sample times to fuel MW and intensities, compute correlations between fuel, demand and intensity; never null.
+    /**Given map of (evenly-spaced) sample times to fuel MW and intensities, computes correlations between fuel, demand and intensity; never null.
      *
      * @param fuelinst
-     * @return (non-null, not containing nulls) tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand.
+     * @return tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand; immutable, non-null, not containing nulls
      */
     public Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Integer>, Map<String,Integer>>> fuelinst)
         {
