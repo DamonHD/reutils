@@ -100,6 +100,10 @@ public final class TestStatUtils extends TestCase
         assertEquals("with two lower-intensity fuel covering extra demand correlation should be -1", -1f, r3.third.floatValue(), 1e-6);
         assertEquals(2, r3.first.size());
         assertEquals(2, r3.second.size());
+        assertTrue(Float.isNaN(r3.first.get("COAL")));
+        assertTrue(Float.isNaN(r3.first.get("CCGT")));
+        assertTrue(Float.isNaN(r3.second.get("COAL")));
+        assertTrue(Float.isNaN(r3.second.get("CCGT")));
 
         System.out.println(r3);
         }
