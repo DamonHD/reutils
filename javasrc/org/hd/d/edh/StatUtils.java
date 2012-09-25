@@ -30,7 +30,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +45,23 @@ public final class StatUtils
     {
     /**Prevent creation of an instance. */
     private StatUtils() { }
+
+
+    /**Calculate Pearson's correlation' using a Collection<Tuple.Pair<Number, Number>>, ie unordered set of pairs. */
+    public static <X extends Number, Y extends Number> double ComputePearsonCorrelation(final Collection<Tuple.Pair<X, Y>> pairs)
+        {
+        final int size = pairs.size();
+        final double[] values1 = new double[size];
+        final double[] values2 = new double[size];
+        final Iterator<Tuple.Pair<X, Y>> pit = pairs.iterator();
+        for(int i = size; --i >= 0; )
+            {
+            final Tuple.Pair<X, Y> pair = pit.next();
+            values1[i] = pair.first.doubleValue();
+            values2[i] = pair.second.doubleValue();
+            }
+        return(ComputePearsonCorrelation(values1, values2));
+        }
 
 
     /**Calculate Pearson's correlation' using List<Double> args. */
@@ -130,6 +150,10 @@ public final class StatUtils
             PairsDemandVsIntensity.add(new Tuple.Pair<Integer, Float>(demand, weightedIntensity));
             }
 
-        throw new RuntimeException("NOT IMPLEMENTED");
+        final float cdi = (float) ComputePearsonCorrelation(PairsDemandVsIntensity);
+
+        final Map<String,Float> m1 = Collections.emptyMap();
+        final Map<String,Float> m2 = Collections.emptyMap();
+        return(new Tuple.Triple<Map<String,Float>, Map<String,Float>, Float>(m1, m2, cdi));
         }
     }
