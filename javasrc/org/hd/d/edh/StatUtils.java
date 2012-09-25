@@ -47,7 +47,7 @@ public final class StatUtils
     private StatUtils() { }
 
 
-    /**Calculate Pearson's correlation' using a Collection<Tuple.Pair<Number, Number>>, ie unordered set of pairs. */
+    /**Calculate Pearson's correlation' using a Collection<Tuple.Pair<Number, Number>>, ie unordered set of numeric pairs. */
     public static <X extends Number, Y extends Number> double ComputePearsonCorrelation(final Collection<Tuple.Pair<X, Y>> pairs)
         {
         final int size = pairs.size();
@@ -151,6 +151,7 @@ public final class StatUtils
             PairsDemandVsIntensity.add(new Tuple.Pair<Integer, Float>(demand, weightedIntensity));
             }
 
+        System.out.println(PairsDemandVsIntensity);
         final float cdi = (float) ComputePearsonCorrelation(PairsDemandVsIntensity);
 
         final Map<String,Float> m1 = Collections.emptyMap();
