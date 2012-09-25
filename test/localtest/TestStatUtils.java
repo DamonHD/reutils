@@ -74,8 +74,9 @@ public final class TestStatUtils extends TestCase
 
         final HashMap<String, Float> m1i = new HashMap<String,Float>();
         m1i.put("COAL", 0.91f);
+        m1i.put("CCGT", 0.36f);
         final HashMap<String, Integer> m1p = new HashMap<String,Integer>();
-        m1p.put("COAL", 60000); // Coal-powered GB in winter!
+        m1p.put("COAL", 40000); // COAL-powered GB in summer!
         fuelinst1.put(1L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(m1i, m1p));
         final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r1 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
         assertNotNull(r1);
@@ -85,5 +86,14 @@ public final class TestStatUtils extends TestCase
         final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r2 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
         assertNotNull(r2);
         assertTrue("with two identical real points demand/intensity correlation should be NaN", Float.isNaN(r2.third.floatValue()));
+
+        final HashMap<String, Float> m3i = new HashMap<String,Float>(m1i);
+        final HashMap<String, Integer> m3p = new HashMap<String,Integer>(m1p);
+        m3i.put("CCGT", 0.36f);
+        m3p.put("CCGT", 20000); // COAL- and CCGT- powered GB in winter!
+        fuelinst1.put(3L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(m3i, m3p));
+        final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r3 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
+        assertNotNull(r3);
+        assertEquals("with two lower-intensity fuel covering extra demand correlation should be -1", -1f, r3.third.floatValue(), 1e-6);
         }
     }
