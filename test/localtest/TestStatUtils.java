@@ -61,12 +61,23 @@ public final class TestStatUtils extends TestCase
     /**Test implementation of combo fuel correlation computation. */
     public static void testComputeFuelCorrelations()
         {
-        try { StatUtils.computeFuelCorrelations(null); fail("should reject null arg"); } catch(final IllegalArgumentException e) { /* expected */ }
+        try { StatUtils.computeFuelCorrelations(null, 0); fail("should reject null arg"); } catch(final IllegalArgumentException e) { /* expected */ }
 
         final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinst1 = new HashMap<Long, Tuple.Pair<Map<String,Float>,Map<String,Integer>>>();
-        try { StatUtils.computeFuelCorrelations(fuelinst1); fail("should reject empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
+        try { StatUtils.computeFuelCorrelations(fuelinst1, 0); fail("should reject empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
 
         fuelinst1.put(0L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(Collections.<String,Float>emptyMap(), Collections.<String,Integer>emptyMap()));
-        try { StatUtils.computeFuelCorrelations(fuelinst1); fail("should reject effectively-empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
+        try { StatUtils.computeFuelCorrelations(fuelinst1, 1); fail("should reject effectively-empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
+
+        final HashMap<String, Float> m1i = new HashMap<String,Float>();
+        m1i.put("COAL", 0.91f);
+        final HashMap<String, Integer> m1p = new HashMap<String,Integer>();
+        m1p.put("COAL", 60000); // Coal-powered GB in winter!
+        fuelinst1.put(1L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(m1i, m1p));
+        final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r1 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
+        assertNotNull(r1);
+        assertTrue("with just one real point correlation should be NaN", Float.isNaN(r1.third.floatValue()));
+
+        //assertEquals("with two identical real points correlation should be +1", 1.0f, r1.third.floatValue(), 1e-6);
         }
     }

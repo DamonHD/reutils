@@ -51,6 +51,7 @@ public final class StatUtils
     public static <X extends Number, Y extends Number> double ComputePearsonCorrelation(final Collection<Tuple.Pair<X, Y>> pairs)
         {
         final int size = pairs.size();
+        if(size < 1) { throw new IllegalArgumentException("must have at least one pair"); }
         final double[] values1 = new double[size];
         final double[] values2 = new double[size];
         final Iterator<Tuple.Pair<X, Y>> pit = pairs.iterator();
@@ -62,7 +63,6 @@ public final class StatUtils
             }
         return(ComputePearsonCorrelation(values1, values2));
         }
-
 
     /**Calculate Pearson's correlation' using List<Double> args. */
     public static double ComputePearsonCorrelation(final List<Double> values1, final List<Double> values2)
@@ -79,11 +79,11 @@ public final class StatUtils
     /**Calculate Pearson's correlation between a vector of unordered pairs. */
     public static double ComputePearsonCorrelation(final double[] values1, final double[] values2)
         {
-        if(null == values1) { throw new IllegalArgumentException(); }
-        if(null == values2) { throw new IllegalArgumentException(); }
+        if(null == values1) { throw new IllegalArgumentException("null values1[]"); }
+        if(null == values2) { throw new IllegalArgumentException("null values2[]"); }
         final int length = values1.length;
-        if(length != values2.length) { throw new IllegalArgumentException(); }
-        if(length < 1) { throw new IllegalArgumentException(); }
+        if(length != values2.length) { throw new IllegalArgumentException("arguments must be equal length"); }
+        if(length < 1) { throw new IllegalArgumentException("must have a least one pair"); }
 
         double sum_sq_x = 0;
         double sum_sq_y = 0;
@@ -110,9 +110,10 @@ public final class StatUtils
 
     /**Given map of (evenly-spaced) sample times to fuel MW and intensities, computes correlations between fuel, demand and intensity; never null.
      * @param fuelinst  map from timestamp to pairs of maps of fuel to (float) intensity (tCO2/MWh) and to (int) MW generation; never null
+     * @param minFuelTypesInMix  minimum number of fuel types in mix at each sample else ignore; non-negative
      * @return tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand; immutable, non-null, not containing nulls
      */
-    public static Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinst)
+    public static Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinst, final int minFuelTypesInMix)
         {
         if(null == fuelinst) { throw new IllegalArgumentException(); }
 
@@ -131,7 +132,7 @@ public final class StatUtils
             final Tuple.Pair<Map<String,Float>, Map<String,Integer>> datum = fuelinst.get(timestamp);
             if((null == datum) || (null == datum.first) || (null == datum.second)) { throw new IllegalArgumentException("null/missing data points"); }
 
-            final float weightedIntensity = FUELINSTUtils.computeWeightedIntensity(datum.first, datum.second, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX);
+            final float weightedIntensity = FUELINSTUtils.computeWeightedIntensity(datum.first, datum.second, minFuelTypesInMix);
             // Reject bad (-ve) records.
             if(weightedIntensity < 0)
                 {
