@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.hd.d.edh.Tuple.Pair;
+
 
 
 /**Statistics utilities.
@@ -173,10 +175,20 @@ public final class StatUtils
 
         final Map<String,Float> cfd = new HashMap<String,Float>();
         for(final String fuelName : PairsFuelVsDemand.keySet())
-            { cfd.put(fuelName, (float) ComputePearsonCorrelation(PairsFuelVsDemand.get(fuelName))); }
+            {
+            final List<Pair<Integer, Integer>> pairs = PairsFuelVsDemand.get(fuelName);
+            if(pairs.size() < 1) { continue; }
+            cfd.put(fuelName, (float) ComputePearsonCorrelation(pairs));
+            System.out.println("FuelVsDemand: "+fuelName+" " + pairs);
+            }
         final Map<String,Float> cfi = new HashMap<String,Float>();
         for(final String fuelName : PairsFuelVsIntensity.keySet())
-            { cfd.put(fuelName, (float) ComputePearsonCorrelation(PairsFuelVsIntensity.get(fuelName))); }
+            {
+            final List<Pair<Integer, Float>> pairs = PairsFuelVsIntensity.get(fuelName);
+            if(pairs.size() < 1) { continue; }
+            cfi.put(fuelName, (float) ComputePearsonCorrelation(pairs));
+            System.out.println("FuelVsIntensity: "+fuelName+" " + pairs);
+            }
 
         return(new Tuple.Triple<Map<String,Float>, Map<String,Float>, Float>(Collections.unmodifiableMap(cfd), Collections.unmodifiableMap(cfi), cdi));
         }

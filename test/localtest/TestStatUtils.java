@@ -55,9 +55,13 @@ public final class TestStatUtils extends TestCase
 
         assertTrue("All-identical data point pairs same as a single point", Double.isNaN(StatUtils.ComputePearsonCorrelation(new double[]{60000,60000}, new double[]{0.91,0.91})));
         assertEquals("Slightly changing values in same direction should yield +1", 1.0, StatUtils.ComputePearsonCorrelation(new double[]{40000,60000}, new double[]{0.90,0.91}), 1e-6);
+        assertEquals("Slightly changing values, with dups, in same direction should yield +1", 1.0, StatUtils.ComputePearsonCorrelation(new double[]{40000,40000,60000}, new double[]{0.90,0.90,0.91}), 1e-6);
+
+        assertTrue("Unchnaging values on one axis gives NaN", Double.isNaN(StatUtils.ComputePearsonCorrelation(new double[]{40000,40000,60000}, new double[]{0.90,0.90,0.90})));
 
         // Test List<Double> overload.
         assertEquals(1.0, StatUtils.ComputePearsonCorrelation(Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)}), Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)})));
+
         assertEquals(-1.0, StatUtils.ComputePearsonCorrelation(Arrays.asList(new Double[]{Double.valueOf(1),Double.valueOf(0)}), Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)})));
         }
 
@@ -73,9 +77,8 @@ public final class TestStatUtils extends TestCase
         try { StatUtils.computeFuelCorrelations(fuelinst1, 1); fail("should reject effectively-empty collection"); } catch(final IllegalArgumentException e) { /* expected */ }
 
         final HashMap<String, Float> m1i = new HashMap<String,Float>();
-        m1i.put("COAL", 0.91f);
-        m1i.put("CCGT", 0.36f);
         final HashMap<String, Integer> m1p = new HashMap<String,Integer>();
+        m1i.put("COAL", 0.91f);
         m1p.put("COAL", 40000); // COAL-powered GB in summer!
         fuelinst1.put(1L, new Tuple.Pair<Map<String,Float>,Map<String,Integer>>(m1i, m1p));
         final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r1 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
@@ -95,5 +98,9 @@ public final class TestStatUtils extends TestCase
         final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> r3 = StatUtils.computeFuelCorrelations(fuelinst1, 1);
         assertNotNull(r3);
         assertEquals("with two lower-intensity fuel covering extra demand correlation should be -1", -1f, r3.third.floatValue(), 1e-6);
+        assertEquals(2, r3.first.size());
+        assertEquals(2, r3.second.size());
+
+        System.out.println(r3);
         }
     }
