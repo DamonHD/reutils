@@ -105,8 +105,11 @@ public final class StatUtils
         final Map<String, List<Tuple.Pair<Integer, Integer>>> PairsFuelVsIntensity = new HashMap<String, List<Tuple.Pair<Integer, Integer>>>();
 
         // Iterate through the unique points in any order...
-        for(final long timestamp : fuelinst.keySet())
+        for(final Long timestamp : fuelinst.keySet())
             {
+            final Tuple.Pair<Map<String,Integer>, Map<String,Integer>> datum = fuelinst.get(timestamp);
+            if((null == datum) || (null == datum.first) || (null == datum.second)) { throw new IllegalArgumentException("null/missing data points"); }
+
 
             }
 
