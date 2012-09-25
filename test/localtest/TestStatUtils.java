@@ -53,4 +53,10 @@ public final class TestStatUtils extends TestCase
         assertEquals(1.0, StatUtils.ComputePearsonCorrelation(Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)}), Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)})));
         assertEquals(-1.0, StatUtils.ComputePearsonCorrelation(Arrays.asList(new Double[]{Double.valueOf(1),Double.valueOf(0)}), Arrays.asList(new Double[]{Double.valueOf(0),Double.valueOf(1)})));
         }
+
+    /**Test implementation of combo fuel correlation computation. */
+    public static void testComputeFuelCorrelations()
+        {
+        try { StatUtils.computeFuelCorrelations(null); fail("should reject null arg"); } catch(final IllegalArgumentException e) { /* expected */ }
+        }
     }
