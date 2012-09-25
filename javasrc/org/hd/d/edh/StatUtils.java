@@ -87,12 +87,12 @@ public final class StatUtils
         }
 
     /**Given map of (evenly-spaced) sample times to fuel MW and intensities, computes correlations between fuel, demand and intensity; never null.
-     *
-     * @param fuelinst
      * @return tuple of correlation of map of fuel MW to demand, map of fuel MW to grid intensity, and intensity to demand; immutable, non-null, not containing nulls
      */
     public Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> computeFuelCorrelations(final Map<Long, Tuple.Pair<Map<String,Integer>, Map<String,Integer>>> fuelinst)
         {
+        if(null == fuelinst) { throw new IllegalArgumentException(); }
+
         throw new RuntimeException("NOT IMPLEMENTED");
         }
     }
