@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +96,13 @@ public final class StatUtils
         if(null == fuelinst) { throw new IllegalArgumentException(); }
 
         // Demand vs intensity pairs.
-        final List<Tuple.Pair<Integer, Integer>> PairsDemandIntensity = new ArrayList<Tuple.Pair<Integer, Integer>>(fuelinst.size());
+        final List<Tuple.Pair<Integer, Integer>> PairsDemandVsIntensity = new ArrayList<Tuple.Pair<Integer, Integer>>(fuelinst.size());
+
+        // Fuel MW vs demand pairs.
+        final Map<String, List<Tuple.Pair<Integer, Integer>>> PairsFuelVsDemand = new HashMap<String, List<Tuple.Pair<Integer, Integer>>>();
+
+        // Fuel MW vs intensity pairs.
+        final Map<String, List<Tuple.Pair<Integer, Integer>>> PairsFuelVsIntensity = new HashMap<String, List<Tuple.Pair<Integer, Integer>>>();
 
         // Iterate through the unique points in any order...
         for(final long timestamp : fuelinst.keySet())
