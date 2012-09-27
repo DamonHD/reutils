@@ -616,6 +616,7 @@ public final class FUELINSTHistorical
             w.write("<p>Correlation of demand against grid intensity: ");
             w.format("%.4f", correlations.third);
             w.write(".</p>");
+            w.println();
 
             w.write("<p>Correlation of fuel use against demand (+ve implies that this fuel use corresponds to demand):");
             final SortedMap<String,Float> timely = new TreeMap<String, Float>(correlations.first);
@@ -637,6 +638,7 @@ public final class FUELINSTHistorical
 
 
             w.println("<h3>Generation Fuel Intensities Used</h3>");
+            w.println("<p>");
             final SortedMap<String,Float> fuelIntensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities());
             for(final String fuel : fuelIntensities.keySet())
                 {
