@@ -371,6 +371,7 @@ public final class FUELINSTHistorical
         final List<TimestampedNonNegInt> intensities = new ArrayList<TimestampedNonNegInt>(512 * files.size());
         // Also collect underlying generation figures to be able to compute correlations.
         final List<Tuple.Pair<Long, Map<String,Integer>>> genByFuel = new ArrayList<Tuple.Pair<Long, Map<String,Integer>>>(512 * files.size());
+        final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinstCorrGrist = new HashMap<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>>(512 * files.size());
         for(final File f : files)
             {
             final Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(f)));
@@ -443,7 +444,7 @@ public final class FUELINSTHistorical
                 }
             }
 
-        // Compute per-fuel correlations to grid intensity across whole data set.
+//        // Compute per-fuel correlations to grid intensity across whole data set.
         // First compute data to be correlated by fuel.
         // Note that since not all fuels appear at each available sample,
         // a separate record of matching grid intensities must be maintained for each fuel.
@@ -476,10 +477,12 @@ public final class FUELINSTHistorical
         for(final String fuel : corrRaw.keySet())
             {
             final Tuple.Pair<List<Double>,List<Double>> pair = corrRaw.get(fuel);
-            final float corr = (float) StatUtils.ComputePearsonCorrelation(pair.first, pair.second);
+            final float corr = (float) StatsUtils.ComputePearsonCorrelation(pair.first, pair.second);
             if(!Float.isNaN(corr) && !Float.isInfinite(corr))
                 { corrFuelToIntensity.put(fuel, corr); }
             }
+
+        //final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> correlations = StatsUtils.computeFuelCorrelations(fuelinstCorrGrist, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX);
 
 
         // Generate the HTML page...

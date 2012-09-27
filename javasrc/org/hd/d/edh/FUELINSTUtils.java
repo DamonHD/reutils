@@ -389,7 +389,7 @@ public final class FUELINSTUtils
                 // Do not attempt unless enough samples.
                 if(fuelMW.size() > 1)
                     {
-                    final float corr = (float) StatUtils.ComputePearsonCorrelation(gridIntensity, fuelMW);
+                    final float corr = (float) StatsUtils.ComputePearsonCorrelation(gridIntensity, fuelMW);
                     // Retain correlation only if sane / finite.
                     if(!Float.isNaN(corr) && !Float.isInfinite(corr))
                         { correlationIntensityToFuel.put(fuel, corr); }

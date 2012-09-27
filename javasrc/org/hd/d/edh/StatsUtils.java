@@ -44,10 +44,10 @@ import org.hd.d.edh.Tuple.Pair;
 
 /**Statistics utilities.
  */
-public final class StatUtils
+public final class StatsUtils
     {
     /**Prevent creation of an instance. */
-    private StatUtils() { }
+    private StatsUtils() { }
 
 
     /**Calculate Pearson's correlation' using a Collection<Tuple.Pair<Number, Number>>, ie unordered set of numeric pairs. */
@@ -112,7 +112,7 @@ public final class StatUtils
         return(result);
         }
 
-    /**Given map of (evenly-spaced) sample times to fuel MW and intensities, computes correlations between fuel, demand and intensity; never null.
+    /**Given map of (preferably evenly-spaced) sample times to fuel intensities and MW, computes correlations between fuel, demand and intensity; never null.
      * @param fuelinst  map from timestamp to pairs of maps of fuel to (float) intensity (tCO2/MWh) and to (int) MW generation; never null
      * @param minFuelTypesInMix  minimum number of fuel types in mix at each sample else ignore; non-negative
      * @return tuple of map of fuel MW correlation to demand, map of fuel MW correlation to grid intensity, and correlation of intensity to demand; immutable, non-null, not containing nulls
