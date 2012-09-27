@@ -179,7 +179,7 @@ public final class StatsUtils
             final List<Pair<Integer, Integer>> pairs = PairsFuelVsDemand.get(fuelName);
             if(pairs.size() < 1) { continue; }
             cfd.put(fuelName, (float) ComputePearsonCorrelation(pairs));
-            System.out.println("FuelVsDemand: "+fuelName+" " + pairs);
+//            System.out.println("FuelVsDemand: "+fuelName+" " + pairs);
             }
         final Map<String,Float> cfi = new HashMap<String,Float>();
         for(final String fuelName : PairsFuelVsIntensity.keySet())
@@ -187,7 +187,7 @@ public final class StatsUtils
             final List<Pair<Integer, Float>> pairs = PairsFuelVsIntensity.get(fuelName);
             if(pairs.size() < 1) { continue; }
             cfi.put(fuelName, (float) ComputePearsonCorrelation(pairs));
-            System.out.println("FuelVsIntensity: "+fuelName+" " + pairs);
+//            System.out.println("FuelVsIntensity: "+fuelName+" " + pairs);
             }
 
         return(new Tuple.Triple<Map<String,Float>, Map<String,Float>, Float>(Collections.unmodifiableMap(cfd), Collections.unmodifiableMap(cfi), cdi));

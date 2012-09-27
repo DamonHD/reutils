@@ -370,7 +370,6 @@ public final class FUELINSTHistorical
         final Set<String> fieldKeys = new HashSet<String>(Arrays.asList(new String[]{TIMESTAMP_FIELD,FUELTYPE_FIELD,FUELGEN_FIELD}));
         final List<TimestampedNonNegInt> intensities = new ArrayList<TimestampedNonNegInt>(512 * files.size());
         // Also collect underlying generation figures to be able to compute correlations.
-        final List<Tuple.Pair<Long, Map<String,Integer>>> genByFuel = new ArrayList<Tuple.Pair<Long, Map<String,Integer>>>(512 * files.size());
         final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
         final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinstCorrGrist = new HashMap<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>>(512 * files.size());
         for(final File f : files)
@@ -380,9 +379,6 @@ public final class FUELINSTHistorical
                 {
                 final List<Pair<Long, Map<String, Integer>>> l = msgsToTimestampedGenByFuel(DataUtils.extractTIBCOMessages(r, "BMRA.SYSTEM.FUELINST", fieldKeys), true);
                 intensities.addAll(timestampedGenByFuelToIntensity(l));
-
-                genByFuel.addAll(l);
-
                 for(final Pair<Long, Map<String, Integer>> entry : l)
                     { fuelinstCorrGrist.put(entry.first, new Tuple.Pair<Map<String,Float>, Map<String,Integer>>(configuredIntensities, entry.second)); }
                 }
@@ -449,45 +445,8 @@ public final class FUELINSTHistorical
                 }
             }
 
-//        // Compute per-fuel correlations to grid intensity across whole data set.
-        // First compute data to be correlated by fuel.
-        // Note that since not all fuels appear at each available sample,
-        // a separate record of matching grid intensities must be maintained for each fuel.
-        final Map<String, Tuple.Pair<List<Double>,List<Double>>> corrRaw = new HashMap<String, Tuple.Pair<List<Double>,List<Double>>>();
-        for(final Tuple.Pair<Long, Map<String,Integer>> e : genByFuel)
-            {
-            final List<TimestampedNonNegInt> tnni = timestampedGenByFuelToIntensity(Collections.singletonList(e));
-            // Skip if a valid intensity cannot be computed for this sample.
-            if(tnni.isEmpty()) { continue; }
-
-            final Double intensity = new Double(tnni.get(0).value);
-
-            for(final String fuel : e.second.keySet())
-                {
-                if(!corrRaw.containsKey(fuel))
-                    {
-                    // No entry yet for this fuel, so make it.
-                    final int listSize = genByFuel.size();
-                    corrRaw.put(fuel, new Tuple.Pair<List<Double>,List<Double>>(new ArrayList<Double>(listSize), new ArrayList<Double>(listSize)));
-                    }
-
-                // Append correlation data pair for this fuel.
-                final Pair<List<Double>, List<Double>> pair = corrRaw.get(fuel);
-                pair.first.add(intensity);
-                pair.second.add(e.second.get(fuel).doubleValue());
-                }
-            }
-        // Do the correlation computation.
-        final Map<String, Float> corrFuelToIntensity = new HashMap<String, Float>(corrRaw.size());
-        for(final String fuel : corrRaw.keySet())
-            {
-            final Tuple.Pair<List<Double>,List<Double>> pair = corrRaw.get(fuel);
-            final float corr = (float) StatsUtils.ComputePearsonCorrelation(pair.first, pair.second);
-            if(!Float.isNaN(corr) && !Float.isInfinite(corr))
-                { corrFuelToIntensity.put(fuel, corr); }
-            }
-
-        //final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> correlations = StatsUtils.computeFuelCorrelations(fuelinstCorrGrist, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX);
+        // Compute per-fuel correlations to grid intensity across whole data set.
+        final Tuple.Triple<Map<String,Float>, Map<String,Float>, Float> correlations = StatsUtils.computeFuelCorrelations(fuelinstCorrGrist, FUELINSTUtils.MIN_FUEL_TYPES_IN_MIX);
 
 
         // Generate the HTML page...
@@ -654,8 +613,21 @@ public final class FUELINSTHistorical
                 w.println("</table>");
                 }
 
+            w.write("<p>Correlation of demand against grid intensity: ");
+            w.format("%.4f", correlations.third);
+            w.write(".</p>");
+
+            w.write("<p>Correlation of fuel use against demand (+ve implies that this fuel use corresponds to demand):");
+            final SortedMap<String,Float> timely = new TreeMap<String, Float>(correlations.first);
+            for(final String fuel : timely.keySet())
+                {
+                w.format(" %s=%.4f", fuel, timely.get(fuel));
+                }
+            w.write(".</p>");
+            w.println();
+
             w.write("<p>Correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
-            final SortedMap<String,Float> goodness = new TreeMap<String, Float>(corrFuelToIntensity);
+            final SortedMap<String,Float> goodness = new TreeMap<String, Float>(correlations.second);
             for(final String fuel : goodness.keySet())
                 {
                 w.format(" %s=%.4f", fuel, goodness.get(fuel));
