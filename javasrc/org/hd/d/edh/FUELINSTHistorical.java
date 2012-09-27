@@ -371,6 +371,7 @@ public final class FUELINSTHistorical
         final List<TimestampedNonNegInt> intensities = new ArrayList<TimestampedNonNegInt>(512 * files.size());
         // Also collect underlying generation figures to be able to compute correlations.
         final List<Tuple.Pair<Long, Map<String,Integer>>> genByFuel = new ArrayList<Tuple.Pair<Long, Map<String,Integer>>>(512 * files.size());
+        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
         final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinstCorrGrist = new HashMap<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>>(512 * files.size());
         for(final File f : files)
             {
@@ -378,8 +379,12 @@ public final class FUELINSTHistorical
             try
                 {
                 final List<Pair<Long, Map<String, Integer>>> l = msgsToTimestampedGenByFuel(DataUtils.extractTIBCOMessages(r, "BMRA.SYSTEM.FUELINST", fieldKeys), true);
-                genByFuel.addAll(l);
                 intensities.addAll(timestampedGenByFuelToIntensity(l));
+
+                genByFuel.addAll(l);
+
+                for(final Pair<Long, Map<String, Integer>> entry : l)
+                    { fuelinstCorrGrist.put(entry.first, new Tuple.Pair<Map<String,Float>, Map<String,Integer>>(configuredIntensities, entry.second)); }
                 }
             finally { r.close(); /* Release resources. */ }
             }
