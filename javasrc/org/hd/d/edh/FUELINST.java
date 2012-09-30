@@ -160,7 +160,7 @@ public final class FUELINST
 
         /**Timestamp of latest 'current' sample; 0 if none. */
         public final long timestamp;
-        /**'Use by' time for this summary, after this the data may not be useable; 0 if none. */
+        /**'Use by' time for this summary, after this the data may not be useful; 0 if none. */
         public final long useByTime;
         /**Current/latest MW of generation covered by this summary; non-negative. */
         public final long currentMW;
