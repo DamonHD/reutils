@@ -41,7 +41,6 @@ import java.util.Map;
 import org.hd.d.edh.Tuple.Pair;
 
 
-
 /**Statistics utilities.
  */
 public final class StatsUtils
