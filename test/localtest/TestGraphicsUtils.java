@@ -34,11 +34,12 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.hd.d.edh.GraphicsUtils;
+import org.hd.d.edh.TrafficLight;
 
 /**Test stats routines. */
 public final class TestGraphicsUtils extends TestCase
     {
-    public static void testWriteSimpleIntensityIconPNG() throws Exception
+    public static void testSimpleIntensityIconPNG() throws Exception
         {
         try { GraphicsUtils.writeSimpleIntensityIconPNG(null, 0, null, 0); fail("should have rejected bogus arguments"); } catch(final IllegalArgumentException e) { /* expected */ }
 
@@ -53,10 +54,23 @@ public final class TestGraphicsUtils extends TestCase
             assertTrue(fIco.canRead());
             assertTrue(fIco.length() > 0);
 
-
+// TODO: test for content
 
 
             }
         finally { fbase.delete(); }
+        }
+
+    /**Simple test of writing RED icon to place we can look at it with browser/etc. */
+    public static void testSimpleIntensityIconPNGWrite() throws Exception
+        {
+        final File fbase = new File("_testRED");
+        final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, TrafficLight.RED, 555);
+        assertNotNull(suffix);
+        assertTrue(suffix.length() > 0);
+        final File fIco = new File(fbase.getPath() + suffix);
+        System.out.println(fIco.getCanonicalPath());
+        assertTrue(fIco.canRead());
+        assertTrue(fIco.length() > 0);
         }
     }
