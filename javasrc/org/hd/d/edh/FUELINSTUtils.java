@@ -686,7 +686,8 @@ public final class FUELINSTUtils
         // Update button(s)/icon(s).
         try
             {
-            if(BUTTON_BASE_DIR.isDirectory() && BUTTON_BASE_DIR.canWrite())
+            final File bd = new File(BUTTON_BASE_DIR);
+            if(bd.isDirectory() && bd.canWrite())
                 {
                 GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, summary.currentIntensity);
                 GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, summary.currentIntensity);
@@ -700,7 +701,7 @@ public final class FUELINSTUtils
     /**Base directory for embeddable intensity buttons/icons; not null.
      * Under 'out' directory of suitable vintage to get correct expiry.
      */
-    private static final File BUTTON_BASE_DIR = new File("out/hourly/button/");
+    private static final String BUTTON_BASE_DIR = "../out/hourly/button/";
 
     /**Generate the text of the status Tweet.
      * Public to allow testing that returned Tweets are always valid.

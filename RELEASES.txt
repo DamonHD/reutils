@@ -27,6 +27,7 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 
 *** STORE RESULTS AS COMPUTED ALONG WITH INPUT DATA/INTENSITIES TO ALLOW RECONSTRUCTION AS-IS IN FUTURE (once-per-day store for HH intervals for the whole day probably OK)
 
+*** Make button base dir configurable.
 
 
 SIGNIFICANT CHANGES SINCE LAST RELEASE
@@ -40,8 +41,20 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 
+
+
+
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20120930:
+    freezepoint name: V1.0.10
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.9
+    DHD20120930: Various small fixes for button handling.
+
 
 20120930:
     freezepoint name: V1.0.9

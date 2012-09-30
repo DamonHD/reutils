@@ -44,16 +44,17 @@ public final class TestGraphicsUtils extends TestCase
         {
         try { GraphicsUtils.writeSimpleIntensityIconPNG(null, 0, System.currentTimeMillis(), null, 0); fail("should have rejected bogus arguments"); } catch(final IllegalArgumentException e) { /* expected */ }
 
-        final File fbase = File.createTempFile("icon", null);
+        final File fbase = File.createTempFile("icon", null, new File("out"));
         try
             {
             // Generate the icon and test it for basic sanity...
-            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, System.currentTimeMillis(), null, 555);
+            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase.getPath(), GraphicsUtils.MIN_ICON_SIZE_PX, System.currentTimeMillis(), null, 555);
             assertNotNull(suffix);
             assertTrue(suffix.length() > 0);
             final File fIco = new File(fbase.getPath() + suffix);
             assertTrue(fIco.canRead());
             assertTrue(fIco.length() > 0);
+            fIco.delete();
 
 // TODO: test for content
 
@@ -65,13 +66,13 @@ public final class TestGraphicsUtils extends TestCase
     /**Simple test of writing RED icon to place we can look at it with browser/etc. */
     public static void testSimpleIntensityIconPNGWrite() throws Exception
         {
-        final File fbase = new File("out/_testRED");
+        final String fbase = "out/";
         for(final int size : new int[] { GraphicsUtils.MIN_ICON_SIZE_PX, 48, 64 } )
             {
             final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, size, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1500));
             assertNotNull(suffix);
             assertTrue(suffix.length() > 0);
-            final File fIco = new File(fbase.getPath() + suffix);
+            final File fIco = new File(fbase + suffix);
             System.out.println(fIco.getCanonicalPath());
             assertTrue(fIco.canRead());
             assertTrue(fIco.length() > 0);

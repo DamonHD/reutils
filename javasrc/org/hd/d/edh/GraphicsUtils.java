@@ -37,7 +37,6 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -80,7 +79,7 @@ public final class GraphicsUtils
      * @param currentIntensity  current grid intensity in gCO2/kWh (kgCO2/MWh); non-negative
      * @return URL-friendly pure-printable-ASCII (no-'/') extension to add to basename for where PNG is written (does not vary with status/intensity arguments); never null nor empty.
      */
-    public static String writeSimpleIntensityIconPNG(final File basename, final int sizePX, final long timestamp, final TrafficLight status, final int currentIntensity)
+    public static String writeSimpleIntensityIconPNG(final String basename, final int sizePX, final long timestamp, final TrafficLight status, final int currentIntensity)
         throws IOException
         {
         if(null == basename) { throw new IllegalArgumentException(); }
@@ -146,17 +145,9 @@ public final class GraphicsUtils
                 final float fontTSScaleFactor = Math.min(fitTSToWidth / (float) wTSTmp, fitTSToHeight / (float) hTSTmp);
                 final Font fontTS = fontTmp.deriveFont(sTmp * fontTSScaleFactor);
                 final Rectangle2D boundsTS = fontTS.getStringBounds(ts, fc);
-//                final double hTS = boundsTS.getHeight();
-//                final double wTS = boundsTS.getWidth();
-//                final float sTS = fontTS.getSize2D();
                 g.setFont(fontTS);
                 g.setColor(Color.GRAY);
                 g.drawString(ts, ICON_BORDER_PX, ((int)(- boundsTS.getY() - boundsMain.getY())) + (2*ICON_BORDER_PX));
-
-            // TODO
-
-
-
                 }
             }
         finally { g.dispose(); }
@@ -165,7 +156,7 @@ public final class GraphicsUtils
         ImageIO.write(buffer, "png", baos);
 
         final String suffix = "intico1-" + sizePX + ".png";
-        DataUtils.replacePublishedFile(basename.getPath() + suffix, baos.toByteArray());
+        DataUtils.replacePublishedFile(basename + suffix, baos.toByteArray());
 
         return(suffix);
         }
