@@ -80,12 +80,12 @@ public final class GraphicsUtils
         if(currentIntensity < 0) { throw new IllegalArgumentException(); }
 
         // Get font set up...
+        final Font fontTmp = Font.decode(null); // Get a system default font...
         final BufferedImage bTmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
         final Graphics2D gTmp = bTmp.createGraphics();
         try
             {
             gTmp.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            final Font font = Font.decode(null); // Get a system default font...
             }
         finally { gTmp.dispose(); }
 
