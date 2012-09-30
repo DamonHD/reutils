@@ -61,8 +61,6 @@ import org.hd.d.edh.FUELINST.CurrentSummary;
  */
 public final class FUELINSTUtils
     {
-    private static final File BUTTON_BASE_DIR = new File("out/hourly/button/");
-
     private FUELINSTUtils() { /* Prevent creation of an instance. */ }
 
     /**Longest edge of graphics building block components in pixels for HTML generation; strictly positive. */
@@ -694,9 +692,15 @@ public final class FUELINSTUtils
                 GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, summary.currentIntensity);
                 GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, summary.currentIntensity);
                 }
+            else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
             }
         catch(final IOException e) { e.printStackTrace(); }
         }
+
+    /**Base directory for embeddable intensity buttons/icons; not null.
+     * Under 'out' directory of suitable vintage to get correct expiry.
+     */
+    private static final File BUTTON_BASE_DIR = new File("out/hourly/button/");
 
     /**Generate the text of the status Tweet.
      * Public to allow testing that returned Tweets are always valid.
