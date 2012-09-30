@@ -30,7 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -77,8 +79,19 @@ public final class GraphicsUtils
         if(sizePX < MIN_ICON_SIZE_PX) { throw new IllegalArgumentException(); }
         if(currentIntensity < 0) { throw new IllegalArgumentException(); }
 
+        // Get font set up...
+        final BufferedImage bTmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+        final Graphics2D gTmp = bTmp.createGraphics();
+        try
+            {
+            gTmp.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            final Font font = Font.decode(null); // Get a system default font...
+            }
+        finally { gTmp.dispose(); }
+
         final BufferedImage buffer = new BufferedImage(sizePX, sizePX, BufferedImage.TYPE_INT_RGB);
         final Graphics2D g = buffer.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         try
             {
             Color bgColour = TL_UNKNOWN_ICON_BG;
