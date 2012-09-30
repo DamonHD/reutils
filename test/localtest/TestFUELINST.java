@@ -102,8 +102,7 @@ public final class TestFUELINST extends TestCase
 //        finally { sampleFile1.close(); }
         }
 
-    /**Test that all possible grid status Tweets are legal with the current property set.
-     */
+    /**Test that all possible grid status Tweets are legal with the current property set. */
     public static void testTweetValidity()
         {
         for(final boolean isDataStale : new boolean[]{ true, false } )
