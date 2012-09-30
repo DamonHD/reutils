@@ -42,13 +42,13 @@ public final class TestGraphicsUtils extends TestCase
     {
     public static void testSimpleIntensityIconPNG() throws Exception
         {
-        try { GraphicsUtils.writeSimpleIntensityIconPNG(null, 0, null, 0); fail("should have rejected bogus arguments"); } catch(final IllegalArgumentException e) { /* expected */ }
+        try { GraphicsUtils.writeSimpleIntensityIconPNG(null, 0, System.currentTimeMillis(), null, 0); fail("should have rejected bogus arguments"); } catch(final IllegalArgumentException e) { /* expected */ }
 
         final File fbase = File.createTempFile("icon", null);
         try
             {
             // Generate the icon and test it for basic sanity...
-            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, null, 555);
+            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, System.currentTimeMillis(), null, 555);
             assertNotNull(suffix);
             assertTrue(suffix.length() > 0);
             final File fIco = new File(fbase.getPath() + suffix);
@@ -66,7 +66,7 @@ public final class TestGraphicsUtils extends TestCase
     public static void testSimpleIntensityIconPNGWrite() throws Exception
         {
         final File fbase = new File("_testRED");
-        final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, TrafficLight.RED, rnd.nextInt(1500));
+        final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1500));
         assertNotNull(suffix);
         assertTrue(suffix.length() > 0);
         final File fIco = new File(fbase.getPath() + suffix);

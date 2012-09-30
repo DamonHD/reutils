@@ -92,6 +92,11 @@ public final class FUELINSTUtils
      */
     public static final String CSVTIMESTAMP_FORMAT = "yyyyMMddHHmmss";
 
+    /**SimpleDateFormat pattern to generate/parse compact HH:mm timestamp down to seconds (all assumed GMT/UTC); not null.
+     * Note that SimpleDateFormat is not immutable nor thread-safe.
+     */
+    public static final String HHMMTIMESTAMP_FORMAT = "HH:mm";
+
     /**GMT TimeZone; never null.
      * Only package-visible because it may be mutable though we never attempt to mutate it.
      * <p>
@@ -810,24 +815,34 @@ public final class FUELINSTUtils
         }
 
 
-    /**Get a parser for the BM timestamps in at least FUELINST data; never null.
+    /**Get a format for the BM timestamps in at least FUELINST data; never null.
      * A returned instance is not safe to share between threads.
      */
     public static SimpleDateFormat getCSVTimestampParser()
         {
         final SimpleDateFormat sDF = new SimpleDateFormat(FUELINSTUtils.CSVTIMESTAMP_FORMAT);
-        sDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All BM timestamps are GMT/UTC.
-        return sDF;
+        sDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All bmreports timestamps are GMT/UTC.
+        return(sDF);
         }
 
-    /**Get a parser for the BM timestamps in at least FUELINST data; never null.
+    /**Get a format for the BM timestamps in at least FUELINST data; never null.
      * A returned instance is not safe to share between threads.
      */
     public static SimpleDateFormat getTIBCOTimestampParser()
         {
         final SimpleDateFormat sDF = new SimpleDateFormat(FUELINSTUtils.TIBCOTIMESTAMP_FORMAT);
         sDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
-        return sDF;
+        return(sDF);
+        }
+
+    /**Get a format compact (HH:MM) timestamps ; never null.
+     * A returned instance is not safe to share between threads.
+     */
+    public static SimpleDateFormat getHHMMTimestampParser()
+        {
+        final SimpleDateFormat sDF = new SimpleDateFormat(FUELINSTUtils.HHMMTIMESTAMP_FORMAT);
+        sDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+        return(sDF);
         }
 
     /**Update (atomically if possible) the HTML traffic-light page. */

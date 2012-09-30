@@ -39,6 +39,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 
@@ -141,6 +143,10 @@ public final class GraphicsUtils
             // If a timestamp is supplied, squeeze it into the display.
             if(0 != timestamp)
                 {
+                final SimpleDateFormat fmt = FUELINSTUtils.getHHMMTimestampParser();
+                final String ts = "@" + fmt.format(new Date(timestamp)) + "Z";
+                System.out.println(ts);
+
 
 
             // TODO
