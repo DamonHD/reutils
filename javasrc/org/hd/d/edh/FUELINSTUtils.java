@@ -61,6 +61,8 @@ import org.hd.d.edh.FUELINST.CurrentSummary;
  */
 public final class FUELINSTUtils
     {
+    private static final File BUTTON_BASE_DIR = new File("out/hourly/button/");
+
     private FUELINSTUtils() { /* Prevent creation of an instance. */ }
 
     /**Longest edge of graphics building block components in pixels for HTML generation; strictly positive. */
@@ -627,14 +629,16 @@ public final class FUELINSTUtils
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
 
             // Update the HTML page.
-            try {
+            try
+                {
                 FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary, isDataStale,
                     hourOfDayHistorical, status, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
 
             // Update the (mobile-friendly) XHTML page.
-            try {
+            try
+                {
                 final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
                     (outputHTMLFileName + ".xml");
                 if(null != outputXMLFileName)
@@ -646,7 +650,8 @@ public final class FUELINSTUtils
             catch(final IOException e) { e.printStackTrace(); }
 
             // Update the (mobile-friendly) XHTML page.
-            try {
+            try
+                {
                 final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
                     (outputHTMLFileName + ".xhtml");
                 if(null != outputXHTMLFileName)
@@ -679,6 +684,18 @@ public final class FUELINSTUtils
                 }
             catch(final IOException e) { e.printStackTrace(); }
             }
+
+        // Update button(s)/icon(s).
+        try
+            {
+            if(BUTTON_BASE_DIR.isDirectory() && BUTTON_BASE_DIR.canWrite())
+                {
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, summary.currentIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, summary.currentIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, summary.currentIntensity);
+                }
+            }
+        catch(final IOException e) { e.printStackTrace(); }
         }
 
     /**Generate the text of the status Tweet.
@@ -755,7 +772,7 @@ public final class FUELINSTUtils
             if(!key.startsWith(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
             // TODO: verify that fuel name is all upper-case ASCII and of reasonable length, else reject.
             final String fuelname = key.substring(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX.length());
-            // Reject non-parsable and illegal (eg -ve) values.
+            // Reject non-parseable and illegal (eg -ve) values.
             final Float intensity;
             try { intensity = new Float(rawProperties.get(key)); }
             catch(final NumberFormatException e)

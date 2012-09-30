@@ -65,14 +65,17 @@ public final class TestGraphicsUtils extends TestCase
     /**Simple test of writing RED icon to place we can look at it with browser/etc. */
     public static void testSimpleIntensityIconPNGWrite() throws Exception
         {
-        final File fbase = new File("_testRED");
-        final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1500));
-        assertNotNull(suffix);
-        assertTrue(suffix.length() > 0);
-        final File fIco = new File(fbase.getPath() + suffix);
-        System.out.println(fIco.getCanonicalPath());
-        assertTrue(fIco.canRead());
-        assertTrue(fIco.length() > 0);
+        final File fbase = new File("out/_testRED");
+        for(int size : new int[] { GraphicsUtils.MIN_ICON_SIZE_PX, 48, 64 } )
+            {
+            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, size, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1500));
+            assertNotNull(suffix);
+            assertTrue(suffix.length() > 0);
+            final File fIco = new File(fbase.getPath() + suffix);
+            System.out.println(fIco.getCanonicalPath());
+            assertTrue(fIco.canRead());
+            assertTrue(fIco.length() > 0);
+            }
         }
 
 
