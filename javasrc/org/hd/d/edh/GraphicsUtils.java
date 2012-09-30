@@ -33,6 +33,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,6 +52,9 @@ public final class GraphicsUtils
 
     /**Minimum simple icon size (both dimensions) in pixels; strictly positive. */
     public static final int MIN_ICON_SIZE_PX = 32;
+
+    /**Target icon border (around text) in pixels; strictly positive. */
+    private static final int ICON_BORDER_PX = 2;
 
     /**Background colour for unknown traffic-light status; non-null. */
     public static final Color TL_UNKNOWN_ICON_BG = Color.WHITE;
@@ -79,15 +84,18 @@ public final class GraphicsUtils
         if(sizePX < MIN_ICON_SIZE_PX) { throw new IllegalArgumentException(); }
         if(currentIntensity < 0) { throw new IllegalArgumentException(); }
 
+        // Basic text to show in the icon.
+        final String basicIconText = String.valueOf(currentIntensity);
+
         // Get font set up...
         final Font fontTmp = Font.decode(null); // Get a system default font...
-        final BufferedImage bTmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
-        final Graphics2D gTmp = bTmp.createGraphics();
-        try
-            {
-            gTmp.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            }
-        finally { gTmp.dispose(); }
+//        final BufferedImage bTmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+//        final Graphics2D gTmp = bTmp.createGraphics();
+//        try
+//            {
+//            gTmp.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//            }
+//        finally { gTmp.dispose(); }
 
         final BufferedImage buffer = new BufferedImage(sizePX, sizePX, BufferedImage.TYPE_INT_RGB);
         final Graphics2D g = buffer.createGraphics();
@@ -107,7 +115,18 @@ public final class GraphicsUtils
             g.setColor(bgColour);
             g.fillRect(0, 0, sizePX, sizePX);
 
+            final FontRenderContext fc = g.getFontRenderContext();
+            final Rectangle2D boundsTmp = fontTmp.getStringBounds(basicIconText, fc);
+            final double wTmp = boundsTmp.getWidth();
+            final double hTmp = boundsTmp.getHeight();
+            final float sTmp = fontTmp.getSize2D();
+            System.out.println("initial width and height with font size "+sTmp+": " + wTmp + ", " + hTmp);
+
+
             // TODO
+
+
+
 
             }
         finally { g.dispose(); }
