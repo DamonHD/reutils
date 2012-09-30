@@ -91,14 +91,7 @@ public final class GraphicsUtils
         final String basicIconText = String.valueOf(currentIntensity);
 
         // Get font set up...
-        final Font fontTmp = Font.decode(null); // Get a system default font...
-//        final BufferedImage bTmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
-//        final Graphics2D gTmp = bTmp.createGraphics();
-//        try
-//            {
-//            gTmp.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//            }
-//        finally { gTmp.dispose(); }
+        final Font fontTmp = Font.decode(null); // Use system default font...
 
         final BufferedImage buffer = new BufferedImage(sizePX, sizePX, BufferedImage.TYPE_INT_RGB);
         final Graphics2D g = buffer.createGraphics();
@@ -128,26 +121,37 @@ public final class GraphicsUtils
             final int fitToHeight = ((2*sizePX)/3) - (2*ICON_BORDER_PX); // Allow text to take 2/3rds of height.
             assert(fitToWidth > 0);
             assert(fitToHeight > 0);
-            System.out.println("initial width and height with font size "+sTmp+": " + wTmp + ", " + hTmp);
+//            System.out.println("initial width and height with font size "+sTmp+": " + wTmp + ", " + hTmp);
             final float fontMainScaleFactor = Math.min(fitToWidth / (float) wTmp, fitToHeight / (float) hTmp);
             final Font fontMain = fontTmp.deriveFont(sTmp * fontMainScaleFactor);
             final Rectangle2D boundsMain = fontMain.getStringBounds(basicIconText, fc);
-            final double wMain = boundsMain.getWidth();
             final double hMain = boundsMain.getHeight();
-            final float sMain = fontMain.getSize2D();
-            System.out.println("scaled ("+fontMainScaleFactor+") width and height with font size "+sMain+": " + wMain + ", " + hMain);
+//            final double wMain = boundsMain.getWidth();
+//            final float sMain = fontMain.getSize2D();
+//            System.out.println("scaled ("+fontMainScaleFactor+") width and height with font size "+sMain+": " + wMain + ", " + hMain);
             g.setFont(fontMain);
             g.setColor(Color.BLACK);
             g.drawString(basicIconText, ICON_BORDER_PX, ((int) - boundsMain.getY()) + ICON_BORDER_PX);
 
-            // If a timestamp is supplied, squeeze it into the display.
+            // If a timestamp is supplied, squeeze it into the display below the intensity.
             if(0 != timestamp)
                 {
                 final SimpleDateFormat fmt = FUELINSTUtils.getHHMMTimestampParser();
                 final String ts = "@" + fmt.format(new Date(timestamp)) + "Z";
-                System.out.println(ts);
-
-
+                final Rectangle2D boundsTSTmp = fontTmp.getStringBounds(ts, fc);
+                final double wTSTmp = boundsTSTmp.getWidth();
+                final double hTSTmp = boundsTSTmp.getHeight();
+                final int fitTSToWidth = sizePX - (2*ICON_BORDER_PX);
+                final int fitTSToHeight = sizePX - (int)(hMain+0.5) - ICON_BORDER_PX; // Allow an extra border.
+                final float fontTSScaleFactor = Math.min(fitTSToWidth / (float) wTSTmp, fitTSToHeight / (float) hTSTmp);
+                final Font fontTS = fontTmp.deriveFont(sTmp * fontTSScaleFactor);
+                final Rectangle2D boundsTS = fontTS.getStringBounds(ts, fc);
+//                final double hTS = boundsTS.getHeight();
+//                final double wTS = boundsTS.getWidth();
+//                final float sTS = fontTS.getSize2D();
+                g.setFont(fontTS);
+                g.setColor(Color.GRAY);
+                g.drawString(ts, ICON_BORDER_PX, ((int)(- boundsTS.getY() - boundsMain.getY())) + (2*ICON_BORDER_PX));
 
             // TODO
 
