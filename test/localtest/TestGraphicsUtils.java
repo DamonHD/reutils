@@ -42,20 +42,21 @@ public final class TestGraphicsUtils extends TestCase
         {
         try { GraphicsUtils.writeSimpleIntensityIconPNG(null, 0, null, 0); fail("should have rejected bogus arguments"); } catch(final IllegalArgumentException e) { /* expected */ }
 
-        final File f1 = File.createTempFile("icon", null);
+        final File fbase = File.createTempFile("icon", null);
         try
             {
-            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(f1, GraphicsUtils.MIN_ICON_SIZE_PX, null, 555);
+            // Generate the icon and test it for basic sanity...
+            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, null, 555);
             assertNotNull(suffix);
             assertTrue(suffix.length() > 0);
-
-
-
+            final File fIco = new File(fbase.getPath() + suffix);
+            assertTrue(fIco.canRead());
+            assertTrue(fIco.length() > 0);
 
 
 
 
             }
-        finally { f1.delete(); }
+        finally { fbase.delete(); }
         }
     }

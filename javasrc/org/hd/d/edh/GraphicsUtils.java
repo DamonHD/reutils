@@ -30,9 +30,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 
 /**Graphics utilities, eg generating Web-friendly output icons/buttons/etc.
@@ -58,25 +62,29 @@ public final class GraphicsUtils
      * @return URL-friendly pure-printable-ASCII (no-'/') extension to add to basename for where PNG is written (does not vary with status/intensity arguments); never null nor empty.
      */
     public static String writeSimpleIntensityIconPNG(final File basename, final int sizePX, final TrafficLight status, final int currentIntensity)
+        throws IOException
         {
         if(null == basename) { throw new IllegalArgumentException(); }
         if(sizePX < MIN_ICON_SIZE_PX) { throw new IllegalArgumentException(); }
         if(currentIntensity < 0) { throw new IllegalArgumentException(); }
 
-        final String suffix = "intico1-" + sizePX + ".png";
-
         final BufferedImage buffer = new BufferedImage(sizePX, sizePX, BufferedImage.TYPE_INT_RGB);
-        final Graphics g = buffer.createGraphics();
+        final Graphics2D g = buffer.createGraphics();
         try
             {
             g.setColor(Color.WHITE);
             g.fillRect(0,0,sizePX,sizePX);
+
+            // TODO
+
             }
         finally { g.dispose(); }
 
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(buffer, "png", baos);
 
-        // TODO
-
+        final String suffix = "intico1-" + sizePX + ".png";
+        DataUtils.replacePublishedFile(basename.getPath() + suffix, baos.toByteArray());
 
         return(suffix);
         }
