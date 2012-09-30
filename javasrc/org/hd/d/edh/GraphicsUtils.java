@@ -73,11 +73,12 @@ public final class GraphicsUtils
      *
      * @param basename  base path including file name stub at which icon is to be written; never null
      * @param sizePX  icon output size (each side) in pixels; strictly positive and no less than MIN_ICON_SIZE_PX
+     * @param timestamp  timestamp of underlying data, or 0 if none
      * @param status  traffic-light status; null for unknown
      * @param currentIntensity  current grid intensity in gCO2/kWh (kgCO2/MWh); non-negative
      * @return URL-friendly pure-printable-ASCII (no-'/') extension to add to basename for where PNG is written (does not vary with status/intensity arguments); never null nor empty.
      */
-    public static String writeSimpleIntensityIconPNG(final File basename, final int sizePX, final TrafficLight status, final int currentIntensity)
+    public static String writeSimpleIntensityIconPNG(final File basename, final int sizePX, final long timestamp, final TrafficLight status, final int currentIntensity)
         throws IOException
         {
         if(null == basename) { throw new IllegalArgumentException(); }
@@ -115,15 +116,18 @@ public final class GraphicsUtils
             g.setColor(bgColour);
             g.fillRect(0, 0, sizePX, sizePX);
 
+            // Size the main intensity number text to fit the icon (width).
             final FontRenderContext fc = g.getFontRenderContext();
             final Rectangle2D boundsTmp = fontTmp.getStringBounds(basicIconText, fc);
             final double wTmp = boundsTmp.getWidth();
             final double hTmp = boundsTmp.getHeight();
             final float sTmp = fontTmp.getSize2D();
             final int fitToWidth = sizePX - (2*ICON_BORDER_PX);
+            final int fitToHeight = ((2*sizePX)/3) - (2*ICON_BORDER_PX); // Allow text to take 2/3rds of height.
             assert(fitToWidth > 0);
+            assert(fitToHeight > 0);
             System.out.println("initial width and height with font size "+sTmp+": " + wTmp + ", " + hTmp);
-            final float fontMainScaleFactor = fitToWidth / (float) wTmp;
+            final float fontMainScaleFactor = Math.min(fitToWidth / (float) wTmp, fitToHeight / (float) hTmp);
             final Font fontMain = fontTmp.deriveFont(sTmp * fontMainScaleFactor);
             final Rectangle2D boundsMain = fontMain.getStringBounds(basicIconText, fc);
             final double wMain = boundsMain.getWidth();
@@ -134,12 +138,16 @@ public final class GraphicsUtils
             g.setColor(Color.BLACK);
             g.drawString(basicIconText, ICON_BORDER_PX, ((int) - boundsMain.getY()) + ICON_BORDER_PX);
 
+            // If a timestamp is supplied, squeeze it into the display.
+            if(0 != timestamp)
+                {
+
 
             // TODO
 
 
 
-
+                }
             }
         finally { g.dispose(); }
 
