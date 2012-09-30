@@ -32,9 +32,6 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-    DHD20120930: Computing first intensity button/icon for embedding.
-    DHD20120928: Computing historical correlation between fuel type MW and overall grid demand (and grid intensity vs demand).
-    DHD20120918: Computing historical correlation between fuel type MW and overall grid intensity over entire data set.
 
 
 
@@ -45,6 +42,17 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20120930:
+    freezepoint name: V1.0.9
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.8
+    DHD20120930: Computing first intensity button/icon for embedding.
+    DHD20120928: Computing historical correlation between fuel type MW and overall grid demand (and grid intensity vs demand).
+    DHD20120918: Computing historical correlation between fuel type MW and overall grid intensity over entire data set.
+
 
 20120918:
     freezepoint name: V1.0.8
