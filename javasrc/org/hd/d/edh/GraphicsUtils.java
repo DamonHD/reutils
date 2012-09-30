@@ -72,7 +72,17 @@ public final class GraphicsUtils
         final Graphics2D g = buffer.createGraphics();
         try
             {
-            g.setColor(Color.WHITE);
+            Color bgColour = Color.WHITE;
+            if(null != status)
+                {
+                switch(status)
+                    {
+                    case RED: bgColour = new Color(0xffcccc); break;
+                    case GREEN: bgColour = new Color(0xccffcc); break;
+                    case YELLOW: bgColour = new Color(0xffffcc); break;
+                    }
+                }
+            g.setColor(bgColour);
             g.fillRect(0,0,sizePX,sizePX);
 
             // TODO
