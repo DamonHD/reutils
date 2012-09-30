@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package localtest;
 
 import java.io.File;
+import java.util.Random;
 
 import junit.framework.TestCase;
 
@@ -65,7 +66,7 @@ public final class TestGraphicsUtils extends TestCase
     public static void testSimpleIntensityIconPNGWrite() throws Exception
         {
         final File fbase = new File("_testRED");
-        final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, TrafficLight.RED, 555);
+        final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, GraphicsUtils.MIN_ICON_SIZE_PX, TrafficLight.RED, rnd.nextInt(1500));
         assertNotNull(suffix);
         assertTrue(suffix.length() > 0);
         final File fIco = new File(fbase.getPath() + suffix);
@@ -73,4 +74,12 @@ public final class TestGraphicsUtils extends TestCase
         assertTrue(fIco.canRead());
         assertTrue(fIco.length() > 0);
         }
+
+
+
+
+
+
+    /**Private source of OK pseudo-random numbers. */
+    private static Random rnd = new Random();
     }
