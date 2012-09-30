@@ -33,6 +33,7 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
+    DHD20120930: Attempting to ensure button/icon shows same figure as HTML page.
 
 
 

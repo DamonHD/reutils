@@ -605,11 +605,11 @@ public final class FUELINSTUtils
         // Dump a summary of the current status re fuel.
         System.out.println(summary);
 
+        // Is the data stale?
+        final boolean isDataStale = summary.useByTime < startTime;
+
         if(outputHTMLFileName != null)
             {
-            // Is the data stale?
-            final boolean isDataStale = summary.useByTime < startTime;
-
             // Status to use to drive traffic-light measure.
             // If the data is current then use the latest data point,
             // else extract a suitable historical value to use in its place.
@@ -683,20 +683,20 @@ public final class FUELINSTUtils
             catch(final IOException e) { e.printStackTrace(); }
             }
 
-        // Update button(s)/icon(s).
-        try
-            {
-            final File bd = new File(BUTTON_BASE_DIR);
-            if(bd.isDirectory() && bd.canWrite())
+            // Update button(s)/icon(s).
+            try
                 {
-                final int retailIntensity = (int) (summary.currentIntensity * (1+summary.totalGridLosses));
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
+                final File bd = new File(BUTTON_BASE_DIR);
+                if(bd.isDirectory() && bd.canWrite())
+                    {
+                    final int retailIntensity = Math.round((isDataStale ? summary.histAveIntensity : summary.currentIntensity) * (1 + summary.totalGridLosses));
+                    GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
+                    GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
+                    GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
+                    }
+                else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
                 }
-            else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
-            }
-        catch(final IOException e) { e.printStackTrace(); }
+            catch(final IOException e) { e.printStackTrace(); }
         }
 
     /**Base directory for embeddable intensity buttons/icons; not null.
