@@ -66,7 +66,7 @@ public final class TestGraphicsUtils extends TestCase
     public static void testSimpleIntensityIconPNGWrite() throws Exception
         {
         final File fbase = new File("out/_testRED");
-        for(int size : new int[] { GraphicsUtils.MIN_ICON_SIZE_PX, 48, 64 } )
+        for(final int size : new int[] { GraphicsUtils.MIN_ICON_SIZE_PX, 48, 64 } )
             {
             final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, size, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1500));
             assertNotNull(suffix);
