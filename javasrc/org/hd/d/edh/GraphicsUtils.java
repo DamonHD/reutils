@@ -29,6 +29,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
 
 /**Graphics utilities, eg generating Web-friendly output icons/buttons/etc.
  */
@@ -47,17 +52,32 @@ public final class GraphicsUtils
      * but this routine will attempt to behave gracefully for values &ge;1000.
      *
      * @param basename  base path including file name stub at which icon is to be written; never null
-     * @param status  traffic-light status; null for unknown
      * @param sizePX  icon output size (each side) in pixels; strictly positive and no less than MIN_ICON_SIZE_PX
+     * @param status  traffic-light status; null for unknown
      * @param currentIntensity  current grid intensity in gCO2/kWh (kgCO2/MWh); non-negative
-     * @return extension to add to basename for where PNG is written (does not vary with input arguments); never null nor empty.
+     * @return URL-friendly pure-printable-ASCII (no-'/') extension to add to basename for where PNG is written (does not vary with status/intensity arguments); never null nor empty.
      */
-    public static String writeSimpleIntensityIconPNG(final String basename, final int sizePX, final TrafficLight status, final int currentIntensity)
+    public static String writeSimpleIntensityIconPNG(final File basename, final int sizePX, final TrafficLight status, final int currentIntensity)
         {
         if(null == basename) { throw new IllegalArgumentException(); }
         if(sizePX < MIN_ICON_SIZE_PX) { throw new IllegalArgumentException(); }
         if(currentIntensity < 0) { throw new IllegalArgumentException(); }
 
-        throw new RuntimeException("NOT IMPLEMENTED");
+        final String suffix = "intico1-" + sizePX + ".png";
+
+        final BufferedImage buffer = new BufferedImage(sizePX, sizePX, BufferedImage.TYPE_INT_RGB);
+        final Graphics g = buffer.createGraphics();
+        try
+            {
+            g.setColor(Color.WHITE);
+            g.fillRect(0,0,sizePX,sizePX);
+            }
+        finally { g.dispose(); }
+
+
+        // TODO
+
+
+        return(suffix);
         }
     }

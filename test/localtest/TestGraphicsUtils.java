@@ -29,6 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
+import java.io.File;
+
 import junit.framework.TestCase;
 
 import org.hd.d.edh.GraphicsUtils;
@@ -36,8 +38,24 @@ import org.hd.d.edh.GraphicsUtils;
 /**Test stats routines. */
 public final class TestGraphicsUtils extends TestCase
     {
-    public static void testWriteSimpleIntensityIconPNG()
+    public static void testWriteSimpleIntensityIconPNG() throws Exception
         {
         try { GraphicsUtils.writeSimpleIntensityIconPNG(null, 0, null, 0); fail("should have rejected bogus arguments"); } catch(final IllegalArgumentException e) { /* expected */ }
+
+        final File f1 = File.createTempFile("icon", null);
+        try
+            {
+            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(f1, GraphicsUtils.MIN_ICON_SIZE_PX, null, 555);
+            assertNotNull(suffix);
+            assertTrue(suffix.length() > 0);
+
+
+
+
+
+
+
+            }
+        finally { f1.delete(); }
         }
     }
