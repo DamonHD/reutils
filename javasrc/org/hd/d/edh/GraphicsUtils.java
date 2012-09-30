@@ -37,16 +37,20 @@ public final class GraphicsUtils
     /**Prevent creation of an instance. */
     private GraphicsUtils() { }
 
+    /**Minimum simple icon size (both dimensions) in pixels; strictly positive. */
+    public static final int MIN_ICON_SIZE_PX = 32;
+
     /**Write a simple PNG icon containing the current intensity and with the current traffic-light colour; never null.
      * The current intensity is usually expected to be (well) within the range [0,1000],
-     * but this routine will attempt not to behave gracefully for &ge;1000 values.
+     * but this routine will attempt not to behave gracefully for values &ge;1000.
      *
      * @param basename  base path including file name stub at which icon is to be written; never null
      * @param status  traffic-light status; null for unknown
+     * @param sizePX  icon output size (each side) in pixels; strictly positive and no less than MIN_ICON_SIZE_PX
      * @param currentIntensity  current grid intensity in gCO2/kWh (kgCO2/MWh); non-negative
      * @return extension to add to basename for where PNG is written (does not vary with input arguments); never null nor empty.
      */
-    public static String writeSimplePNGIcon(final String basename, final TrafficLight status, final int currentIntensity)
+    public static String writeSimplePNGIcon(final String basename, final int sizePX, final TrafficLight status, final int currentIntensity)
         {
         if(null == basename) { throw new IllegalArgumentException(); }
         if(currentIntensity < 0) { throw new IllegalArgumentException(); }
