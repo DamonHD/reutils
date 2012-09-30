@@ -40,7 +40,7 @@ import org.hd.d.edh.StatsUtils;
 import org.hd.d.edh.Tuple;
 
 /**Test stats routines. */
-public final class TestStatUtils extends TestCase
+public final class TestStatsUtils extends TestCase
     {
     /**Test implementation of Pearson correlation. */
     public static void testComputePearsonCorrelation()
