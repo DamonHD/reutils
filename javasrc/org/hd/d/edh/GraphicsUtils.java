@@ -132,7 +132,7 @@ public final class GraphicsUtils
             System.out.println("scaled ("+fontMainScaleFactor+") width and height with font size "+sMain+": " + wMain + ", " + hMain);
             g.setFont(fontMain);
             g.setColor(Color.BLACK);
-            g.drawString(basicIconText, ICON_BORDER_PX, (int) - hMain - ICON_BORDER_PX);
+            g.drawString(basicIconText, ICON_BORDER_PX, ((int) - boundsMain.getY()) + ICON_BORDER_PX);
 
 
             // TODO
