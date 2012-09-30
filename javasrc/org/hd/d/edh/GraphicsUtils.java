@@ -120,7 +120,17 @@ public final class GraphicsUtils
             final double wTmp = boundsTmp.getWidth();
             final double hTmp = boundsTmp.getHeight();
             final float sTmp = fontTmp.getSize2D();
+            final int fitToWidth = sizePX - (2*ICON_BORDER_PX);
+            assert(fitToWidth > 0);
             System.out.println("initial width and height with font size "+sTmp+": " + wTmp + ", " + hTmp);
+            final float fontMainScaleFactor = fitToWidth / (float) wTmp;
+            final Font fontMain = fontTmp.deriveFont(sTmp * fontMainScaleFactor);
+            final Rectangle2D boundsMain = fontMain.getStringBounds(basicIconText, fc);
+            final double wMain = boundsMain.getWidth();
+            final double hMain = boundsMain.getHeight();
+            final float sMain = fontMain.getSize2D();
+            System.out.println("scaled ("+fontMainScaleFactor+") width and height with font size "+sMain+": " + wMain + ", " + hMain);
+            g.setFont(fontMain);
 
 
             // TODO
