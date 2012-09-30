@@ -49,6 +49,15 @@ public final class GraphicsUtils
     /**Minimum simple icon size (both dimensions) in pixels; strictly positive. */
     public static final int MIN_ICON_SIZE_PX = 32;
 
+    /**Background colour for unknown traffic-light status; non-null. */
+    public static final Color TL_UNKNOWN_ICON_BG = Color.WHITE;
+    /**Background colour for yellow traffic-light status; non-null. */
+    public static final Color TL_YELLOW_ICON_BG = new Color(0xffffcc);
+    /**Background colour for green traffic-light status; non-null. */
+    public static final Color TL_GREEN_ICON_BG = new Color(0xccffcc);
+    /**Background colour for red traffic-light status; non-null. */
+    public static final Color TL_RED_ICON_BG = new Color(0xffcccc);
+
     /**Write a simple PNG icon containing the current intensity and with the current traffic-light colour; never null.
      * This attempts to update the output atomically and leaving it globally readable at all times.
      *
@@ -72,18 +81,18 @@ public final class GraphicsUtils
         final Graphics2D g = buffer.createGraphics();
         try
             {
-            Color bgColour = Color.WHITE;
+            Color bgColour = TL_UNKNOWN_ICON_BG;
             if(null != status)
                 {
                 switch(status)
                     {
-                    case RED: bgColour = new Color(0xffcccc); break;
-                    case GREEN: bgColour = new Color(0xccffcc); break;
-                    case YELLOW: bgColour = new Color(0xffffcc); break;
+                    case RED: bgColour = TL_RED_ICON_BG; break;
+                    case GREEN: bgColour = TL_GREEN_ICON_BG; break;
+                    case YELLOW: bgColour = TL_YELLOW_ICON_BG; break;
                     }
                 }
             g.setColor(bgColour);
-            g.fillRect(0,0,sizePX,sizePX);
+            g.fillRect(0, 0, sizePX, sizePX);
 
             // TODO
 
