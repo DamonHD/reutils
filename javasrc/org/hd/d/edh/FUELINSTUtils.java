@@ -689,9 +689,10 @@ public final class FUELINSTUtils
             final File bd = new File(BUTTON_BASE_DIR);
             if(bd.isDirectory() && bd.canWrite())
                 {
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, summary.currentIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, summary.currentIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, summary.currentIntensity);
+                final int retailIntensity = (int) (summary.currentIntensity * (1+summary.totalGridLosses));
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
                 }
             else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
             }

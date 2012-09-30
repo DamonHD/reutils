@@ -48,6 +48,15 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 20120930:
+    freezepoint name: V1.0.11
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.10
+    DHD20120930: Showing retail/consumption intensity rather than generation.
+
+
+20120930:
     freezepoint name: V1.0.10
     branch name: HEAD
     Deployed where: earth.org.uk
