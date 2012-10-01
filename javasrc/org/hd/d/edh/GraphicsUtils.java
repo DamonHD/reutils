@@ -144,7 +144,7 @@ public final class GraphicsUtils
             final Rectangle2D boundsU = fontU.getStringBounds(units, fc);
             g.setFont(fontU);
             g.setColor(Color.BLACK);
-            g.drawString(units, ICON_BORDER_PX, sizePX + ICON_BORDER_PX); // At bottom (with margin).
+            g.drawString(units, ICON_BORDER_PX, sizePX - ((int)(boundsU.getY() + boundsU.getHeight())) - ICON_BORDER_PX); // At bottom (with margin).
 
             // If a timestamp is supplied, squeeze it into the display above the intensity (in grey).
             if(0 != timestamp)
