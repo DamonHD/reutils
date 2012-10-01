@@ -55,7 +55,7 @@ public final class GraphicsUtils
     public static final int MIN_ICON_SIZE_PX = 32;
 
     /**Target icon border (around text) in pixels; strictly positive. */
-    private static final int ICON_BORDER_PX = 2;
+    private static final int ICON_BORDER_PX = 1;
 
     /**Background colour for unknown traffic-light status; non-null. */
     public static final Color TL_UNKNOWN_ICON_BG = Color.WHITE;
@@ -132,7 +132,7 @@ public final class GraphicsUtils
             g.setColor(Color.BLACK);
             g.drawString(basicIconText, ICON_BORDER_PX, (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
 
-            // If a timestamp is supplied, squeeze it into the display below the intensity.
+            // If a timestamp is supplied, squeeze it into the display above the intensity.
             if(0 != timestamp)
                 {
                 final SimpleDateFormat fmt = FUELINSTUtils.getHHMMTimestampParser();
@@ -141,7 +141,7 @@ public final class GraphicsUtils
                 final double wTSTmp = boundsTSTmp.getWidth();
                 final double hTSTmp = boundsTSTmp.getHeight();
                 final int fitTSToWidth = sizePX - (2*ICON_BORDER_PX);
-                final int fitTSToHeight = sizePX - (int)(hMain+0.5) - ICON_BORDER_PX; // Allow an extra border.
+                final float fitTSToHeight = (float) (((sizePX - hMain)/2.0) - 1); // Allow a 1-pixel extra border/gap; don't round prematurely.
                 final float fontTSScaleFactor = Math.min(fitTSToWidth / (float) wTSTmp, fitTSToHeight / (float) hTSTmp);
                 final Font fontTS = fontTmp.deriveFont(sTmp * fontTSScaleFactor);
                 final Rectangle2D boundsTS = fontTS.getStringBounds(ts, fc);
