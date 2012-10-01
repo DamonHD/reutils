@@ -132,7 +132,21 @@ public final class GraphicsUtils
             g.setColor(Color.BLACK);
             g.drawString(basicIconText, ICON_BORDER_PX, (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
 
-            // If a timestamp is supplied, squeeze it into the display above the intensity.
+            // Show units at the bottom of the icon, ie under the number.
+            final String units = "gCO2/kWh";
+            final Rectangle2D boundsUTmp = fontTmp.getStringBounds(units, fc);
+            final double wUTmp = boundsUTmp.getWidth();
+            final double hUTmp = boundsUTmp.getHeight();
+            final int fitUToWidth = sizePX - (2*ICON_BORDER_PX);
+            final float fitUToHeight = (float) (((sizePX - hMain)/2.0) - 1); // Allow a 1-pixel extra border/gap; don't round prematurely.
+            final float fontUScaleFactor = Math.min(fitUToWidth / (float) wUTmp, fitUToHeight / (float) hUTmp);
+            final Font fontU = fontTmp.deriveFont(sTmp * fontUScaleFactor);
+            final Rectangle2D boundsU = fontU.getStringBounds(units, fc);
+            g.setFont(fontU);
+            g.setColor(Color.BLACK);
+            g.drawString(units, ICON_BORDER_PX, sizePX + ICON_BORDER_PX); // At bottom (with margin).
+
+            // If a timestamp is supplied, squeeze it into the display above the intensity (in grey).
             if(0 != timestamp)
                 {
                 final SimpleDateFormat fmt = FUELINSTUtils.getHHMMTimestampParser();
