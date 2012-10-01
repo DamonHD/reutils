@@ -130,7 +130,7 @@ public final class GraphicsUtils
 //            System.out.println("scaled ("+fontMainScaleFactor+") width and height with font size "+sMain+": " + wMain + ", " + hMain);
             g.setFont(fontMain);
             g.setColor(Color.BLACK);
-            g.drawString(basicIconText, ICON_BORDER_PX, (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
+            g.drawString(basicIconText, (int) (-boundsMain.getCenterX() + (sizePX/2.0)), (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
 
             // Show units at the bottom of the icon, ie under the number.
             final String units = "gCO2/kWh";
@@ -144,7 +144,7 @@ public final class GraphicsUtils
             final Rectangle2D boundsU = fontU.getStringBounds(units, fc);
             g.setFont(fontU);
             g.setColor(Color.BLACK);
-            g.drawString(units, ICON_BORDER_PX, sizePX - ((int)(boundsU.getY() + boundsU.getHeight())) - ICON_BORDER_PX); // At bottom (with margin).
+            g.drawString(units, (int) (-boundsU.getCenterX() + (sizePX/2.0)), sizePX - ((int)(boundsU.getY() + boundsU.getHeight())) - ICON_BORDER_PX); // At bottom (with margin).
 
             // If a timestamp is supplied, squeeze it into the display above the intensity (in grey).
             if(0 != timestamp)
@@ -161,7 +161,7 @@ public final class GraphicsUtils
                 final Rectangle2D boundsTS = fontTS.getStringBounds(ts, fc);
                 g.setFont(fontTS);
                 g.setColor(Color.GRAY);
-                g.drawString(ts, ICON_BORDER_PX, ((int)(-boundsTS.getY())) + ICON_BORDER_PX); // At top (with margin).
+                g.drawString(ts, (int) (-boundsTS.getCenterX() + (sizePX/2.0)), ((int)(-boundsTS.getY())) + ICON_BORDER_PX); // At top (with margin).
                 }
             }
         finally { g.dispose(); }
