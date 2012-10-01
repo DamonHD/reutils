@@ -69,7 +69,7 @@ public final class TestGraphicsUtils extends TestCase
         final String fbase = "out/";
         for(final int size : new int[] { GraphicsUtils.MIN_ICON_SIZE_PX, 48, 64 } )
             {
-            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, size, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1500));
+            final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, size, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1100));
             assertNotNull(suffix);
             assertTrue(suffix.length() > 0);
             final File fIco = new File(fbase + suffix);

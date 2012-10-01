@@ -33,7 +33,6 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-    DHD20120930: Attempting to ensure button/icon shows same figure as HTML page.
 
 
 
@@ -47,6 +46,16 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20121001:
+    freezepoint name: V1.0.12
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.11
+    DHD20121001: Adjusted button/icon to be stacked timestamp / intensity / units.
+    DHD20120930: Attempting to ensure button/icon shows same figure as HTML page with same rounding.
+
 
 20120930:
     freezepoint name: V1.0.11
