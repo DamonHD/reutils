@@ -130,7 +130,7 @@ public final class GraphicsUtils
 //            System.out.println("scaled ("+fontMainScaleFactor+") width and height with font size "+sMain+": " + wMain + ", " + hMain);
             g.setFont(fontMain);
             g.setColor(Color.BLACK);
-            g.drawString(basicIconText, ICON_BORDER_PX, ((int) - boundsMain.getY()) + ICON_BORDER_PX);
+            g.drawString(basicIconText, ICON_BORDER_PX, (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
 
             // If a timestamp is supplied, squeeze it into the display below the intensity.
             if(0 != timestamp)
@@ -147,7 +147,7 @@ public final class GraphicsUtils
                 final Rectangle2D boundsTS = fontTS.getStringBounds(ts, fc);
                 g.setFont(fontTS);
                 g.setColor(Color.GRAY);
-                g.drawString(ts, ICON_BORDER_PX, ((int)(- boundsTS.getY() - boundsMain.getY())) + (2*ICON_BORDER_PX));
+                g.drawString(ts, ICON_BORDER_PX, ((int)(-boundsTS.getY())) + ICON_BORDER_PX); // At top (with margin).
                 }
             }
         finally { g.dispose(); }
