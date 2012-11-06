@@ -162,7 +162,7 @@ public final class FUELINSTUtils
             url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
             final URLConnection conn = url.openConnection();
             conn.setAllowUserInteraction(false);
-            conn.setUseCaches(true); // Ensure that we get non-stale values each time.
+            conn.setUseCaches(false); // Ensure that we get non-stale values each time.
             conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
             conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
