@@ -29,7 +29,7 @@ public final class IRLgi implements RemoteGenerationIntensity
     /**Character encoding for the POST body; never null nor empty. */
     private static final String POST_ENCODING = "UTF-8";
 
-    /**Retrieve current / latest-recent generation intensity; non-negative. */
+    /**Retrieve current / latest-recent generation intensity in gCO2/kWh; non-negative. */
     @Override public int getLatest() throws IOException
         {
         // Get today's (UTC) date.

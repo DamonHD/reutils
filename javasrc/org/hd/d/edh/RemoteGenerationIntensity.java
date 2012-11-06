@@ -14,7 +14,7 @@ public interface RemoteGenerationIntensity
     /**Gets remote grid human-readable name/abbreviation; never null nor empty. */
     public String gridName();
 
-    /**Get latest intensity in gCO2/MWh; non-negative.
+    /**Get latest intensity in gCO2/kWh; non-negative.
      * Attempts to get recent intensity,
      * or throws an exception if no reasonably recent value available, eg within last hour or two.
      * <p>
