@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.hd.d.edh.RemoteGenerationIntensity;
 
 /**IRL (Irish grid) remote-intensity fetcher; never succeeds. */
-public final class IRL implements RemoteGenerationIntensity
+public final class IRLgi implements RemoteGenerationIntensity
     {
     @Override public String gridName() { return("IRL"); }
 
