@@ -35,6 +35,7 @@ import junit.framework.TestCase;
 
 import org.hd.d.edh.RemoteGenerationIntensity;
 
+import remoteIntensity.IRL;
 import remoteIntensity.NULL;
 
 /**Miscellaneous tests.
@@ -48,5 +49,15 @@ public final class TestRemoteIntensity extends TestCase
         final RemoteGenerationIntensity rgiN = new NULL();
         assertNotNull(rgiN.gridName());
         try { rgiN.getLatest(); fail("expected IOException"); } catch(final IOException e) { /* expected */ }
+        }
+
+    /**Test handling of IRL remote-intensity source.
+     * This should avoid hammering the real remote server.
+     */
+    public static void testIRL()
+        {
+        final RemoteGenerationIntensity rgiIRL = new IRL();
+        assertNotNull(rgiIRL.gridName());
+        assertEquals("IRL", rgiIRL.gridName());
         }
     }
