@@ -3,12 +3,15 @@ package remoteIntensity;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
+import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.RemoteGenerationIntensity;
 
 /**IRL (Irish grid) remote-intensity fetcher.
@@ -29,18 +32,22 @@ public final class IRLgi implements RemoteGenerationIntensity
     /**Retrieve current / latest-recent generation intensity; non-negative. */
     @Override public int getLatest() throws IOException
         {
+        // Get today's (UTC) date.
+        final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+        cal.setTimeInMillis(System.currentTimeMillis());
+        final SimpleDateFormat sDF = new SimpleDateFormat("dd/MM/yyyy");
+        sDF.setCalendar(cal);
+        final String todayDDMMYYYY = sDF.format(cal.getTime());
+
         // Parameters and values to send...
-        final String todayDDMMYYYY = "05/11/2012"; // FIXME
         final String[][] params =
             {
                 { "download", "Y" },
                 { "startdate", todayDDMMYYYY },
                 { "enddate", todayDDMMYYYY },
-                { "proc", "data_pack.getco2intensityforadayiphone" },
+                { "proc", "data_pack.getco2intensityforadayiphone" }, // Would be more efficient just to request last hour or so.
                 { "templatename", "CO2 Intensity" },
-                //{ "columnnames", "Time,gCO2/KWh" },
-                //{ "prevurl", URL },
-                //{ "submit", "Download" },
+                { "columnnames", "Time,gCO2/KWh" },
             };
         final StringBuilder sb = new StringBuilder(256);
         for(int i = params.length; --i >= 0; )
@@ -61,31 +68,29 @@ public final class IRLgi implements RemoteGenerationIntensity
         conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
-        // Read the response...
+        // Read the response.
+        // Use last non-negative parseable number in second column.
+        int lastValue = -1;
         final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         try
             {
             String row;
             while(null != (row = br.readLine()))
                 {
-
-                System.out.println(row);
-
-                // TODO
-
+                if(row.startsWith("Time")) { continue; }
+                final String cols[] = DataUtils.delimCSV.split(row);
+                if(cols.length < 2) { continue; }
+                try
+                    {
+                    final int v = Math.round(Float.parseFloat(cols[1].trim()));
+                    if(v >= 0) { lastValue = v; }
+                    }
+                catch(final NumberFormatException e) { /* Ignore non-numbers, eg "null". */ }
                 }
-
-
-            // TODO
-
-
-
             }
         finally { br.close(); }
 
-
-
-
-        throw new IOException("NOT IMPLEMENTED");
+        if(lastValue < 0) { throw new IOException("no valid value found"); }
+        return(lastValue);
         }
     }

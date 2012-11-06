@@ -59,6 +59,6 @@ public final class TestRemoteIntensity extends TestCase
         final RemoteGenerationIntensity rgiIRL = new IRLgi();
         assertNotNull(rgiIRL.gridName());
         assertEquals("IRL", rgiIRL.gridName());
-//        assertTrue(0 <= rgiIRL.getLatest()); // FIXME: pesters remote server
+        //assertTrue(0 <= rgiIRL.getLatest()); // FIXME: pesters remote server so don't leave in
         }
     }
