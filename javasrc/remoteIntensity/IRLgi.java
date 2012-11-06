@@ -27,6 +27,14 @@ import org.hd.d.edh.RemoteGenerationIntensity;
 &lt;input type="submit" value="Download" class="submit" /&gt;
 &lt;/form&gt;
 </pre>
+ * which might encode as:
+<pre>
+download=Y&downloadstartdate=06%2F11%2F2012&downloadenddate=06%2F11%2F2012&proc=data_pack.getco2intensityforadayiphone&templatename=CO2+Intensity&columnnames=Time%2Cg+CO%E2%82%82%2FKWh&prevurl=http%3A%2F%2Fwww.eirgrid.com%2Foperations%2Fsystemperformancedata%2Fco2intensity%2F
+</pre>
+ * but gets redirected anyway to:
+<pre>
+http://www.eirgrid.com/operations/systemperformancedata/download.jsp?download=Y&startdate=06/11/2012&enddate=06/11/2012&proc=data_pack.getco2intensityforadayiphone&templatename=CO2%20Intensity&columnnames=Time,g%20CO&#8322;/KWh&prevurl=http://www.eirgrid.com/operations/systemperformancedata/co2intensity/
+</pre>
  */
 public final class IRLgi implements RemoteGenerationIntensity
     {
