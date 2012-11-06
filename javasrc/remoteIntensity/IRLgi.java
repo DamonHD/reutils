@@ -64,7 +64,7 @@ public final class IRLgi implements RemoteGenerationIntensity
         conn.setDoInput(true);
         conn.setRequestMethod("GET");
         conn.setAllowUserInteraction(false);
-        conn.setUseCaches(false); // Ensure that we get non-stale values each time.
+        conn.setUseCaches(false); // Ensure non-stale values each time.
         conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
