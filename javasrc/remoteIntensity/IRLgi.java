@@ -1,10 +1,10 @@
 package remoteIntensity;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -44,6 +44,8 @@ public final class IRLgi implements RemoteGenerationIntensity
         // Set up URL connection to fetch the data.
         final URL url = new URL(URL);
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         conn.setAllowUserInteraction(false);
@@ -52,7 +54,7 @@ public final class IRLgi implements RemoteGenerationIntensity
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
         // Parameters and values to send...
-        final String todayDDMMYYYY = "06/11/2012";
+        final String todayDDMMYYYY = "05/11/2012"; // FIXME
         final String[][] params =
             {
                 { "download", "Y" },
@@ -60,40 +62,52 @@ public final class IRLgi implements RemoteGenerationIntensity
                 { "downloadenddate", todayDDMMYYYY },
                 { "proc", "data_pack.getco2intensityforadayiphone" },
                 { "templatename", "CO2 Intensity" },
-                { "columnnames", "Time,g CO&#8322;/KWh" },
+                { "columnnames", "Time,gCO2/KWh" },
                 { "download", "Y" },
+                { "prevurl", URL },
+                { "submit", "Download" },
             };
-        final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+        // Write parameters in one block.
+        final StringBuilder sb = new StringBuilder(256);
+        for(int i = params.length; --i >= 0; )
+            {
+            // Send parameters down the wire...
+            sb.append(URLEncoder.encode(params[i][0], POST_ENCODING));
+            sb.append("=");
+            sb.append(URLEncoder.encode(params[i][1], POST_ENCODING));
+            if(0 != i) { sb.append("&"); }
+            }
+        sb.append("\r\n");
+        //conn.setFixedLengthStreamingMode(sb.length());
+        final Writer w = new OutputStreamWriter(conn.getOutputStream());
         try
             {
-            for(int i = params.length; --i >= 0; )
-                {
-                // Send parameters down the wire...
-                bw.write(URLEncoder.encode(params[i][0], POST_ENCODING));
-                    bw.write("=");
-                    bw.write(URLEncoder.encode(params[i][1], POST_ENCODING));
-                if(0 != i) { bw.write("&"); }
-                }
-            bw.write("\r\n");
-            bw.flush();
+            w.write(sb.toString());
+            w.flush();
+            }
+        finally { w.close(); }
 
-            // Read the response...
-            final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            try
+        // Read the response...
+        final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        try
+            {
+            String row;
+            while(null != (row = br.readLine()))
                 {
 
-
-
+                System.out.println(row);
 
                 // TODO
 
-
-
-
                 }
-            finally { br.close(); }
+
+
+            // TODO
+
+
+
             }
-        finally { bw.close(); }
+        finally { br.close(); }
 
 
 

@@ -54,10 +54,11 @@ public final class TestRemoteIntensity extends TestCase
     /**Test handling of IRL remote-intensity source.
      * This should avoid hammering the real remote server.
      */
-    public static void testIRL()
+    public static void testIRL() throws Exception
         {
         final RemoteGenerationIntensity rgiIRL = new IRLgi();
         assertNotNull(rgiIRL.gridName());
         assertEquals("IRL", rgiIRL.gridName());
+//        assertTrue(0 <= rgiIRL.getLatest()); // FIXME: pesters remote server
         }
     }
