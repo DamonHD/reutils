@@ -51,9 +51,16 @@ public final class IRLgi implements RemoteGenerationIntensity
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
         // Parameters and values to send...
+        final String todayDDMMYYYY = "06/11/2012";
         final String[][] params =
             {
-                    { "a", "b" },
+                { "download", "Y" },
+                { "downloadstartdate", todayDDMMYYYY },
+                { "downloadenddate", todayDDMMYYYY },
+                { "proc", "data_pack.getco2intensityforadayiphone" },
+                { "templatename", "CO2 Intensity" },
+                { "columnnames", "Time,g CO&#8322;/KWh" },
+                { "download", "Y" },
             };
         final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
         try
