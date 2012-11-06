@@ -1,5 +1,6 @@
 package remoteIntensity;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -77,9 +78,20 @@ public final class IRLgi implements RemoteGenerationIntensity
             bw.flush();
 
             // Read the response...
-            final InputStreamReader is = new InputStreamReader(conn.getInputStream());
-            try { /* ... */ }
-            finally { is.close(); }
+            final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            try
+                {
+
+
+
+
+                // TODO
+
+
+
+
+                }
+            finally { br.close(); }
             }
         finally { bw.close(); }
 
