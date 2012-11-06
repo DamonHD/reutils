@@ -12,26 +12,6 @@ import java.net.URLEncoder;
 import org.hd.d.edh.RemoteGenerationIntensity;
 
 /**IRL (Irish grid) remote-intensity fetcher.
- * Does POST to <code>http://www.eirgrid.com/operations/systemperformancedata/co2intensity/</code>
- * <p>
- * Sample HTML to be emulated:
-<pre>
-&lt;form name="downloadForm" action="http://www.eirgrid.com/operations/systemperformancedata/co2intensity/" method="post"&gt;
-&lt;input type="hidden" name="download" value="Y" /&gt;
-&lt;input type="text" name="downloadstartdate" value="06/11/2012" /&gt;
-&lt;input type="text" name="downloadenddate" value="06/11/2012" /&gt;
-&lt;input type="hidden" name="proc" value="data_pack.getco2intensityforadayiphone" /&gt;
-&lt;input type="hidden" name="templatename" value="CO2 Intensity" /&gt;
-&lt;input type="hidden" name="columnnames" value="Time,g CO&#8322;/KWh" /&gt;
-&lt;input type="hidden" name="prevurl" value="http://www.eirgrid.com/operations/systemperformancedata/co2intensity/" /&gt;
-&lt;input type="submit" value="Download" class="submit" /&gt;
-&lt;/form&gt;
-</pre>
- * which might encode as:
-<pre>
-download=Y&downloadstartdate=06%2F11%2F2012&downloadenddate=06%2F11%2F2012&proc=data_pack.getco2intensityforadayiphone&templatename=CO2+Intensity&columnnames=Time%2Cg+CO%E2%82%82%2FKWh&prevurl=http%3A%2F%2Fwww.eirgrid.com%2Foperations%2Fsystemperformancedata%2Fco2intensity%2F
-</pre>
- * but gets redirected anyway to:
 <pre>
 http://www.eirgrid.com/operations/systemperformancedata/download.jsp?download=Y&startdate=06/11/2012&enddate=06/11/2012&proc=data_pack.getco2intensityforadayiphone&templatename=CO2%20Intensity&columnnames=Time,g%20CO&#8322;/KWh&prevurl=http://www.eirgrid.com/operations/systemperformancedata/co2intensity/
 </pre>
@@ -41,7 +21,7 @@ public final class IRLgi implements RemoteGenerationIntensity
     @Override public String gridName() { return("IRL"); }
 
     /**Remote URL to retrieve data from with POST; not null nor empty. */
-    private static final String URL = "http://www.eirgrid.com/operations/systemperformancedata/co2intensity/";
+    private static final String URL = "http://www.eirgrid.com/operations/systemperformancedata/download.jsp";
 
     /**Character encoding for the POST body; never null nor empty. */
     private static final String POST_ENCODING = "UTF-8";
@@ -49,33 +29,19 @@ public final class IRLgi implements RemoteGenerationIntensity
     /**Retrieve current / latest-recent generation intensity; non-negative. */
     @Override public int getLatest() throws IOException
         {
-        // Set up URL connection to fetch the data.
-        final URL url = new URL(URL);
-        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setDoOutput(true);
-        conn.setDoInput(true);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        conn.setAllowUserInteraction(false);
-        conn.setUseCaches(false); // Ensure that we get non-stale values each time.
-        conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
-        conn.setReadTimeout(60000); // Set a long-ish read timeout.
-
         // Parameters and values to send...
         final String todayDDMMYYYY = "05/11/2012"; // FIXME
         final String[][] params =
             {
                 { "download", "Y" },
-                { "downloadstartdate", todayDDMMYYYY },
-                { "downloadenddate", todayDDMMYYYY },
+                { "startdate", todayDDMMYYYY },
+                { "enddate", todayDDMMYYYY },
                 { "proc", "data_pack.getco2intensityforadayiphone" },
                 { "templatename", "CO2 Intensity" },
-                { "columnnames", "Time,gCO2/KWh" },
-                { "download", "Y" },
-                { "prevurl", URL },
-                { "submit", "Download" },
+                //{ "columnnames", "Time,gCO2/KWh" },
+                //{ "prevurl", URL },
+                //{ "submit", "Download" },
             };
-        // Write parameters in one block.
         final StringBuilder sb = new StringBuilder(256);
         for(int i = params.length; --i >= 0; )
             {
@@ -85,15 +51,15 @@ public final class IRLgi implements RemoteGenerationIntensity
             sb.append(URLEncoder.encode(params[i][1], POST_ENCODING));
             if(0 != i) { sb.append("&"); }
             }
-        sb.append("\r\n");
-        //conn.setFixedLengthStreamingMode(sb.length());
-        final Writer w = new OutputStreamWriter(conn.getOutputStream());
-        try
-            {
-            w.write(sb.toString());
-            w.flush();
-            }
-        finally { w.close(); }
+        // Set up URL connection to fetch the data.
+        final URL url = new URL(URL + "?" + sb.toString());
+        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setDoInput(true);
+        conn.setRequestMethod("GET");
+        conn.setAllowUserInteraction(false);
+        conn.setUseCaches(false); // Ensure that we get non-stale values each time.
+        conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
+        conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
         // Read the response...
         final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
