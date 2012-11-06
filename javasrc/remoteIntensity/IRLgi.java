@@ -1,9 +1,12 @@
 package remoteIntensity;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import org.hd.d.edh.RemoteGenerationIntensity;
 
@@ -31,20 +34,47 @@ public final class IRLgi implements RemoteGenerationIntensity
     /**Remote URL to retrieve data from with POST; not null nor empty. */
     private static final String URL = "http://www.eirgrid.com/operations/systemperformancedata/co2intensity/";
 
+    /**Character encoding for the POST body; never null nor empty. */
+    private static final String POST_ENCODING = "UTF-8";
+
+    /**Retrieve current / latest-recent generation intensity; non-negative. */
     @Override public int getLatest() throws IOException
         {
         // Set up URL connection to fetch the data.
         final URL url = new URL(URL);
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         conn.setAllowUserInteraction(false);
         conn.setUseCaches(false); // Ensure that we get non-stale values each time.
         conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
-        final InputStreamReader is = new InputStreamReader(conn.getInputStream());
-        try { /* ... */ }
-        finally { is.close(); }
+        // Parameters and values to send...
+        final String[][] params =
+            {
+                    { "a", "b" },
+            };
+        final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+        try
+            {
+            for(int i = params.length; --i >= 0; )
+                {
+                // Send parameters down the wire...
+                bw.write(URLEncoder.encode(params[i][0], POST_ENCODING));
+                    bw.write("=");
+                    bw.write(URLEncoder.encode(params[i][1], POST_ENCODING));
+                if(0 != i) { bw.write("&"); }
+                }
+            bw.write("\r\n");
+            bw.flush();
+
+            // Read the response...
+            final InputStreamReader is = new InputStreamReader(conn.getInputStream());
+            try { /* ... */ }
+            finally { is.close(); }
+            }
+        finally { bw.close(); }
 
 
 
