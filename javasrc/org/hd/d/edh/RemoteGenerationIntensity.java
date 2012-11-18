@@ -8,6 +8,8 @@ import java.io.IOException;
  * Instances may not be internally thread-safe
  * but separate instances should be safe to run in separate threads,
  * eg to gather date on several remote grids concurrently.
+ * <p>
+ * Implementations may use persistence/cacheing to reduce the impact on remote servers.
  */
 public interface RemoteGenerationIntensity
     {
@@ -24,4 +26,11 @@ public interface RemoteGenerationIntensity
      * @throws IOException if no sufficiently-recent or reliable value is available
      */
     public int getLatest() throws IOException;
+
+
+    /**Base directory path relative to PWD for an RGI implementation to cache its state; non-null.
+     * Within that directory any cache file name should be prefixed with the grid name
+     * and optionally some other string for uniqueness.
+     */
+    static final String RGI_CACHE_DIR_BASE_PATH = ".cacheRGI";
     }

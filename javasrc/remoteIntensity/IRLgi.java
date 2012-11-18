@@ -1,6 +1,7 @@
 package remoteIntensity;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -8,11 +9,13 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.RemoteGenerationIntensity;
+import org.hd.d.edh.Tuple;
 
 /**IRL (Irish grid) remote-intensity fetcher.
 <pre>
@@ -29,9 +32,38 @@ public final class IRLgi implements RemoteGenerationIntensity
     /**Character encoding for the POST body; never null nor empty. */
     private static final String POST_ENCODING = "UTF-8";
 
+    /**PWD-relative path of cache file; not null.
+     * The cache file contains a tuple of serialised Date UTC time that the value was fetched computed,
+     * followed by the Integer non-negative intensity (gCO2/kWh) or null if none was available.
+     */
+    private static final File CACHE_PATH = new File(RGI_CACHE_DIR_BASE_PATH, "IRL.ser");
+
+    /**Maximum time to cache IRL intensity result for (seconds); strictly positive.
+     * Longer values will reduce amount that remote server is pestered,
+     * and cost of less timely intensity figures.
+     * <p>
+     * Should probably be just less than recalculation interval at server.
+     */
+    private static int MAX_CACHE_S = 290;
+
     /**Retrieve current / latest-recent generation intensity in gCO2/kWh; non-negative. */
     @Override public int getLatest() throws IOException
         {
+        // Attempt to retrieve from persistent cache, if any.
+        if(CACHE_PATH.exists())
+            {
+            try
+                {
+                final Tuple.Pair<Date, Integer> lastStatus = (Tuple.Pair<Date, Integer>) DataUtils.deserialiseFromFile(CACHE_PATH, false);
+                }
+            catch(final Exception e)
+                {
+                System.err.println("Cannot retrieve cached intensity for IRL: " + e.getMessage());
+                // Fall through to continue.
+                }
+            }
+
+
         // Get today's (UTC) date.
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
         cal.setTimeInMillis(System.currentTimeMillis());
