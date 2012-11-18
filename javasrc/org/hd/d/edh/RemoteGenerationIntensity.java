@@ -14,7 +14,12 @@ import java.io.IOException;
  */
 public interface RemoteGenerationIntensity
     {
-    /**Gets remote grid human-readable name/abbreviation; never null nor empty. */
+    /**Remote grid human-readable name/abbreviation unique to this grid/implementation; never null nor empty.
+     * Should be suitable/safe for use as part of a filename,
+     * in particular avoiding whitespace and filesystem and shell meta-characters
+     * such as '/', ':', '?', '*',
+     * and should not differ from other instance/grid names only in case.
+     */
     public String gridName();
 
     /**Get latest intensity in gCO2/kWh; non-negative.
