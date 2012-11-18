@@ -59,7 +59,7 @@ public final class IRLgi implements RemoteGenerationIntensity
             try
                 {
                 final Tuple.Pair<Date, Integer> lastStatus = (Tuple.Pair<Date, Integer>) DataUtils.deserialiseFromFile(CACHE_PATH, false);
-                if((null != lastStatus) && ((now - lastStatus.first.getTime()) < MAX_CACHE_MS))
+                if((null != lastStatus) && ((now - lastStatus.first.getTime()) <= MAX_CACHE_MS))
                     {
                     if(null == lastStatus.second) { throw new IOException("could not fetch/compute"); }
                     if(lastStatus.second >= 0) { return(lastStatus.second); }
