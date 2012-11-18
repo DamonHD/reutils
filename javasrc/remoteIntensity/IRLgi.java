@@ -74,6 +74,8 @@ public final class IRLgi implements RemoteGenerationIntensity
                 }
             }
 
+        // FETCH/COMPUTE
+
         // Get today's (UTC) date.
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
         cal.setTimeInMillis(now);
@@ -147,7 +149,7 @@ public final class IRLgi implements RemoteGenerationIntensity
             }
         catch(final IOException e)
             {
-            // Cache failure value if parent dir exists (silent if not)...
+            // Negatively cache failure if parent dir exists (silently ignore if not)...
             if(RGI_CACHE_DIR_BASE_PATH.exists())
                 { DataUtils.serialiseToFile(new Tuple.Pair<Date, Integer>(new Date(), null), CACHE_PATH, false, true); }
             // Rethrow...
