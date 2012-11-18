@@ -57,7 +57,7 @@ public final class TestRemoteIntensity extends TestCase
         final RemoteGenerationIntensity rgiIRL = new IRLgi();
         assertNotNull(rgiIRL.gridName());
         assertEquals("IRL", rgiIRL.gridName());
-        try { assertTrue("any intensity returned must be non-negative", 0 <= rgiIRL.getLatest()); } catch(IOException e) { /* failure permitted */ }
-        try { assertTrue("any intensity returned must be non-negative", 0 <= rgiIRL.getLatest()); } catch(IOException e) { /* failure permitted */ }
+        try { assertTrue("any intensity returned must be non-negative", 0 <= rgiIRL.getLatest()); } catch(final IOException e) { /* failure permitted */ }
+        try { assertTrue("any intensity returned must be non-negative", 0 <= rgiIRL.getLatest()); } catch(final IOException e) { /* failure permitted */ }
         }
     }
