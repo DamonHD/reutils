@@ -34,27 +34,38 @@ public final class IRLgi implements RemoteGenerationIntensity
 
     /**PWD-relative path of cache file; not null.
      * The cache file contains a tuple of serialised Date UTC time that the value was fetched computed,
-     * followed by the Integer non-negative intensity (gCO2/kWh) or null if none was available.
+     * followed by the Integer non-negative intensity (gCO2/kWh) or null to cache a -ve result if none was available.
+     * <p>
+     * The cache file is NOT compressed.
      */
     private static final File CACHE_PATH = new File(RGI_CACHE_DIR_BASE_PATH, "IRL.ser");
 
-    /**Maximum time to cache IRL intensity result for (seconds); strictly positive.
+    /**Maximum time to cache IRL intensity result for (milliseconds); strictly positive.
      * Longer values will reduce amount that remote server is pestered,
      * and cost of less timely intensity figures.
      * <p>
      * Should probably be just less than recalculation interval at server.
      */
-    private static int MAX_CACHE_S = 290;
+    private static int MAX_CACHE_MS = 290 * 1000; // Just under 5 minutes.
 
     /**Retrieve current / latest-recent generation intensity in gCO2/kWh; non-negative. */
     @Override public int getLatest() throws IOException
         {
+        final long now = System.currentTimeMillis();
+
         // Attempt to retrieve from persistent cache, if any.
         if(CACHE_PATH.exists())
             {
             try
                 {
                 final Tuple.Pair<Date, Integer> lastStatus = (Tuple.Pair<Date, Integer>) DataUtils.deserialiseFromFile(CACHE_PATH, false);
+                if((null != lastStatus) && ((now - lastStatus.first.getTime()) < MAX_CACHE_MS))
+                    {
+                    if(null == lastStatus.second) { throw new IOException("could not fetch/compute"); }
+                    if(lastStatus.second >= 0) { return(lastStatus.second); }
+                    System.err.println("Ignoring bad cached intensity for IRL: " + lastStatus.second);
+                    // Fall through to disregard bad (-ve) persisted value.
+                    }
                 }
             catch(final Exception e)
                 {
@@ -63,10 +74,9 @@ public final class IRLgi implements RemoteGenerationIntensity
                 }
             }
 
-
         // Get today's (UTC) date.
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-        cal.setTimeInMillis(System.currentTimeMillis());
+        cal.setTimeInMillis(now);
         final SimpleDateFormat sDF = new SimpleDateFormat("dd/MM/yyyy");
         sDF.setCalendar(cal);
         final String todayDDMMYYYY = sDF.format(cal.getTime());
@@ -90,6 +100,7 @@ public final class IRLgi implements RemoteGenerationIntensity
             sb.append(URLEncoder.encode(params[i][1], POST_ENCODING));
             if(0 != i) { sb.append("&"); }
             }
+
         // Set up URL connection to fetch the data.
         final URL url = new URL(URL + "?" + sb.toString());
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -100,29 +111,47 @@ public final class IRLgi implements RemoteGenerationIntensity
         conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
-        // Read the response.
-        // Use last non-negative parseable number in second column.
-        int lastValue = -1;
-        final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         try
             {
-            String row;
-            while(null != (row = br.readLine()))
+            // Read the response.
+            // Use last non-negative parseable number in second column.
+            int lastValue = -1;
+            final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            try
                 {
-                if(row.startsWith("Time")) { continue; }
-                final String cols[] = DataUtils.delimCSV.split(row);
-                if(cols.length < 2) { continue; }
-                try
+                String row;
+                while(null != (row = br.readLine()))
                     {
-                    final int v = Math.round(Float.parseFloat(cols[1].trim()));
-                    if(v >= 0) { lastValue = v; }
+                    if(row.startsWith("Time")) { continue; }
+                    final String cols[] = DataUtils.delimCSV.split(row);
+                    if(cols.length < 2) { continue; }
+                    try
+                        {
+                        final int v = Math.round(Float.parseFloat(cols[1].trim()));
+                        if(v >= 0) { lastValue = v; }
+                        }
+                    catch(final NumberFormatException e) { /* Ignore non-numbers, eg "null". */ }
                     }
-                catch(final NumberFormatException e) { /* Ignore non-numbers, eg "null". */ }
                 }
-            }
-        finally { br.close(); }
+            finally { br.close(); }
 
-        if(lastValue < 0) { throw new IOException("no valid value found"); }
-        return(lastValue);
+            if(lastValue < 0) { throw new IOException("no valid value found"); }
+
+            // Persist/cache value.
+            if(RGI_CACHE_DIR_BASE_PATH.exists())
+                { DataUtils.serialiseToFile(new Tuple.Pair<Date, Integer>(new Date(), lastValue), CACHE_PATH, false, true); }
+            else
+                { System.err.println("No parent dir "+RGI_CACHE_DIR_BASE_PATH.getCanonicalPath()+" to cache intensity in "+CACHE_PATH); }
+
+            return(lastValue);
+            }
+        catch(final IOException e)
+            {
+            // Cache failure value if parent dir exists (silent if not)...
+            if(RGI_CACHE_DIR_BASE_PATH.exists())
+                { DataUtils.serialiseToFile(new Tuple.Pair<Date, Integer>(new Date(), null), CACHE_PATH, false, true); }
+            // Rethrow...
+            throw e;
+            }
         }
     }

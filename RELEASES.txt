@@ -29,6 +29,8 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 
 *** Make button base dir configurable.
 
+*** Make super-green lowest-quartile intensity & not highest-quartile demand & lowest-quartile (or zero) storage and update display to pale green if only intensity measure is met
+
 
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================

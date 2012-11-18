@@ -38,9 +38,7 @@ import org.hd.d.edh.RemoteGenerationIntensity;
 import remoteIntensity.IRLgi;
 import remoteIntensity.NULLgi;
 
-/**Miscellaneous tests.
- *
- */
+/**Test fetch/computation of remote intensity values. */
 public final class TestRemoteIntensity extends TestCase
     {
     /**Test handling of NULL remote-intensity source. */
@@ -52,13 +50,14 @@ public final class TestRemoteIntensity extends TestCase
         }
 
     /**Test handling of IRL remote-intensity source.
-     * This should avoid hammering the real remote server.
+     * This should avoid hammering the real remote server, ie at least cacheing should be in place.
      */
     public static void testIRL() throws Exception
         {
         final RemoteGenerationIntensity rgiIRL = new IRLgi();
         assertNotNull(rgiIRL.gridName());
         assertEquals("IRL", rgiIRL.gridName());
-        //assertTrue(0 <= rgiIRL.getLatest()); // FIXME: pesters remote server so don't leave in
+        try { assertTrue("any intensity returned must be non-negative", 0 <= rgiIRL.getLatest()); } catch(IOException e) { /* failure permitted */ }
+        try { assertTrue("any intensity returned must be non-negative", 0 <= rgiIRL.getLatest()); } catch(IOException e) { /* failure permitted */ }
         }
     }

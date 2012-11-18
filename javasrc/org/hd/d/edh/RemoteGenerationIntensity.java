@@ -1,5 +1,6 @@
 package org.hd.d.edh;
 
+import java.io.File;
 import java.io.IOException;
 
 /**Get live generation intensity of remote grid.
@@ -31,6 +32,9 @@ public interface RemoteGenerationIntensity
     /**Base directory path relative to PWD for an RGI implementation to cache its state; non-null.
      * Within that directory any cache file name should be prefixed with the grid name
      * and optionally some other string for uniqueness.
+     * <p>
+     * Generally this path should not be automatically created,
+     * and its presence indicates that the user wants cacheing.
      */
-    static final String RGI_CACHE_DIR_BASE_PATH = ".cacheRGI";
+    static final File RGI_CACHE_DIR_BASE_PATH = new File(".cacheRGI");
     }
