@@ -241,7 +241,7 @@ public final class FUELINSTHistorical
      * Note that this can lead to an indefinitely large number of buckets
      * so needs to be handled differently to capped-size buckets.
      */
-    public static final BucketAlg BUCKET_BY_UNIQUE_HOUR_UTC = new BucketAlg(){
+    public static final BucketAlg BUCKET_BY_EACH_HOUR_UTC = new BucketAlg(){
         public boolean isCappedSize() { return(false); }
         public String getBucket(final long timestamp)
             {
@@ -253,7 +253,7 @@ public final class FUELINSTHistorical
             }
         /**Sub-buckets don't really make sense for this... */
         public BucketAlg getSubBucketAlg() { return(null); }
-        public String getTitle() { return("UniqueHour"); }
+        public String getTitle() { return("EachHour"); }
         };
 
     /**Immutable functor to bucket by year and day-of-year (GMT), ie unique day; non-null.
@@ -467,7 +467,7 @@ public final class FUELINSTHistorical
             new Bucketer(BUCKET_BY_YEAR_GMT),
             new Bucketer(BUCKET_SINGLETON),
 
-            new Bucketer(BUCKET_BY_UNIQUE_HOUR_UTC) // Have this last, to display last.
+            new Bucketer(BUCKET_BY_EACH_HOUR_UTC) // Have this last, to display last.
             };
 
         // Fill all the buckets given our full data set.
@@ -491,6 +491,8 @@ public final class FUELINSTHistorical
         try
             {
             w.println(rawProperties.get("dataAnalysisPage.HTML.preamble"));
+
+            w.println(); // Usual start of cut-n-paste.
 
             w.println("<p>Input data runs from "+new Date(intensities.get(0).timestamp)+" to "+new Date(intensities.get(nIntensities-1).timestamp)+".</p>");
 
@@ -520,11 +522,27 @@ public final class FUELINSTHistorical
 
                     if(INLINE_CSV)
                         {
-                        w.println("<p>YYYY/MM/DD HH:00 UTC, intensity gCO2/kWh, sample count</p>");
+                        w.println("<p>YYYY/MM/DD HH:00 UTC, mean intensity gCO2/kWh, sample count</p>");
                         w.println("<div><textarea rows=\"10\" cols=\"60\">");
+                        final StringBuilder sb = new StringBuilder(32); // Can be reused for each line...
                         for(final Map.Entry<String, List<TimestampedNonNegInt>> e : dataByBucket.entrySet())
                             {
-                            w.println(e.getKey() + "," + "," + e.getValue().size());
+                            sb.setLength(0);
+                            final int sampleCount = e.getValue().size();
+                            // Date/time.
+                            sb.append(e.getKey()).append(',');
+                            // Intensity: omit value to leave empty field (still terminate with comma) if no samples.
+                            if(sampleCount > 0)
+                                {
+                                long sum = 0;
+                                for(final TimestampedNonNegInt tsnni : e.getValue()) { sum += tsnni.value; }
+                                final int mean = Math.round(sum / (float) sampleCount);
+                                sb.append(mean);
+                                }
+                            sb.append(',');
+                            // Sample count
+                            sb.append(sampleCount);
+                            w.println(sb.toString());
                             }
                         w.println("</textarea></div>");
                         }
@@ -717,10 +735,12 @@ public final class FUELINSTHistorical
                 }
             w.println(".</p>");
 
+            w.println("<p>Report generated at "+(new Date())+", generation time "+(System.currentTimeMillis()-startTime)+"ms.</p>");
+
+            w.println(); // Usual end of cut-n-paste.
+
             w.println("<h3>Methodology</h3>");
             w.println(rawProperties.get("methodology.HTML"));
-
-            w.println("<p>Report generated at "+(new Date())+", generation time "+(System.currentTimeMillis()-startTime)+"ms.</p>");
 
             w.println(rawProperties.get("dataAnalysisPage.HTML.postamble"));
 
