@@ -671,6 +671,8 @@ public final class FUELINSTHistorical
                 if(1 == cols) { doneOneBucketSummary = true; }
                 }
 
+            w.println("<h3>Other Analysis</h3>");
+
             w.write("<p>Correlation of demand against grid intensity: ");
             w.format("%.4f", correlations.third);
             w.println(".</p>");
