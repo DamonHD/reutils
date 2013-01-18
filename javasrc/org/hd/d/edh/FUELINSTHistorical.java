@@ -70,7 +70,7 @@ public final class FUELINSTHistorical
     public interface BucketAlg
         {
         /**Returns true if the result is of capped size however big (and over whatever period) the data set. */
-        public boolean cappedSize();
+        public boolean isCappedSize();
 
         /**Returns the bucket for this timestamp one of a small enumeration of values; never null.
          * These values should sort lexically in the order for them to be displayed.
@@ -238,7 +238,7 @@ public final class FUELINSTHistorical
      * so needs to be handled differently to capped-size buckets.
      */
     public static final BucketAlg BUCKET_BY_YEAR_AND_DAY_GMT = new BucketAlg(){
-        public boolean cappedSize() { return(false); }
+        public boolean isCappedSize() { return(false); }
         public String getBucket(final long timestamp)
             {
             final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
@@ -253,7 +253,7 @@ public final class FUELINSTHistorical
 
     /**Immutable functor to bucket all data into a single bucket; non-null. */
     public static final BucketAlg BUCKET_SINGLETON = new BucketAlg(){
-        public boolean cappedSize() { return(true); }
+        public boolean isCappedSize() { return(true); }
         public String getBucket(final long timestamp) { return("ALL"); }
         public BucketAlg getSubBucketAlg() { return(BUCKET_BY_YEAR_AND_DAY_GMT); }
         public String getTitle() { return("ALL"); }
@@ -261,7 +261,7 @@ public final class FUELINSTHistorical
 
     /**Immutable functor to bucket by week/weekend (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_WEEKEND_GMT = new BucketAlg(){
-        public boolean cappedSize() { return(true); }
+        public boolean isCappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
             final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
@@ -276,7 +276,7 @@ public final class FUELINSTHistorical
 
     /**Immutable functor to bucket by hour of day (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_HOUR_GMT = new BucketAlg(){
-        public boolean cappedSize() { return(true); }
+        public boolean isCappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
             final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
@@ -292,7 +292,7 @@ public final class FUELINSTHistorical
 
     /**Immutable functor to bucket by month (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_MONTH_GMT = new BucketAlg(){
-        public boolean cappedSize() { return(true); }
+        public boolean isCappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
             final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
@@ -307,7 +307,7 @@ public final class FUELINSTHistorical
 
     /**Immutable functor to bucket by month (GMT); non-null. */
     public static final BucketAlg BUCKET_BY_YEAR_GMT = new BucketAlg(){
-        public boolean cappedSize() { return(true); }
+        public boolean isCappedSize() { return(true); }
         public String getBucket(final long timestamp)
             {
             final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
@@ -468,6 +468,9 @@ public final class FUELINSTHistorical
             // Quit as soon as we have been reduced to a single bucket to avoid redundant output thereafter.
             for(final Bucketer b : bucketers)
                 {
+                // Only show the capped-size bucket sets.
+                if(!b.bucketAlg.isCappedSize()) { continue; }
+                
                 final String title = b.bucketAlg.getTitle();
                 if(BUCKET_SINGLETON.getTitle().equals(title))
                     { w.println("<h3>All</h3>"); }
