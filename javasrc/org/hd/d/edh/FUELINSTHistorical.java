@@ -93,7 +93,7 @@ public final class FUELINSTHistorical
         /**The bucketing algorithm; never null. */
         public final BucketAlg bucketAlg;
 
-        /**Human-readable summary. */
+        /**Human-readable summary; never null. */
         @Override public final String toString() { return(bucketAlg.getTitle()); };
 
         /**If true then the data can not be updated, ie the data is read-only.
@@ -458,12 +458,13 @@ public final class FUELINSTHistorical
         // Prepare sets of buckets to be displayed, in order.
         final Bucketer bucketers[] =
             {
-            new Bucketer(BUCKET_BY_UNIQUE_HOUR_UTC),
             new Bucketer(BUCKET_BY_HOUR_GMT),
             new Bucketer(BUCKET_BY_WEEKEND_GMT),
             new Bucketer(BUCKET_BY_MONTH_GMT),
             new Bucketer(BUCKET_BY_YEAR_GMT),
             new Bucketer(BUCKET_SINGLETON),
+
+            new Bucketer(BUCKET_BY_UNIQUE_HOUR_UTC) // Have this last, to display last.
             };
 
         // Fill all the buckets given our full data set.
@@ -491,24 +492,39 @@ public final class FUELINSTHistorical
             w.println("<p>Input data runs from "+new Date(intensities.get(0).timestamp)+" to "+new Date(intensities.get(nIntensities-1).timestamp)+".</p>");
 
             // Display the buckets' data, in order.
-            // Quit as soon as we have been reduced to a single bucket to avoid redundant output thereafter.
+            // Skip remaining 1-bucket results after first one to avoid redundant output thereafter.
+            boolean doneOneBucketSummary = false;
             for(final Bucketer b : bucketers)
                 {
-                // Only show the capped-size bucket sets.
+                final String title = b.bucketAlg.getTitle();
+                final SortedMap<String, List<TimestampedNonNegInt>> dataByBucket = b.getDataByBucket();
+                final Set<String> keys = dataByBucket.keySet();
+                final int cols = keys.size();
+
+                // Display summary of non-capped-size buckets' data.
+                // Assumed to be intensity-by-hour data: write it out too.
                 if(!b.bucketAlg.isCappedSize())
                     {
-                    System.out.println("Skipping bucket "+b+" with count: "+b.getDataByBucket().size());
+                    System.out.println("Non-capped bucket "+b+" with count: "+b.getDataByBucket().size());
+                    w.println("<h3>Data Analysed By " + title + "</h3>");
+                    if(cols < 1)
+                        {
+                        w.println("<p>No data.</p>");
+                        continue;
+                        }
+                    w.println("<p>Datum count: " + cols + "</p>");
+                    w.println("<p>Range: " + dataByBucket.firstKey() + " to " + dataByBucket.lastKey() + "</p>");
+                    w.println("<p>See CSV file for full data set...</p>");
                     continue;
                     }
 
-                final String title = b.bucketAlg.getTitle();
+                // Skip 1-bucket summaries/tables once one has been done.
+                if(doneOneBucketSummary && (1 == cols)) { continue; }
+
                 if(BUCKET_SINGLETON.getTitle().equals(title))
                     { w.println("<h3>All</h3>"); }
                 else
                     { w.println("<h3>Data Analysed By " + title + "</h3>"); }
-                final SortedMap<String, List<TimestampedNonNegInt>> dataByBucket = b.getDataByBucket();
-                final Set<String> keys = dataByBucket.keySet();
-                final int cols = keys.size();
                 if(cols < 1)
                     {
                     w.println("<p>No data.</p>");
@@ -651,8 +667,8 @@ public final class FUELINSTHistorical
                 w.println("</table>");
 
                 // Once the display is down to one bucket
-                // further tables are redundant.
-                if(1 == cols) { break; }
+                // further one-bucket tables are redundant.
+                if(1 == cols) { doneOneBucketSummary = true; }
                 }
 
             w.write("<p>Correlation of demand against grid intensity: ");
