@@ -93,6 +93,9 @@ public final class FUELINSTHistorical
         /**The bucketing algorithm; never null. */
         public final BucketAlg bucketAlg;
 
+        /**Human-readable summary. */
+        @Override public final String toString() { return(bucketAlg.getTitle()); };
+
         /**If true then the data can not be updated, ie the data is read-only.
          * Cannot be set false once it is true.
          * <p>
@@ -492,8 +495,12 @@ public final class FUELINSTHistorical
             for(final Bucketer b : bucketers)
                 {
                 // Only show the capped-size bucket sets.
-                if(!b.bucketAlg.isCappedSize()) { continue; }
-                
+                if(!b.bucketAlg.isCappedSize())
+                    {
+                    System.out.println("Skipping bucket "+b+" with count: "+b.getDataByBucket().size());
+                    continue;
+                    }
+
                 final String title = b.bucketAlg.getTitle();
                 if(BUCKET_SINGLETON.getTitle().equals(title))
                     { w.println("<h3>All</h3>"); }
