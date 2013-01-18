@@ -347,6 +347,9 @@ public final class FUELINSTHistorical
     /**If true then allow (discard) duplicate samples, else throw an exception and stop. */
     private static final boolean DISCARD_DUP_SAMPLES = true;
 
+    /**If true then put by-hour CSV data in-line for cut-n-paste, else write separate file. */
+    private static final boolean INLINE_CSV = true;
+
     /**Do a historical analysis of TIBCO daily data dumps. */
     public static void doHistoricalAnalysis(final String[] args)
         throws IOException, ParseException
@@ -361,8 +364,8 @@ public final class FUELINSTHistorical
         // Extract destination HTML output file name.
         final String outputHTMLFileName = args[1];
 
-        // Derive .csv name from .html.
-        final String outputCSVFileName = outputHTMLFileName + ".intensities.csv";
+//        // Derive .csv name from .html.
+//        final String outputCSVFileName = outputHTMLFileName + ".intensities.csv";
 
         final File first = new File(args[2]);
         if(!first.exists() || !first.canRead())
@@ -513,8 +516,19 @@ public final class FUELINSTHistorical
                         continue;
                         }
                     w.println("<p>Datum count: " + cols + "</p>");
-                    w.println("<p>Range: " + dataByBucket.firstKey() + " to " + dataByBucket.lastKey() + "</p>");
-                    w.println("<p>See CSV file for full data set...</p>");
+                    w.println("<p>Range: " + dataByBucket.firstKey() + " to " + dataByBucket.lastKey() + "; all times UTC.</p>");
+
+                    if(INLINE_CSV)
+                        {
+                        w.println("<p>YYYY/MM/DD HH:00 UTC, intensity gCO2/kWh, sample count</p>");
+                        w.println("<div><textarea rows=\"10\" cols=\"60\">");
+                        for(final Map.Entry<String, List<TimestampedNonNegInt>> e : dataByBucket.entrySet())
+                            {
+                            w.println(e.getKey() + "," + "," + e.getValue().size());
+                            }
+                        w.println("</textarea></div>");
+                        }
+                    else { w.println("<p>See CSV file for full data set...</p>"); }
                     continue;
                     }
 
