@@ -39,6 +39,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -230,6 +231,27 @@ public final class FUELINSTHistorical
 
     /**The field name of the fuel generation (MW) from the FUELINST message in TIBCO format; non-null. */
     private final static String FUELGEN_FIELD = "FG";
+
+    /**Immutable functor to bucket by unique hour (GMT/UTC); non-null.
+     * This is suitable for looking for daily variability within other (larger) bucket sizes.
+     * <p>
+     * Note that this can lead to an indefinitely large number of buckets
+     * so needs to be handled differently to capped-size buckets.
+     */
+    public static final BucketAlg BUCKET_BY_UNIQUE_HOUR_UTC = new BucketAlg(){
+        public boolean isCappedSize() { return(false); }
+        public String getBucket(final long timestamp)
+            {
+            final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
+            c.setTimeInMillis(timestamp);
+            final SimpleDateFormat sDF = new SimpleDateFormat("yyyy/MM/dd HH:00");
+            sDF.setCalendar(c);
+            return(sDF.format(c.getTime()));
+            }
+        /**Sub-buckets don't really make sense for this... */
+        public BucketAlg getSubBucketAlg() { return(null); }
+        public String getTitle() { return("UniqueHour"); }
+        };
 
     /**Immutable functor to bucket by year and day-of-year (GMT), ie unique day; non-null.
      * This is suitable for looking for daily variability within other (larger) bucket sizes.
@@ -433,6 +455,7 @@ public final class FUELINSTHistorical
         // Prepare sets of buckets to be displayed, in order.
         final Bucketer bucketers[] =
             {
+            new Bucketer(BUCKET_BY_UNIQUE_HOUR_UTC),
             new Bucketer(BUCKET_BY_HOUR_GMT),
             new Bucketer(BUCKET_BY_WEEKEND_GMT),
             new Bucketer(BUCKET_BY_MONTH_GMT),
