@@ -333,7 +333,11 @@ public final class FUELINSTHistorical
         if(args.length < 3)
             { throw new IllegalStateException("must have output file name and at least one input file to process"); }
 
-        final String outputHTMLFileName = (args.length < 2) ? null : args[1];
+        // Extract destination HTML output file name.
+        final String outputHTMLFileName = args[1];
+
+        // Derive .csv name from .html.
+        final String outputCSVFileName = outputHTMLFileName + ".intensities.csv";
 
         final File first = new File(args[2]);
         if(!first.exists() || !first.canRead())
@@ -612,7 +616,7 @@ public final class FUELINSTHistorical
                     }
 
                 w.println("</table>");
-                
+
                 // Once the display is down to one bucket
                 // further tables are redundant.
                 if(1 == cols) { break; }
