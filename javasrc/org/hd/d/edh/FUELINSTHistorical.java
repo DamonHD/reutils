@@ -461,6 +461,7 @@ public final class FUELINSTHistorical
             w.println("<p>Input data runs from "+new Date(intensities.get(0).timestamp)+" to "+new Date(intensities.get(nIntensities-1).timestamp)+".</p>");
 
             // Display the buckets' data, in order.
+            // Quit as soon as we have been reduced to a single bucket to avoid redundant output thereafter.
             for(final Bucketer b : bucketers)
                 {
                 final String title = b.bucketAlg.getTitle();
@@ -611,6 +612,10 @@ public final class FUELINSTHistorical
                     }
 
                 w.println("</table>");
+                
+                // Once the display is down to one bucket
+                // further tables are redundant.
+                if(1 == cols) { break; }
                 }
 
             w.write("<p>Correlation of demand against grid intensity: ");
