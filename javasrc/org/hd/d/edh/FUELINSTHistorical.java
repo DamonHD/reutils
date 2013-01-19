@@ -364,9 +364,6 @@ public final class FUELINSTHistorical
         // Extract destination HTML output file name.
         final String outputHTMLFileName = args[1];
 
-//        // Derive .csv name from .html.
-//        final String outputCSVFileName = outputHTMLFileName + ".intensities.csv";
-
         final File first = new File(args[2]);
         if(!first.exists() || !first.canRead())
             { throw new IOException("third arg must be a readable extant directory or plain file"); }
@@ -519,6 +516,9 @@ public final class FUELINSTHistorical
                         }
                     w.println("<p>Datum count: " + cols + "</p>");
                     w.println("<p>Range: " + dataByBucket.firstKey() + " to " + dataByBucket.lastKey() + "; all times UTC.</p>");
+
+                    // Derive .csv name from .html, including the starting YYYY year.
+                    final String outputCSVFileName = outputHTMLFileName + ".intensities." + dataByBucket.firstKey().substring(0, 4) +".csv";
 
                     if(INLINE_CSV)
                         {
