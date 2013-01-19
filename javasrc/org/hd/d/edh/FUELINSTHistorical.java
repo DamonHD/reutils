@@ -555,7 +555,7 @@ public final class FUELINSTHistorical
                     else
                         {
                         // Derive .csv name from .html, including the starting YYYY year.
-                        final String outputCSVFileName = outputHTMLFileName + ".intensities." + dataByBucket.firstKey().substring(0, 4) +".csv";
+                        final String outputCSVFileName = outputHTMLFileName + ".intensities." + title + "." + dataByBucket.firstKey().substring(0, 4) +".csv";
                         w.println("<p>See <a href=\"" + outputCSVFileName+ "\">CSV file</a> for full data set...</p>");
 
                         final ByteArrayOutputStream baosCSV = new ByteArrayOutputStream(16384);
