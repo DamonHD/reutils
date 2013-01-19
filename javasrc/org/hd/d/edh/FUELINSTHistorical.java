@@ -562,13 +562,21 @@ public final class FUELINSTHistorical
                         final PrintWriter wCSV = new PrintWriter(baosCSV);
 
                         // Create descriptive header
-                        wCSV.println("\"Description\",\"V1\",\"Carbon intensity by hour computed by earth.org.uk from Elexon and other data.\",\"All times UTC/GMT.\"");
+                        wCSV.println("\"Report\",\"V1.1\",\\\"All times UTC/GMT.\\\",\"Carbon intensity by hour computed by earth.org.uk from Elexon and other data.\"");
                         final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
                         c.setTime(new Date());
                         final SimpleDateFormat sDF = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                         sDF.setCalendar(c);
-                        wCSV.println("\"Generated\"," + sDF.format(c.getTime()));
-                        wCSV.println("\"YYYY/MM/DD HH:00 UTC hour start\",\"mean intensity gCO2/kWh\",\"sample count within hour\"</p>");
+                        wCSV.println("\"Generation date\"," + sDF.format(c.getTime()));
+                        final StringBuffer sb = new StringBuffer(64);
+                        final SortedMap<String,Float> fuelIntensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities());
+                        for(final String fuel : fuelIntensities.keySet())
+                            {
+                            sb.append(',');
+                            sb.append(fuel).append('=').append(fuelIntensities.get(fuel));
+                            }
+                        wCSV.println("\"Fuel intensities\",\"gCO2/kWh\",\"(base)\"" + sb);
+                        wCSV.println("\"YYYY/MM/DD HH:00 UTC hour start\",\"Mean intensity gCO2/kWh\",\"Sample count within hour\"</p>");
 
                         // Write data.
                         (new StreamCSV()).StreamIt(wCSV);
