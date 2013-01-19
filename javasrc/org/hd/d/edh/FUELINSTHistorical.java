@@ -517,38 +517,64 @@ public final class FUELINSTHistorical
                     w.println("<p>Datum count: " + cols + "</p>");
                     w.println("<p>Range: " + dataByBucket.firstKey() + " to " + dataByBucket.lastKey() + "; all times UTC.</p>");
 
-                    // Derive .csv name from .html, including the starting YYYY year.
-                    final String outputCSVFileName = outputHTMLFileName + ".intensities." + dataByBucket.firstKey().substring(0, 4) +".csv";
+                    // Write out CSV to supplied PrintWriter.
+                    final class StreamCSV
+                        {
+                        public void StreamIt(final PrintWriter pw)
+                            {
+                            final StringBuilder sb = new StringBuilder(32); // Can be reused for each line...
+                            for(final Map.Entry<String, List<TimestampedNonNegInt>> e : dataByBucket.entrySet())
+                                {
+                                sb.setLength(0);
+                                final int sampleCount = e.getValue().size();
+                                // Date/time.
+                                sb.append(e.getKey()).append(',');
+                                // Intensity: omit value to leave empty field (still terminate with comma) if no samples.
+                                if(sampleCount > 0)
+                                    {
+                                    long sum = 0;
+                                    for(final TimestampedNonNegInt tsnni : e.getValue()) { sum += tsnni.value; }
+                                    final int mean = Math.round(sum / (float) sampleCount);
+                                    sb.append(mean);
+                                    }
+                                sb.append(',');
+                                // Sample count
+                                sb.append(sampleCount);
+                                pw.println(sb.toString());
+                                }
+                           }
+                        }
 
                     if(INLINE_CSV)
                         {
                         w.println("<p>YYYY/MM/DD HH:00 UTC, mean intensity gCO2/kWh, sample count</p>");
                         w.println("<div><textarea rows=\"10\" cols=\"60\">");
-                        final StringBuilder sb = new StringBuilder(32); // Can be reused for each line...
-                        for(final Map.Entry<String, List<TimestampedNonNegInt>> e : dataByBucket.entrySet())
-                            {
-                            sb.setLength(0);
-                            final int sampleCount = e.getValue().size();
-                            // Date/time.
-                            sb.append(e.getKey()).append(',');
-                            // Intensity: omit value to leave empty field (still terminate with comma) if no samples.
-                            if(sampleCount > 0)
-                                {
-                                long sum = 0;
-                                for(final TimestampedNonNegInt tsnni : e.getValue()) { sum += tsnni.value; }
-                                final int mean = Math.round(sum / (float) sampleCount);
-                                sb.append(mean);
-                                }
-                            sb.append(',');
-                            // Sample count
-                            sb.append(sampleCount);
-                            w.println(sb.toString());
-                            }
+                        (new StreamCSV()).StreamIt(w);
                         w.println("</textarea></div>");
                         }
                     else
                         {
+                        // Derive .csv name from .html, including the starting YYYY year.
+                        final String outputCSVFileName = outputHTMLFileName + ".intensities." + dataByBucket.firstKey().substring(0, 4) +".csv";
                         w.println("<p>See <a href=\"" + outputCSVFileName+ "\">CSV file</a> for full data set...</p>");
+
+                        final ByteArrayOutputStream baosCSV = new ByteArrayOutputStream(16384);
+                        final PrintWriter wCSV = new PrintWriter(baosCSV);
+
+                        // Create descriptive header
+                        wCSV.println("\"Description\",\"V1\",\"Carbon intensity by hour computed by earth.org.uk from Elexon and other data.\",\"All times UTC/GMT.\"");
+                        final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
+                        c.setTime(new Date());
+                        final SimpleDateFormat sDF = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                        sDF.setCalendar(c);
+                        wCSV.println("\"Generated\"," + sDF.format(c.getTime()));
+                        wCSV.println("\"YYYY/MM/DD HH:00 UTC hour start\",\"mean intensity gCO2/kWh\",\"sample count within hour\"</p>");
+
+                        // Write data.
+                        (new StreamCSV()).StreamIt(wCSV);
+
+                        wCSV.close();
+                        DataUtils.replacePublishedFile(outputCSVFileName, baosCSV.toByteArray());
                         }
                     continue;
                     }
