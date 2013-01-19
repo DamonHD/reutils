@@ -348,7 +348,7 @@ public final class FUELINSTHistorical
     private static final boolean DISCARD_DUP_SAMPLES = true;
 
     /**If true then put by-hour CSV data in-line for cut-n-paste, else write separate file. */
-    private static final boolean INLINE_CSV = true;
+    private static final boolean INLINE_CSV = false;
 
     /**Do a historical analysis of TIBCO daily data dumps. */
     public static void doHistoricalAnalysis(final String[] args)
@@ -546,7 +546,10 @@ public final class FUELINSTHistorical
                             }
                         w.println("</textarea></div>");
                         }
-                    else { w.println("<p>See CSV file for full data set...</p>"); }
+                    else
+                        {
+                        w.println("<p>See <a href=\"" + outputCSVFileName+ "\">CSV file</a> for full data set...</p>");
+                        }
                     continue;
                     }
 
