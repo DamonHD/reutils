@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
+import java.io.File;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
@@ -117,5 +118,16 @@ System.out.println("LENGTH="+message.length()+": "+message);
                         message.length() <= TwitterUtils.MAX_TWEET_CHARS);
                 }
             }
+        }
+
+    /**Test that XML output is generated correctly. */
+    public void testXMLOutput() throws Exception
+        {
+        final File tmpFile = File.createTempFile("XMLOutputTest", ".tmp");
+        try
+            {
+
+            }
+        finally { tmpFile.delete(); }
         }
     }
