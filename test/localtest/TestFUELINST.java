@@ -45,6 +45,7 @@ import org.hd.d.edh.FUELINST;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
+import org.hd.d.edh.FUELINST.CurrentSummary;
 import org.w3c.dom.Document;
 
 /**Test the FUELINST handler. */
@@ -125,6 +126,9 @@ System.out.println("LENGTH="+message.length()+": "+message);
             }
         }
 
+    /**Cached summary information. */
+    public static final File CACHE1 = new File("_gridCarbonIntensityGB.201503231711.cache");
+
     /**Test that XML output is generated correctly. */
     public void testXMLOutput() throws Exception
         {
@@ -146,8 +150,20 @@ System.out.println("LENGTH="+message.length()+": "+message);
                                         1,
                                         TrafficLight.YELLOW);
             final DocumentBuilder builderEmpty = factory.newDocumentBuilder();
-            final Document parsed = builderEmpty.parse(tmpFile);
-            assertNotNull(parsed);
+            final Document parsedEmpty = builderEmpty.parse(tmpFile);
+            assertNotNull(parsedEmpty);
+
+//            // Try with a more realistic cached entry.
+//            // Test that a minimal generated XML file is parseable at least.
+//            FUELINSTUtils.updateXMLFile(System.currentTimeMillis(),
+//                                        tmpFile.toString(),
+//                                        FUELINSTUtils.computeCurrentSummary(CACHE1),
+//                                        true,
+//                                        1,
+//                                        TrafficLight.YELLOW);
+//            final DocumentBuilder builderCached1 = factory.newDocumentBuilder();
+//            final Document parsedCached1 = builderCached1.parse(tmpFile);
+//            assertNotNull(parsedCached1);
             }
         catch(final Exception e)
             {
