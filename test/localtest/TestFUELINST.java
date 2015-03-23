@@ -41,6 +41,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import junit.framework.TestCase;
 
 import org.hd.d.edh.DataUtils;
+import org.hd.d.edh.FUELINST;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
@@ -128,7 +129,7 @@ System.out.println("LENGTH="+message.length()+": "+message);
     /**Test that XML output is generated correctly. */
     public void testXMLOutput() throws Exception
         {
-        final File tmpFile = File.createTempFile("XMLOutputTest", ".tmp");
+        final File tmpFile = File.createTempFile("XMLOutputTest", ".xml");
         try
             {
             final DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
@@ -137,6 +138,13 @@ System.out.println("LENGTH="+message.length()+": "+message);
             final DocumentBuilder builderBad = factory.newDocumentBuilder();
             try { builderBad.parse(tmpFile); fail("XML parse should fail"); }
             catch(final SAXException e) { /* expected. */ }
+
+//            FUELINSTUtils.updateXMLFile(final long startTime,
+//                    final String outputXMLFileName,
+//                    final FUELINST.CurrentSummary summary,
+//                    final boolean isDataStale,
+//                    final int hourOfDayHistorical,
+//                    final TrafficLight status);
             }
         finally { tmpFile.delete(); }
         }
