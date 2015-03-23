@@ -634,7 +634,7 @@ public final class FUELINSTUtils
                 }
             catch(final IOException e) { e.printStackTrace(); }
 
-            // Update the (mobile-friendly) XHTML page.
+            // Update the XML data dump.
             try
                 {
                 final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
@@ -1191,7 +1191,9 @@ public final class FUELINSTUtils
         DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray());
         }
 
-    static void updateXMLFile(final long startTime,
+    /**Update (atomically if possible) the XML traffic-light data dump.
+     */
+    public static void updateXMLFile(final long startTime,
                                            final String outputXMLFileName,
                                            final FUELINST.CurrentSummary summary,
                                            final boolean isDataStale,
@@ -1286,10 +1288,12 @@ public final class FUELINSTUtils
 
                 w.println("<sample>");
                 w.println("<hour>"+sbh+"</hour>");
+                w.println("<carbon_intensity>");
                 if((null == hIntensity) || (0 == hIntensity))
-                    { w.println("<carbon_intensity></carbon_intensity>"); continue; /* Skip empty slot. */ }
+                    { /* Empty slot. */ }
                 else
-                    { w.println("<carbon_intensity>"+ String.valueOf(hIntensity)+"</carbon_intensity>"); }
+                    { w.println(String.valueOf(hIntensity)); }
+                w.println("</carbon_intensity>");
                 w.println("</sample>");
                 }
             w.println("</generation_intensity>");

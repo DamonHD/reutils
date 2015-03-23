@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package localtest;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
@@ -139,12 +140,23 @@ System.out.println("LENGTH="+message.length()+": "+message);
             try { builderBad.parse(tmpFile); fail("XML parse should fail"); }
             catch(final SAXException e) { /* expected. */ }
 
-//            FUELINSTUtils.updateXMLFile(final long startTime,
-//                    final String outputXMLFileName,
-//                    final FUELINST.CurrentSummary summary,
-//                    final boolean isDataStale,
-//                    final int hourOfDayHistorical,
-//                    final TrafficLight status);
+            // Test that a minimal generated XML file is parseable at least.
+            FUELINSTUtils.updateXMLFile(System.currentTimeMillis(),
+                                        tmpFile.toString(),
+                                        new FUELINST.CurrentSummary(),
+                                        true,
+                                        1,
+                                        TrafficLight.YELLOW);
+            final DocumentBuilder builderEmpty = factory.newDocumentBuilder();
+            final Document parsed = builderEmpty.parse(tmpFile);
+            assertNotNull(parsed);
+            }
+        catch(final Exception e)
+            {
+            final File bad = new File("out/bad.xml.tmp");
+            System.err.println("Bad file moved to " + bad.getAbsolutePath());
+            tmpFile.renameTo(bad);
+            throw e;
             }
         finally { tmpFile.delete(); }
         }
