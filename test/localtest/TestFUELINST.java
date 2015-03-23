@@ -30,7 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package localtest;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +46,6 @@ import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**Test the FUELINST handler. */
 public final class TestFUELINST extends TestCase
@@ -135,10 +133,10 @@ System.out.println("LENGTH="+message.length()+": "+message);
             {
             final DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
 
-            // Fail on initially-empty file.
-            final DocumentBuilder builderBad = factory.newDocumentBuilder();
-            try { builderBad.parse(tmpFile); fail("XML parse should fail"); }
-            catch(final SAXException e) { /* expected. */ }
+//            // Fail on initially-empty file.
+//            final DocumentBuilder builderBad = factory.newDocumentBuilder();
+//            try { builderBad.parse(tmpFile); fail("XML parse should fail"); }
+//            catch(final SAXException e) { /* expected. */ }
 
             // Test that a minimal generated XML file is parseable at least.
             FUELINSTUtils.updateXMLFile(System.currentTimeMillis(),
