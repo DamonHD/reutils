@@ -35,12 +35,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import junit.framework.TestCase;
 
 import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**Test the FUELINST handler. */
 public final class TestFUELINST extends TestCase
@@ -126,7 +131,12 @@ System.out.println("LENGTH="+message.length()+": "+message);
         final File tmpFile = File.createTempFile("XMLOutputTest", ".tmp");
         try
             {
+            final DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
 
+            // Fail on initially-empty file.
+            final DocumentBuilder builderBad = factory.newDocumentBuilder();
+            try { builderBad.parse(tmpFile); fail("XML parse should fail"); }
+            catch(final SAXException e) { /* expected. */ }
             }
         finally { tmpFile.delete(); }
         }
