@@ -555,6 +555,14 @@ public final class FUELINSTUtils
         System.out.println("Supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputSupergreenFlagFile, supergreenFlagState);
+        
+        // Present when red, ie not in most carbon-intensive part of the day.
+        // Flag is computed even with stale data.
+        final File outputRedFlagFile = new File(baseFileName + ".red.flag");
+        final boolean redFlagState = TrafficLight.RED == statusUncapped;
+        System.out.println("Red flag file is " + outputRedFlagFile + ": " + (redFlagState ? "set" : "clear"));
+        // Remove power-low/grid-poor flag file when status is not RED, else create it (for GREEN/YELLOW/unknown).
+        FUELINSTUtils.doPublicFlagFile(outputRedFlagFile, redFlagState);
         }
 
     /**Create/remove public (readable by everyone) flag file as needed to match required state.
