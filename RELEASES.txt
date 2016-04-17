@@ -15,15 +15,11 @@ Incorporate fudge-factors and/or summary by hour by hour by fuel with methods to
 
 Cache the raw properties after first loading and parsing for efficiency.
 
-Add optional 'green window' (eg 1am to 5am) outwith which even pure predictive output is not allowed to go green in absence of live data.
-
 Allow for WIND (and other fuel) fudge factor (for embedded generation invisible to Elexon) with optional comment/explanation.
 
 For long-term data analysis show fraction of year hour/day/month in bottom 1/3, 1/4 intensity, no PS, green/supergreen, etc.
 
-Store a week's worth of data for better predictions on most days except holidays such as Xmas and have special treatment for them.
-
-Change sendTweet to send depending on status colour change only, eg not text change to avoid spurious messages when switching between live and predictive modes.
+Store a week's worth of data for better predictions (and green/red estimates) on most days except holidays such as Xmas and have special treatment for them.
 
 *** STORE RESULTS AS COMPUTED ALONG WITH INPUT DATA/INTENSITIES TO ALLOW RECONSTRUCTION AS-IS IN FUTURE (once-per-day store for HH intervals for the whole day probably OK)
 
@@ -35,7 +31,6 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-    DHD20130119: Added code to generate adjunct CSV file of intensity by hour for a historical analysis.
 
 
 
@@ -48,6 +43,16 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20160331:
+    freezepoint name: V1.0.14
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.13
+    DHD20160331: Added 'red' flag to signal grid highest intensity (used locally at 16WW!).
+    DHD20130119: Added code to generate adjunct CSV file of intensity by hour for a historical analysis.
+
 
 20150323:
     freezepoint name: V1.0.13
