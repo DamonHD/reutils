@@ -35,7 +35,6 @@ Change sendTweet to send depending on status colour change only, eg not text cha
 SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
-    DHD20130119: Added code to generate adjunct CSV file of intensity by hour for a historical analysis.
 
 
 
@@ -48,6 +47,16 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20160331:
+    freezepoint name: V1.0.14
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.13
+    DHD20160331: Added 'red' flag to signal grid highest intensity (used locally at 16WW!).
+    DHD20130119: Added code to generate adjunct CSV file of intensity by hour for a historical analysis.
+
 
 20150323:
     freezepoint name: V1.0.13
