@@ -222,6 +222,9 @@ public final class FUELINSTUtils
             {
             // Extract fuel values for this row and compute a weighted intensity...
             final Map<String, String> namedFields = DataUtils.extractNamedFieldsByPositionFromRow(template, row);
+            // Special case after BMRS upgrade 2016/12/30: ignore trailing row starting "FTR ".
+            if(namedFields.get("type").startsWith("FTR")) { continue; }
+            // Reject malformed/unexpected data.
             if(!"FUELINST".equals(namedFields.get("type")))
                 { throw new IOException("Expected FUELINST data but got: " + namedFields.get("type")); }
             final Map<String,Integer> generationByFuel = new HashMap<String,Integer>();
