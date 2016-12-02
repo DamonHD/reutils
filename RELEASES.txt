@@ -44,6 +44,15 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+20161201:
+    freezepoint name: V1.1.0
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.0.14
+    DHD20161201: Accommodating BMRS update today (switchoff of old server).
+
+
 20160331:
     freezepoint name: V1.0.14
     branch name: HEAD
