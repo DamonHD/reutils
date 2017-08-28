@@ -908,14 +908,14 @@ public final class FUELINSTUtils
             // Write out crude 'lights' with only appropriate lamp lit
             // and some appropriate text.
             final int sidePixels = GCOMP_PX_MAX; // Edge length of each 'lamp'.
-            final String open = "<tr><th style=\"height:"+sidePixels+"px;width:"+((3*sidePixels)/2)+"px\"";
+            final String open = "<tr><th style=\"border:3px solid;height:"+sidePixels+"px;width:"+((3*sidePixels)/2)+"px";
             final String close = "</th></tr>";
-            w.write("<table border=\"3\" align=\"center\">");
+            w.write("<div><table style=\"margin-left:auto;margin-right:auto\">");
             final String weaselWord = isDataStale ? "probably " : "";
-            w.write(open+((status == TrafficLight.RED) ? " bgcolor=\"red\">Grid carbon intensity is "+weaselWord+"high; please do not run big appliances such as a dishwasher or washing machine now if you can postpone" : ">&nbsp;")+close);
-            w.write(open+((status == TrafficLight.YELLOW) ? " bgcolor=\"yellow\">Grid is "+weaselWord+"OK; but you could still avoid CO2 emissions by postponing running big appliances such as dishwashers or washing machines" : ((status == null) ? ">Status is unknown" : ">&nbsp;"))+close);
-            w.write(open+((status == TrafficLight.GREEN) ? " bgcolor=\"green\">Grid is "+weaselWord+"good; you might run major loads such as your dishwasher and/or washing machine now to minimise CO2 emissions" : ">&nbsp;")+close);
-            w.write("</table>");
+            w.write(open+((status == TrafficLight.RED) ? ";background-color:red\">Grid carbon intensity is "+weaselWord+"high; please do not run big appliances such as a dishwasher or washing machine now if you can postpone" : "\">&nbsp;")+close);
+            w.write(open+((status == TrafficLight.YELLOW) ? ";background-color:yellow\">Grid is "+weaselWord+"OK; but you could still avoid CO2 emissions by postponing running big appliances such as dishwashers or washing machines" : ((status == null) ? "\">Status is unknown" : "\">&nbsp;"))+close);
+            w.write(open+((status == TrafficLight.GREEN) ? ";background-color:green\">Grid is "+weaselWord+"good; you might run major loads such as your dishwasher and/or washing machine now to minimise CO2 emissions" : "\">&nbsp;")+close);
+            w.write("</table></div>");
             w.println();
 
             if(summary.histMinIntensity < summary.histMaxIntensity)
@@ -927,9 +927,9 @@ public final class FUELINSTUtils
             if(SHOW_INTENSITY_DELTA && !isDataStale)
                 {
                 if(summary.recentChange == TrafficLight.GREEN)
-                    { w.println("<p style=\"color: green\">Good: carbon intensity (CO2 per kWh) is currently dropping.</p>"); }
+                    { w.println("<p style=\"color:green\">Good: carbon intensity (CO2 per kWh) is currently dropping.</p>"); }
                 else if(summary.recentChange == TrafficLight.RED)
-                    { w.println("<p style=\"color: red\">Bad: carbon intensity (CO2 per kWh) is currently rising.</p>"); }
+                    { w.println("<p style=\"color:red\">Bad: carbon intensity (CO2 per kWh) is currently rising.</p>"); }
                 }
 
             w.println("<p>Latest data is from <strong>"+(new Date(summary.timestamp))+"</strong>. This page should be updated every few minutes: use your browser's refresh/reload button if you need to check again.</p>");

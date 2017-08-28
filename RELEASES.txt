@@ -35,6 +35,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
     DHD20170826: fixing broken HTML(5) output. 
+    DHD20170826: some micro-optimisations for XHTML-compliant HTML5 output. 
 
 
 
