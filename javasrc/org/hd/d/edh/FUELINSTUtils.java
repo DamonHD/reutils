@@ -975,7 +975,7 @@ public final class FUELINSTUtils
 
             // Intensity (and generation) by hour of day.
             final int newSlot = FUELINST.CurrentSummary.getGMTHourOfDay(startTime);
-            w.write("<table border=\"1\" align=\"center\">");
+            w.write("<div><table style=\"margin-left:auto;margin-right:auto\">");
             w.write("<tr><th colspan=\"24\">");
                 w.write(isDataStale ? "Last available historical" : "Recent");
                 w.write(" mean GMT hourly generation intensity gCO2/kWh (average="+summary.histAveIntensity+"); *now (="+summary.currentIntensity+")</th></tr>");
@@ -989,7 +989,7 @@ public final class FUELINSTUtils
                 sbh.append(displayHourGMT);
                 if(sbh.length() < 2) { sbh.insert(0, '0'); }
                 if(hourOfDayHistorical == displayHourGMT) { sbh.append('*'); }
-                w.write("<th>"+sbh+"</th>");
+                w.write("<th style=\"border:1px solid\">"+sbh+"</th>");
                 }
             w.write("</tr>");
             w.write("<tr>");
@@ -1027,7 +1027,7 @@ public final class FUELINSTUtils
                 if((null == hGeneration) || (0 == hGeneration)) { w.write("<td></td>"); continue; /* Skip empty slot. */ }
                 final int height = (GCOMP_PX_MAX*hGeneration) / Math.max(1, maxGenerationMW);
                 final int scaledToGW = (hGeneration + 500) / 1000;
-                w.write("<td width=\"30\"><ul class=\"barGraph\">");
+                w.write("<td style=\"width:30px\"><ul class=\"barGraph\">");
                     w.write("<li style=\"background-color:gray;height:"+height+"px;left:0\">");
                     w.write(String.valueOf(scaledToGW));
                     w.write("</li>");
@@ -1048,7 +1048,7 @@ public final class FUELINSTUtils
                     w.write("</ul></td>");
                 }
             w.write("</tr>");
-            w.write("</table>");
+            w.write("</table><div>");
             w.println();
             // Footnotes
             if(usedLessGreen)
