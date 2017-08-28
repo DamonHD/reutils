@@ -651,7 +651,7 @@ public final class FUELINSTHistorical
 
                     final int height = (FUELINSTUtils.GCOMP_PX_MAX * mean) / maxMax;
                     w.write("<td width=\"30\"><ul class=\"barGraph\">");
-                    w.write("<li style=\"background-color:gray;height:"+height+"px;left:0px;\">");
+                    w.write("<li style=\"background-color:gray;height:"+height+"px;left:0\">");
                     w.write(String.valueOf(mean));
                     w.write("</li>");
                     w.write("</ul></td>");

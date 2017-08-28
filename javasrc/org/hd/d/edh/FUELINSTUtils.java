@@ -908,7 +908,7 @@ public final class FUELINSTUtils
             // Write out crude 'lights' with only appropriate lamp lit
             // and some appropriate text.
             final int sidePixels = GCOMP_PX_MAX; // Edge length of each 'lamp'.
-            final String open = "<tr><th height=\""+sidePixels+"\" width=\""+((3*sidePixels)/2)+"\"";
+            final String open = "<tr><th style=\"height:"+sidePixels+";width:"+((3*sidePixels)/2)+"\"";
             final String close = "</th></tr>";
             w.write("<table border=\"3\" align=\"center\">");
             final String weaselWord = isDataStale ? "probably " : "";
@@ -920,7 +920,7 @@ public final class FUELINSTUtils
 
             if(summary.histMinIntensity < summary.histMaxIntensity)
                 {
-                w.println("<p align=\"center\">You might have saved as much as <big><big><big><strong>"+FUELINSTUtils.computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"%</strong></big></big></big> carbon emissions by choosing the best time to run your washing and other major loads.</p>");
+                w.println("<p style=\"text-align:center\">You might have saved as much as <strong style=\"font-size:xx-large\">"+FUELINSTUtils.computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"%</strong> carbon emissions by choosing the best time to run your washing and other major loads.</p>");
                 }
 
             // Note any recent change/delta iff the data is not stale.
@@ -958,12 +958,10 @@ public final class FUELINSTUtils
                 w.write(isDataStale ?
                      "Recent effective carbon intensity for a domestic user at this time of day was " :
                      "Effective grid carbon intensity for a domestic user is currently ");
-                w.write("<big><big><big>");
-                if(null != status) { w.write("<span style=\"color:"+statusColour+";background-color:black\">"); }
+                if(null != status) { w.write("<span style=\"font-size:xx-large;color:"+statusColour+";background-color:black\">"); }
                 w.write(String.valueOf(Math.round((isDataStale ? summary.histAveIntensity : summary.currentIntensity) * (1 + summary.totalGridLosses))));
                 w.write("gCO2/kWh");
                 if(null != status) { w.write("</span>"); }
-                w.write("</big></big></big>");
                 w.write(" including transmission and distribution losses of ");
                 w.write(String.valueOf(Math.round(100 * summary.totalGridLosses)));
                 w.write("%.</p>");
@@ -1011,7 +1009,7 @@ public final class FUELINSTUtils
                     rawHourStatus.toString().toLowerCase();
                 final int height = (GCOMP_PX_MAX*hIntensity) / Math.max(1, maxHourlyIntensity);
                 w.write("<td width=\"30\"><ul class=\"barGraph\">");
-                    w.write("<li style=\"background-color:"+barColour+";height:"+height+"px;left:0px;\">");
+                    w.write("<li style=\"background-color:"+barColour+";height:"+height+"px;left:0\">");
                     w.write(String.valueOf(hIntensity));
                     w.write("</li>");
                     w.write("</ul></td>");
@@ -1030,13 +1028,13 @@ public final class FUELINSTUtils
                 final int height = (GCOMP_PX_MAX*hGeneration) / Math.max(1, maxGenerationMW);
                 final int scaledToGW = (hGeneration + 500) / 1000;
                 w.write("<td width=\"30\"><ul class=\"barGraph\">");
-                    w.write("<li style=\"background-color:gray;height:"+height+"px;left:0px;\">");
+                    w.write("<li style=\"background-color:gray;height:"+height+"px;left:0\">");
                     w.write(String.valueOf(scaledToGW));
                     w.write("</li>");
                     final int hZCGeneration = summary.histAveZCGenerationByHourOfDay.get0(displayHourGMT);
                     if(0 != hZCGeneration)
                         {
-                        w.write("<li style=\"background-color:green;height:"+((GCOMP_PX_MAX*hZCGeneration) / Math.max(1, maxGenerationMW))+"px;left:0px;\">");
+                        w.write("<li style=\"background-color:green;height:"+((GCOMP_PX_MAX*hZCGeneration) / Math.max(1, maxGenerationMW))+"px;left:0\">");
                         if(hZCGeneration >= (maxGenerationMW/8)) { w.write(String.valueOf((hZCGeneration + 500) / 1000)); }
                         w.write("</li>");
                         }
@@ -1087,7 +1085,7 @@ public final class FUELINSTUtils
                 if(!byCategory.isEmpty())
                     {
                     final Map<String,Integer> byCat = getFuelMWByCategory(summary.currentGenerationMWByFuelMW, byCategory);
-                    w.write("<p>Generation by fuel category (may overlap): ");
+                    w.write("<p>Generation by fuel category (may overlap):</p><dl>");
                     final SortedMap<String,Integer> powerbyCat = new TreeMap<String, Integer>(byCat);
                     for(final String category : powerbyCat.keySet())
                         {
@@ -1101,7 +1099,7 @@ public final class FUELINSTUtils
                         w.write(" "); w.write((new ArrayList<String>(new TreeSet<String>(byCategory.get(category)))).toString()); w.write("");
                         w.write("</dd>");
                         }
-                    w.write("</dl></p>");
+                    w.write("</dl>");
                     w.println();
                     }
                 }
@@ -1129,13 +1127,13 @@ public final class FUELINSTUtils
             final SortedMap<String,String> fullFuelNames = new TreeMap<String,String>(FUELINSTUtils.getConfiguredFuelNames());
             if(!fullFuelNames.isEmpty())
                 {
-                w.write("<p>Key to fuel codes:<dl>");
+                w.write("<p>Key to fuel codes:</p><dl>");
                     for(final String fuel : fullFuelNames.keySet())
                         {
                         w.write("<dt>"); w.write(fuel); w.write("</dt>");
                         w.write("<dd>"); w.write(fullFuelNames.get(fuel)); w.write("</dd>");
                         }
-                    w.write("</dl></p>");
+                    w.write("</dl>");
                 w.println();
                 }
 
