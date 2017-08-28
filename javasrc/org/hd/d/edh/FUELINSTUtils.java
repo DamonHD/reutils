@@ -1048,7 +1048,7 @@ public final class FUELINSTUtils
                     w.write("</ul></td>");
                 }
             w.write("</tr>");
-            w.write("</table><div>");
+            w.write("</table></div>");
             w.println();
             // Footnotes
             if(usedLessGreen)

@@ -47,6 +47,16 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 20170826:
+    freezepoint name: V1.1.4
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.3
+    DHD20170826: fixing broken HTML(5) output. 
+    DHD20170826: some micro-optimisations for XHTML-compliant HTML5 output. 
+
+
+20170826:
     freezepoint name: V1.1.3
     branch name: HEAD
     Deployed where: earth.org.uk
