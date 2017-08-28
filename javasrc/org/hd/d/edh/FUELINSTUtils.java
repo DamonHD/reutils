@@ -908,7 +908,7 @@ public final class FUELINSTUtils
             // Write out crude 'lights' with only appropriate lamp lit
             // and some appropriate text.
             final int sidePixels = GCOMP_PX_MAX; // Edge length of each 'lamp'.
-            final String open = "<tr><th style=\"height:"+sidePixels+";width:"+((3*sidePixels)/2)+"\"";
+            final String open = "<tr><th style=\"height:"+sidePixels+"px;width:"+((3*sidePixels)/2)+"px\"";
             final String close = "</th></tr>";
             w.write("<table border=\"3\" align=\"center\">");
             final String weaselWord = isDataStale ? "probably " : "";
