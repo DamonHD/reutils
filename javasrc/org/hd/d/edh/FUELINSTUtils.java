@@ -1008,7 +1008,7 @@ public final class FUELINSTUtils
                 final String barColour = lessGreen ? FUELINSTUtils.LESS_GREEN_STORAGE_DRAWDOWN :
                     rawHourStatus.toString().toLowerCase();
                 final int height = (GCOMP_PX_MAX*hIntensity) / Math.max(1, maxHourlyIntensity);
-                w.write("<td width=\"30\"><ul class=\"barGraph\">");
+                w.write("<td style=\"width:30px\"><ul class=\"barGraph\">");
                     w.write("<li style=\"background-color:"+barColour+";height:"+height+"px;left:0\">");
                     w.write(String.valueOf(hIntensity));
                     w.write("</li>");

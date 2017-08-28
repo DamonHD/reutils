@@ -34,8 +34,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 ======================================
 
 
-    DHD20170826: fixing broken HTML(5) output. 
-    DHD20170826: some micro-optimisations for XHTML-compliant HTML5 output. 
+
 
 
 
@@ -46,6 +45,16 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+20170826:
+    freezepoint name: V1.1.2
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.1
+    DHD20170826: fixing broken HTML(5) output. 
+    DHD20170826: some micro-optimisations for XHTML-compliant HTML5 output. 
+
 
 20170826:
     freezepoint name: V1.1.1
