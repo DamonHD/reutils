@@ -11,7 +11,11 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
-Make HTML output HTML5 compliant, and optimise for size against better CSS.
+Keep 7-day rolling intensity and do primary set of lights against that (but show 24h view too).
+
+Fold in Sheffiled Solar and factor for on-shore wind.
+
+Fold in NatGrid 48h predictions.
 
 Incorporate fudge-factors and/or summary by hour by hour by fuel with methods to calc adjusted thresholds, etc, and poss create new summary object?
 
