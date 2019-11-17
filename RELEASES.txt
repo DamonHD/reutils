@@ -41,6 +41,11 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 
+PENDING 201911XX:
+    DHD: append carbon intensity figure with timestamp to log for current UTC day in specified dir, starting each with header row(s) including current FUELINST weights.
+
+
+
 
 
 
@@ -49,11 +54,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
-
-
-
-PENDING 201911XX:
-    DHD: append carbon intensity figure with timestamp to log for current UTC day in specified dir, starting each with header row(s) including current FUELINST weights.
 
 
 
