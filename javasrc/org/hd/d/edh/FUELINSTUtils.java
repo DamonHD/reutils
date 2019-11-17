@@ -747,6 +747,9 @@ public final class FUELINSTUtils
         }
 
     /**Append to (or create if necessary) the (retail) intensity log.
+     * If run more often than new data is available
+     * this may produce duplicate/repeated records.
+     * 
      * @param id   non-null writable directory for the log file
      * @param timestamp  +ve timestamp of latest input available data point
      * @param retailIntensity  non-negative retail/domestic intensity kgCO2e/kWh
@@ -766,6 +769,15 @@ public final class FUELINSTUtils
         final File logFile = new File(id, dateUTC + ".log");
 //System.out.println("Intensity log filename: " + logFile);
         
+        // Refuse to write to a log other than today's for safety.
+        // This may conceivably wrongly drop records at either end of the day.
+        final String todayDateUTC = fsDF.format(new Date());
+        if(!dateUTC.equals(todayDateUTC))
+            {
+        	System.err.println("WARNING: will not write to intemsity log for "+dateUTC+" at "+(new Date()));
+        	return;
+            }
+        
         // Compute the timestamp string for the log record.
         final SimpleDateFormat tsDF = new SimpleDateFormat(UTCMINTIMESTAMP_FORMAT);
         tsDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
@@ -779,10 +791,16 @@ public final class FUELINSTUtils
         	    new BufferedWriter(new FileWriter(logFile, true))))
 	        {
         	// Write a header if the file was new.
-	        if(!logFileExists) { pw.println("# Time kgCO2e/kWh"); }
+	        if(!logFileExists)
+	            {
+	        	pw.println("# Retail GB electricity carbon intensity as computed by earth.org.uk.");
+	        	pw.println("# Time kgCO2e/kWh");
+	        	}
 	        // Append the new record <timestamp> <intensity>.
 	        pw.print(timestampUTC); pw.print(' '); pw.println(retailIntensity);
 	        }
+        // Attempt to ensure that the log file is readable by all.
+        logFile.setReadable(true, false);
 	    }
 
 	/**Base directory for embeddable intensity buttons/icons; not null.
@@ -799,13 +817,19 @@ public final class FUELINSTUtils
      * The log is line-oriented with lines of the form (no leading spaces)
      *     <IDO8601UTCSTAMPTOMIN> <kgCO2e/kWh>
      * ie two space-separated columns, eg:
-     *     # Time kgCO2e/kWh
      *     # Other comment and one-of-data here.
+     *     # Time kgCO2e/kWh
      *     2019-11-17T16:02Z 352
      *     2019-11-17T16:12Z 351
      *     
      * Initial lines may be headers, starting with # in in column 1,
      * and may be ignored for data purposes.
+     * 
+     * This may contain repeat records if data is sampled more often
+     * than it is updated at the source.
+     * 
+     * Records will not be generated when data is 'stale',
+     * ie when fresh data is not available from the source.
      * 
      * Log files will be named with the form YYYYMMDD.log
      * eg 20191117.log.
