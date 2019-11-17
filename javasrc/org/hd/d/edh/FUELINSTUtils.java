@@ -694,50 +694,65 @@ public final class FUELINSTUtils
             catch(final IOException e) { e.printStackTrace(); }
             }
 
-            // Compute intensity as seen by typical GB domestic consumer.
-            final int retailIntensity = Math.round((isDataStale ?
-            		summary.histAveIntensity :
-            	    summary.currentIntensity) * (1 + summary.totalGridLosses));
+        // Compute intensity as seen by typical GB domestic consumer.
+        final int retailIntensity = Math.round((isDataStale ?
+        		summary.histAveIntensity :
+        	    summary.currentIntensity) * (1 + summary.totalGridLosses));
 
-            // Update button(s)/icon(s).
+        // Update button(s)/icon(s).
+        try
+            {
+            final File bd = new File(BUTTON_BASE_DIR);
+            if(bd.isDirectory() && bd.canWrite())
+                {
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
+                }
+            else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
+            }
+        catch(final IOException e) { e.printStackTrace(); }
+        
+        // New as of 2019-10.
+        // Append to the intensity log.
+        // Only do this for current/live data, ie if not stale.
+        if(isDataStale || (0 == summary.timestamp))
+            { System.err.println("Will not update log, data stale."); }
+        else
+        	{ 		
             try
-                {
-                final File bd = new File(BUTTON_BASE_DIR);
-                if(bd.isDirectory() && bd.canWrite())
-                    {
-                    GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
-                    GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
-                    GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
-                    }
-                else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
-                }
+	            {
+	            final File id = new File(INTENSITY_LOG_BASE_DIR);
+	            if(id.isDirectory() && id.canWrite())
+	                {
+	            	appendToRetailIntensityLog(id, summary.timestamp, retailIntensity);
+	                }
+	            else { System.err.println("Missing directory for intensity log: " + INTENSITY_LOG_BASE_DIR); }
+	            }
             catch(final IOException e) { e.printStackTrace(); }
-            
-            // New as of 2019-10.
-            // Append to the intensity log.
-            // Only do this for current/live data, ie if not stale.
-            if(isDataStale || (0 == summary.timestamp))
-                {
-            	System.err.println("Cannot update log, data stale.");
-                }
-            else
-            	{
-//            try
-		            {
-		            final File id = new File(INTENSITY_LOG_BASE_DIR);
-		            if(id.isDirectory() && id.canWrite())
-		                {
-		                // TODO
-		
-		            	
-		                }
-		            else { System.err.println("Missing directory for intensity log: " + INTENSITY_LOG_BASE_DIR); }
-		            }
-//            catch(final IOException e) { e.printStackTrace(); }
-            	}
+        	}
         }
 
-    /**Base directory for embeddable intensity buttons/icons; not null.
+    /**Append to (or create if necessary) the (retail) intensity log.
+     * @param id   non-null writeable directory for the log file
+     * @param timestamp  +ve timestamp of latest input available data point
+     * @param retailIntensity  non-negative retail/domestic intensity kgCO2e/kWh
+     */
+    private static void appendToRetailIntensityLog(File id, long timestamp, int retailIntensity)
+        throws IOException
+        {
+        if(null == id) { throw new IllegalArgumentException(); }
+        if(0 >= timestamp) { throw new IllegalArgumentException(); }
+        if(0 > retailIntensity) { throw new IllegalArgumentException(); }
+
+		// TODO
+		
+    	
+    	
+    	
+	    }
+
+	/**Base directory for embeddable intensity buttons/icons; not null.
      * Under 'out' directory of suitable vintage to get correct expiry.
      */
     private static final String BUTTON_BASE_DIR = "../out/hourly/button/";
@@ -749,13 +764,13 @@ public final class FUELINSTUtils
      * generation seen on the GB national grid.
      * 
      * The log is line-oriended with lines of the form (no leading spaces)
-     *     <IDO8601UTCSTAMPTOMIN>,<kgCO2e/kWh>
-     * ie two comma-separated columns, eg:
-     *     2019-11-17T16:02Z,352
-     *     2019-11-17T16:12Z,351
+     *     <IDO8601UTCSTAMPTOMIN> <kgCO2e/kWh>
+     * ie two space-separated columns, eg:
+     *     2019-11-17T16:02Z 352
+     *     2019-11-17T16:12Z 351
      *     
-     * Initial lines may be headers, starting with quoted strings in column 1,
-     * ie with the first character " and may be ignored for data purposes.
+     * Initial lines may be headers, starting with # in in column 1,
+     * and may be ignored for data purposes.
      */
     private static final String INTENSITY_LOG_BASE_DIR = "../data/FUELINST/live/";
 
