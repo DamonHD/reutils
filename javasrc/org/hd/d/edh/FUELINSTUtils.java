@@ -694,13 +694,17 @@ public final class FUELINSTUtils
             catch(final IOException e) { e.printStackTrace(); }
             }
 
+            // Compute intensity as seen by typical GB domestic consumer.
+            final int retailIntensity = Math.round((isDataStale ?
+            		summary.histAveIntensity :
+            	    summary.currentIntensity) * (1 + summary.totalGridLosses));
+
             // Update button(s)/icon(s).
             try
                 {
                 final File bd = new File(BUTTON_BASE_DIR);
                 if(bd.isDirectory() && bd.canWrite())
                     {
-                    final int retailIntensity = Math.round((isDataStale ? summary.histAveIntensity : summary.currentIntensity) * (1 + summary.totalGridLosses));
                     GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
                     GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
                     GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
@@ -708,12 +712,42 @@ public final class FUELINSTUtils
                 else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
                 }
             catch(final IOException e) { e.printStackTrace(); }
+            
+            // New as of 2019-10.
+            // Append to the intensity log.
+//            try
+	            {
+	            final File id = new File(INTENSITY_LOG_BASE_DIR);
+	            if(id.isDirectory() && id.canWrite())
+	                {
+	                // TODO
+	
+	            	
+	                }
+	            else { System.err.println("Missing directory for intensity log: " + INTENSITY_LOG_BASE_DIR); }
+	            }
+//        catch(final IOException e) { e.printStackTrace(); }  
         }
 
     /**Base directory for embeddable intensity buttons/icons; not null.
      * Under 'out' directory of suitable vintage to get correct expiry.
      */
     private static final String BUTTON_BASE_DIR = "../out/hourly/button/";
+
+    /**Base directory for log of integer kgCO2e/kWh intensity values; not null.
+     * Under 'data' directory.
+     * Intensity values are 'retail', ie as at typical domestic consumer,
+     * after transmission and distribution losses, based on non-embedded
+     * generation seen on the GB nation grid.
+     * 
+     * Lines of form <UTCSTAMPTOMIN> <kgCO2e/kWh>, eg:
+     *     20191117T16:02Z 352
+     *     20191117T16:12Z 351
+     *     
+     * Initial lines may be headers, starting with quoted strings in column 1,
+     * ie with the first character " and may be ignored for data purposes.
+     */
+    private static final String INTENSITY_LOG_BASE_DIR = "../data/FUELINST/live/";
 
     /**Generate the text of the status Tweet.
      * Public to allow testing that returned Tweets are always valid.

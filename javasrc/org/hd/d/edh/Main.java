@@ -61,7 +61,7 @@ public final class Main
      *         <p>
      *         Shows red/yellow/green 'start your appliance now' indication
      *         based primarily on current UK grid carbon intensity.
-     *         Can write HTML output for eou site if output filename is supplied,
+     *         Can write HTML output for EOU site if output filename is supplied,
      *         else writes a summary on System.out.
      *         Will also delete outfile.html.flag file if status is GREEN, else will create it,
      *         which is useful for automated remote 200/404 status check.
