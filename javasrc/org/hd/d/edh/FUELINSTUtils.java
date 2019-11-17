@@ -715,18 +715,26 @@ public final class FUELINSTUtils
             
             // New as of 2019-10.
             // Append to the intensity log.
+            // Only do this for current/live data, ie if not stale.
+            if(isDataStale || (0 == summary.timestamp))
+                {
+            	System.err.println("Cannot update log, data stale.");
+                }
+            else
+            	{
 //            try
-	            {
-	            final File id = new File(INTENSITY_LOG_BASE_DIR);
-	            if(id.isDirectory() && id.canWrite())
-	                {
-	                // TODO
-	
-	            	
-	                }
-	            else { System.err.println("Missing directory for intensity log: " + INTENSITY_LOG_BASE_DIR); }
-	            }
-//        catch(final IOException e) { e.printStackTrace(); }  
+		            {
+		            final File id = new File(INTENSITY_LOG_BASE_DIR);
+		            if(id.isDirectory() && id.canWrite())
+		                {
+		                // TODO
+		
+		            	
+		                }
+		            else { System.err.println("Missing directory for intensity log: " + INTENSITY_LOG_BASE_DIR); }
+		            }
+//            catch(final IOException e) { e.printStackTrace(); }
+            	}
         }
 
     /**Base directory for embeddable intensity buttons/icons; not null.
@@ -736,13 +744,15 @@ public final class FUELINSTUtils
 
     /**Base directory for log of integer kgCO2e/kWh intensity values; not null.
      * Under 'data' directory.
-     * Intensity values are 'retail', ie as at typical domestic consumer,
+     * Intensity values are 'retail', ie as at a typical domestic consumer,
      * after transmission and distribution losses, based on non-embedded
-     * generation seen on the GB nation grid.
+     * generation seen on the GB national grid.
      * 
-     * Lines of form <UTCSTAMPTOMIN> <kgCO2e/kWh>, eg:
-     *     20191117T16:02Z 352
-     *     20191117T16:12Z 351
+     * The log is line-oriended with lines of the form (no leading spaces)
+     *     <IDO8601UTCSTAMPTOMIN>,<kgCO2e/kWh>
+     * ie two comma-separated columns, eg:
+     *     2019-11-17T16:02Z,352
+     *     2019-11-17T16:12Z,351
      *     
      * Initial lines may be headers, starting with quoted strings in column 1,
      * ie with the first character " and may be ignored for data purposes.
