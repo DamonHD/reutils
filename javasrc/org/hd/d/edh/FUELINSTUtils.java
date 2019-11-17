@@ -30,11 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
@@ -95,12 +98,12 @@ public final class FUELINSTUtils
     /**SimpleDateFormat pattern to generate UTC date down to days; not null.
      * Note that SimpleDateFormat is not immutable nor thread-safe.
      */
-    public static final String UTCDAYSFILENAME_FORMAT = "yyyyMMdd";
+    public static final String UTCDAYFILENAME_FORMAT = "yyyyMMdd";
 
     /**SimpleDateFormat pattern to generate ISO 8601 UTC timestamp down to minutes; not null.
      * Note that SimpleDateFormat is not immutable nor thread-safe.
      */
-    public static final String UTCMINTIMESTAMP_FORMAT = "yyyy-MM-ddTHH:mmZ";
+    public static final String UTCMINTIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm'Z'";
 
     /**SimpleDateFormat pattern to generate/parse compact HH:mm timestamp down to seconds (all assumed GMT/UTC); not null.
      * Note that SimpleDateFormat is not immutable nor thread-safe.
@@ -755,15 +758,31 @@ public final class FUELINSTUtils
         if(0 >= timestamp) { throw new IllegalArgumentException(); }
         if(0 > retailIntensity) { throw new IllegalArgumentException(); }
 
-        final SimpleDateFormat fsDF = new SimpleDateFormat(UTCDAYSFILENAME_FORMAT);
+        // Compute the log filename.
+        final SimpleDateFormat fsDF = new SimpleDateFormat(UTCDAYFILENAME_FORMAT);
         fsDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
         final String dateUTC = fsDF.format(new Date(timestamp));
 //System.out.println("UTC date for log: " + dateUTC);
-		
-		
-    	
-    	
-    	
+        final File logFile = new File(id, dateUTC + ".log");
+//System.out.println("Intensity log filename: " + logFile);
+        
+        // Compute the timestamp string for the log record.
+        final SimpleDateFormat tsDF = new SimpleDateFormat(UTCMINTIMESTAMP_FORMAT);
+        tsDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+        final String timestampUTC = tsDF.format(new Date(timestamp));
+
+        // If multiple copied of this code run at once
+        // then there may be a race creating/updating the file.
+        // This especially applies to the header(s).
+        final boolean logFileExists = logFile.exists();
+        try(PrintWriter pw = new PrintWriter(
+        	    new BufferedWriter(new FileWriter(logFile, true))))
+	        {
+        	// Write a header if the file was new.
+	        if(!logFileExists) { pw.println("# Time kgCO2e/kWh"); }
+	        // Append the new record <timestamp> <intensity>.
+	        pw.print(timestampUTC); pw.print(' '); pw.println(retailIntensity);
+	        }
 	    }
 
 	/**Base directory for embeddable intensity buttons/icons; not null.
@@ -777,7 +796,7 @@ public final class FUELINSTUtils
      * after transmission and distribution losses, based on non-embedded
      * generation seen on the GB national grid.
      * 
-     * The log is line-oriended with lines of the form (no leading spaces)
+     * The log is line-oriented with lines of the form (no leading spaces)
      *     <IDO8601UTCSTAMPTOMIN> <kgCO2e/kWh>
      * ie two space-separated columns, eg:
      *     # Time kgCO2e/kWh
@@ -787,8 +806,11 @@ public final class FUELINSTUtils
      *     
      * Initial lines may be headers, starting with # in in column 1,
      * and may be ignored for data purposes.
+     * 
+     * Log files will be named with the form YYYYMMDD.log
+     * eg 20191117.log.
      */
-    private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "../data/FUELINST/live/";
+    private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "tmp"; // "../data/FUELINST/live/";
 
     /**Generate the text of the status Tweet.
      * Public to allow testing that returned Tweets are always valid.
