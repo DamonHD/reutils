@@ -92,6 +92,16 @@ public final class FUELINSTUtils
      */
     public static final String CSVTIMESTAMP_FORMAT = "yyyyMMddHHmmss";
 
+    /**SimpleDateFormat pattern to generate UTC date down to days; not null.
+     * Note that SimpleDateFormat is not immutable nor thread-safe.
+     */
+    public static final String UTCDAYSFILENAME_FORMAT = "yyyyMMdd";
+
+    /**SimpleDateFormat pattern to generate ISO 8601 UTC timestamp down to minutes; not null.
+     * Note that SimpleDateFormat is not immutable nor thread-safe.
+     */
+    public static final String UTCMINTIMESTAMP_FORMAT = "yyyy-MM-ddTHH:mmZ";
+
     /**SimpleDateFormat pattern to generate/parse compact HH:mm timestamp down to seconds (all assumed GMT/UTC); not null.
      * Note that SimpleDateFormat is not immutable nor thread-safe.
      */
@@ -702,14 +712,14 @@ public final class FUELINSTUtils
         // Update button(s)/icon(s).
         try
             {
-            final File bd = new File(BUTTON_BASE_DIR);
+            final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
             if(bd.isDirectory() && bd.canWrite())
                 {
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
                 }
-            else { System.err.println("Missing directory for icons: " + BUTTON_BASE_DIR); }
+            else { System.err.println("Missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
             }
         catch(final IOException e) { e.printStackTrace(); }
         
@@ -722,19 +732,19 @@ public final class FUELINSTUtils
         	{ 		
             try
 	            {
-	            final File id = new File(INTENSITY_LOG_BASE_DIR);
+	            final File id = new File(DEFAULT_INTENSITY_LOG_BASE_DIR);
 	            if(id.isDirectory() && id.canWrite())
 	                {
 	            	appendToRetailIntensityLog(id, summary.timestamp, retailIntensity);
 	                }
-	            else { System.err.println("Missing directory for intensity log: " + INTENSITY_LOG_BASE_DIR); }
+	            else { System.err.println("Missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
 	            }
             catch(final IOException e) { e.printStackTrace(); }
         	}
         }
 
     /**Append to (or create if necessary) the (retail) intensity log.
-     * @param id   non-null writeable directory for the log file
+     * @param id   non-null writable directory for the log file
      * @param timestamp  +ve timestamp of latest input available data point
      * @param retailIntensity  non-negative retail/domestic intensity kgCO2e/kWh
      */
@@ -745,7 +755,11 @@ public final class FUELINSTUtils
         if(0 >= timestamp) { throw new IllegalArgumentException(); }
         if(0 > retailIntensity) { throw new IllegalArgumentException(); }
 
-		// TODO
+        final SimpleDateFormat fsDF = new SimpleDateFormat(UTCDAYSFILENAME_FORMAT);
+        fsDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+        final String dateUTC = fsDF.format(new Date(timestamp));
+//System.out.println("UTC date for log: " + dateUTC);
+		
 		
     	
     	
@@ -755,7 +769,7 @@ public final class FUELINSTUtils
 	/**Base directory for embeddable intensity buttons/icons; not null.
      * Under 'out' directory of suitable vintage to get correct expiry.
      */
-    private static final String BUTTON_BASE_DIR = "../out/hourly/button/";
+    private static final String DEFAULT_BUTTON_BASE_DIR = "../out/hourly/button/";
 
     /**Base directory for log of integer kgCO2e/kWh intensity values; not null.
      * Under 'data' directory.
@@ -766,13 +780,15 @@ public final class FUELINSTUtils
      * The log is line-oriended with lines of the form (no leading spaces)
      *     <IDO8601UTCSTAMPTOMIN> <kgCO2e/kWh>
      * ie two space-separated columns, eg:
+     *     # Time kgCO2e/kWh
+     *     # Other comment and one-of-data here.
      *     2019-11-17T16:02Z 352
      *     2019-11-17T16:12Z 351
      *     
      * Initial lines may be headers, starting with # in in column 1,
      * and may be ignored for data purposes.
      */
-    private static final String INTENSITY_LOG_BASE_DIR = "../data/FUELINST/live/";
+    private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "../data/FUELINST/live/";
 
     /**Generate the text of the status Tweet.
      * Public to allow testing that returned Tweets are always valid.
@@ -928,7 +944,7 @@ public final class FUELINSTUtils
         return(sDF);
         }
 
-    /**Get a format compact (HH:MM) timestamps ; never null.
+    /**Get a format compact (HH:MM) timestamps; never null.
      * A returned instance is not safe to share between threads.
      */
     public static SimpleDateFormat getHHMMTimestampParser()
