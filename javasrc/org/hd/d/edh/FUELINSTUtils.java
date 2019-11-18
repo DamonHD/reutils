@@ -769,19 +769,19 @@ public final class FUELINSTUtils
         final File logFile = new File(id, dateUTC + ".log");
 //System.out.println("Intensity log filename: " + logFile);
         
+        // Compute the timestamp string for the log record.
+        final SimpleDateFormat tsDF = new SimpleDateFormat(UTCMINTIMESTAMP_FORMAT);
+        tsDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+        final String timestampUTC = tsDF.format(new Date(timestamp));
+        
         // Refuse to write to a log other than today's for safety.
         // This may conceivably wrongly drop records at either end of the day.
         final String todayDateUTC = fsDF.format(new Date());
         if(!dateUTC.equals(todayDateUTC))
             {
-        	System.err.println("WARNING: will not write to intemsity log for "+dateUTC+" at "+(new Date()));
+        	System.err.println("WARNING: will not write to intensity log for "+dateUTC+" ("+timestampUTC+") at "+(new Date()));
         	return;
             }
-        
-        // Compute the timestamp string for the log record.
-        final SimpleDateFormat tsDF = new SimpleDateFormat(UTCMINTIMESTAMP_FORMAT);
-        tsDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
-        final String timestampUTC = tsDF.format(new Date(timestamp));
 
         // If multiple copied of this code run at once
         // then there may be a race creating/updating the file.
@@ -794,7 +794,7 @@ public final class FUELINSTUtils
 	        if(!logFileExists)
 	            {
 	        	pw.println("# Retail GB electricity carbon intensity as computed by earth.org.uk.");
-	        	pw.println("# Time kgCO2e/kWh");
+	        	pw.println("# Time gCO2e/kWh");
 	        	}
 	        // Append the new record <timestamp> <intensity>.
 	        pw.print(timestampUTC); pw.print(' '); pw.println(retailIntensity);
@@ -808,7 +808,7 @@ public final class FUELINSTUtils
      */
     private static final String DEFAULT_BUTTON_BASE_DIR = "../out/hourly/button/";
 
-    /**Base directory for log of integer kgCO2e/kWh intensity values; not null.
+    /**Base directory for log of integer gCO2e/kWh intensity values; not null.
      * Under 'data' directory.
      * Intensity values are 'retail', ie as at a typical domestic consumer,
      * after transmission and distribution losses, based on non-embedded
@@ -818,7 +818,7 @@ public final class FUELINSTUtils
      *     <IDO8601UTCSTAMPTOMIN> <kgCO2e/kWh>
      * ie two space-separated columns, eg:
      *     # Other comment and one-of-data here.
-     *     # Time kgCO2e/kWh
+     *     # Time gCO2e/kWh
      *     2019-11-17T16:02Z 352
      *     2019-11-17T16:12Z 351
      *     
@@ -834,7 +834,7 @@ public final class FUELINSTUtils
      * Log files will be named with the form YYYYMMDD.log
      * eg 20191117.log.
      */
-    private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "tmp"; // "../data/FUELINST/live/";
+    private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "tmp"; // "../data/FUELINST/log/live/";
 
     /**Generate the text of the status Tweet.
      * Public to allow testing that returned Tweets are always valid.

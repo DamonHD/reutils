@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-Copyright (c) 2008-2016, Damon Hart-Davis
+Copyright (c) 2008-2019, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="app.name" value="reutils"/>
     <property name="app.version.major" value="1"/>
     <property name="app.version.minor" value="1"/>
-    <property name="app.version.micro" value="5"/>
+    <property name="app.version.micro" value="6"/>
     <property name="app.version" value="${app.version.major}.${app.version.minor}.${app.version.micro}"/>
     <!-- Version excluding the "micro" portion, thus reflecting only significant API/functionality changes. -->
     <property name="app.version.notmicro" value="${app.version.major}.${app.version.minor}"/>

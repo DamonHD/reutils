@@ -42,7 +42,8 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING 201911XX:
-    DHD: append carbon intensity figure with timestamp to log for current UTC day in specified dir, starting each with header row(s) including current FUELINST weights.
+    DHD: try to grant 'all' real access to intensity log.
+    DHD: start each day's intensity log with header row(s) including current FUELINST weights.
 
 
 
@@ -57,6 +58,15 @@ SIGNIFICANT RELEASES (newest first)
 
 
 
+
+
+20191118:
+    freezepoint name: V1.1.5
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.4
+    DHD20171118: logging computed intensity figure (UTC time + gCO2/kWh).
 
 
 20170826:
