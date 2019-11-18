@@ -834,7 +834,7 @@ public final class FUELINSTUtils
      * Log files will be named with the form YYYYMMDD.log
      * eg 20191117.log.
      */
-    private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "tmp"; // "../data/FUELINST/log/live/";
+    private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "../data/FUELINST/log/live/";
 
     /**Generate the text of the status Tweet.
      * Public to allow testing that returned Tweets are always valid.
