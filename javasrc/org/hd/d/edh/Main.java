@@ -125,21 +125,22 @@ public final class Main
                 return; // Completed.
                 }
             else if("extraTweet".equals(command))
-	               {
-            	   final int minMsg = 9; // Minimum plausible Tweet length.
-            	   if((args.length < 2) || (null == args[1]) || (args[1].length() < minMsg))
-	            	      {
-	                   System.err.println("extraTweet tweet missing or too short");
-	                   System.exit(1);
-	            	      }
-            	   else
-            		      {
-            		      final String messageText = args[1];
-	                   final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
-	                   TwitterUtils.setTwitterStatusIfChanged(td, null, messageText);
-            		      }
+	            {
+            	final int minMsg = 9; // Minimum plausible Tweet length.
+            	if((args.length < 2) || (null == args[1]) || (args[1].length() < minMsg))
+	            	{
+	                System.err.println("extraTweet tweet missing or too short");
+	                System.exit(1);
+	            	}
+            	else
+            		{
+            		final String messageText = args[1];
+	                final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+	                TwitterUtils.setTwitterStatusIfChanged(td, null, messageText);
+            		}
+
                 return; // Completed.
-	               }
+	            }
             }
         catch(final Throwable e)
             {
