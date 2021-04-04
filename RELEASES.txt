@@ -57,7 +57,13 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 
-
+20210404:
+    freezepoint name: V1.1.6
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.5
+    DHD20210404: adding 'extraTweet' facility to Tweet ad hoc on existing channel.
 
 
 20191118:
