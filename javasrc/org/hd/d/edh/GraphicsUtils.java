@@ -66,7 +66,7 @@ public final class GraphicsUtils
     /**Background colour for red traffic-light status; non-null. */
     public static final Color TL_RED_ICON_BG = new Color(0xffcccc);
     
-    /**If true, aim to minimise PNG icon size.
+    /**If true, aim to minimise PNG icon size, immediately or after (say) zopflipng postprocessing.
      * This may be using a palette, skipping anti-aliasing, and other techniques.
      */
     public static final boolean MINIMISE_PNG_ICON_SIZE = true;
@@ -100,8 +100,6 @@ public final class GraphicsUtils
         final BufferedImage buffer = new BufferedImage(sizePX, sizePX,
         		MINIMISE_PNG_ICON_SIZE ? BufferedImage.TYPE_BYTE_INDEXED : BufferedImage.TYPE_INT_RGB);
         final Graphics2D g = buffer.createGraphics();
-        if(!MINIMISE_PNG_ICON_SIZE)
-            { g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); }
         try
             {
             Color bgColour = TL_UNKNOWN_ICON_BG;
@@ -116,6 +114,9 @@ public final class GraphicsUtils
                 }
             g.setColor(bgColour);
             g.fillRect(0, 0, sizePX, sizePX);
+
+            // The text looks very rough without anti-aliasing.
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             // Size the main intensity number text to fit the icon (width).
             final FontRenderContext fc = g.getFontRenderContext();
