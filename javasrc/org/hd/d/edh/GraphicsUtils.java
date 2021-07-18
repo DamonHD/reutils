@@ -140,37 +140,40 @@ public final class GraphicsUtils
             g.setColor(Color.BLACK);
             g.drawString(basicIconText, (int) (-boundsMain.getCenterX() + (sizePX/2.0)), (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
 
-            // Show units at the bottom of the icon, ie under the number.
-            final String units = "gCO2/kWh";
-            final Rectangle2D boundsUTmp = fontTmp.getStringBounds(units, fc);
-            final double wUTmp = boundsUTmp.getWidth();
-            final double hUTmp = boundsUTmp.getHeight();
-            final int fitUToWidth = sizePX - (2*ICON_BORDER_PX);
-            final float fitUToHeight = (float) (((sizePX - hMain)/2.0) - 1); // Allow a 1-pixel extra border/gap; don't round prematurely.
-            final float fontUScaleFactor = Math.min(fitUToWidth / (float) wUTmp, fitUToHeight / (float) hUTmp);
-            final Font fontU = fontTmp.deriveFont(sTmp * fontUScaleFactor);
-            final Rectangle2D boundsU = fontU.getStringBounds(units, fc);
-            g.setFont(fontU);
-            g.setColor(Color.BLACK);
-            g.drawString(units, (int) (-boundsU.getCenterX() + (sizePX/2.0)), sizePX - ((int)(boundsU.getY() + boundsU.getHeight())) - ICON_BORDER_PX); // At bottom (with margin).
-
-            // If a timestamp is supplied, squeeze it into the display above the intensity (in grey).
-            if(0 != timestamp)
-                {
-                final SimpleDateFormat fmt = FUELINSTUtils.getHHMMTimestampParser();
-                final String ts = "@" + fmt.format(new Date(timestamp)) + "Z";
-                final Rectangle2D boundsTSTmp = fontTmp.getStringBounds(ts, fc);
-                final double wTSTmp = boundsTSTmp.getWidth();
-                final double hTSTmp = boundsTSTmp.getHeight();
-                final int fitTSToWidth = sizePX - (2*ICON_BORDER_PX);
-                final float fitTSToHeight = (float) (((sizePX - hMain)/2.0) - 1); // Allow a 1-pixel extra border/gap; don't round prematurely.
-                final float fontTSScaleFactor = Math.min(fitTSToWidth / (float) wTSTmp, fitTSToHeight / (float) hTSTmp);
-                final Font fontTS = fontTmp.deriveFont(sTmp * fontTSScaleFactor);
-                final Rectangle2D boundsTS = fontTS.getStringBounds(ts, fc);
-                g.setFont(fontTS);
-                g.setColor(Color.GRAY);
-                g.drawString(ts, (int) (-boundsTS.getCenterX() + (sizePX/2.0)), ((int)(-boundsTS.getY())) + ICON_BORDER_PX); // At top (with margin).
-                }
+            if(!MINIMISE_PNG_ICON_SIZE || (sizePX > MIN_ICON_SIZE_PX))
+	            {
+	            // Show units at the bottom of the icon, ie under the number.
+	            final String units = "gCO2/kWh";
+	            final Rectangle2D boundsUTmp = fontTmp.getStringBounds(units, fc);
+	            final double wUTmp = boundsUTmp.getWidth();
+	            final double hUTmp = boundsUTmp.getHeight();
+	            final int fitUToWidth = sizePX - (2*ICON_BORDER_PX);
+	            final float fitUToHeight = (float) (((sizePX - hMain)/2.0) - 1); // Allow a 1-pixel extra border/gap; don't round prematurely.
+	            final float fontUScaleFactor = Math.min(fitUToWidth / (float) wUTmp, fitUToHeight / (float) hUTmp);
+	            final Font fontU = fontTmp.deriveFont(sTmp * fontUScaleFactor);
+	            final Rectangle2D boundsU = fontU.getStringBounds(units, fc);
+	            g.setFont(fontU);
+	            g.setColor(Color.BLACK);
+	            g.drawString(units, (int) (-boundsU.getCenterX() + (sizePX/2.0)), sizePX - ((int)(boundsU.getY() + boundsU.getHeight())) - ICON_BORDER_PX); // At bottom (with margin).
+	
+	            // If a timestamp is supplied, squeeze it into the display above the intensity (in grey).
+	            if(0 != timestamp)
+	                {
+	                final SimpleDateFormat fmt = FUELINSTUtils.getHHMMTimestampParser();
+	                final String ts = "@" + fmt.format(new Date(timestamp)) + "Z";
+	                final Rectangle2D boundsTSTmp = fontTmp.getStringBounds(ts, fc);
+	                final double wTSTmp = boundsTSTmp.getWidth();
+	                final double hTSTmp = boundsTSTmp.getHeight();
+	                final int fitTSToWidth = sizePX - (2*ICON_BORDER_PX);
+	                final float fitTSToHeight = (float) (((sizePX - hMain)/2.0) - 1); // Allow a 1-pixel extra border/gap; don't round prematurely.
+	                final float fontTSScaleFactor = Math.min(fitTSToWidth / (float) wTSTmp, fitTSToHeight / (float) hTSTmp);
+	                final Font fontTS = fontTmp.deriveFont(sTmp * fontTSScaleFactor);
+	                final Rectangle2D boundsTS = fontTS.getStringBounds(ts, fc);
+	                g.setFont(fontTS);
+	                g.setColor(Color.GRAY);
+	                g.drawString(ts, (int) (-boundsTS.getCenterX() + (sizePX/2.0)), ((int)(-boundsTS.getY())) + ICON_BORDER_PX); // At top (with margin).
+	                }
+	            }
             }
         finally { g.dispose(); }
 
