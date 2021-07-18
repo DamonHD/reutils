@@ -47,7 +47,7 @@ PENDING 201911XX:
 
 
 
-
+    DHD20210718: reduce PNG icon bytes by use of palette etc. 
 
 
 

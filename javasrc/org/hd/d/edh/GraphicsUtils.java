@@ -65,6 +65,11 @@ public final class GraphicsUtils
     public static final Color TL_GREEN_ICON_BG = new Color(0xccffcc);
     /**Background colour for red traffic-light status; non-null. */
     public static final Color TL_RED_ICON_BG = new Color(0xffcccc);
+    
+    /**If true, aim to minimise PNG icon size.
+     * This may be using a palette, skipping anti-aliasing, and other techniques.
+     */
+    public static final boolean MINIMISE_PNG_ICON_SIZE = true;
 
     /**Write a simple PNG icon containing the current intensity and with the current traffic-light colour; never null.
      * This attempts to update the output atomically and leaving it globally readable at all times.
@@ -92,9 +97,11 @@ public final class GraphicsUtils
         // Get font set up...
         final Font fontTmp = Font.decode(null); // Use system default font...
 
-        final BufferedImage buffer = new BufferedImage(sizePX, sizePX, BufferedImage.TYPE_INT_RGB);
+        final BufferedImage buffer = new BufferedImage(sizePX, sizePX,
+        		MINIMISE_PNG_ICON_SIZE ? BufferedImage.TYPE_BYTE_INDEXED : BufferedImage.TYPE_INT_RGB);
         final Graphics2D g = buffer.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if(!MINIMISE_PNG_ICON_SIZE)
+            { g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); }
         try
             {
             Color bgColour = TL_UNKNOWN_ICON_BG;
