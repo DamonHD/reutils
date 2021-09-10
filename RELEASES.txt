@@ -11,6 +11,8 @@ or release/freeze points.
 IMMEDIATE TODO
 ==============
 
+Have grid intensity code report any excess FUELINST fields that it does not have a mapping for, and pick source with all the detail?
+
 Keep 7-day rolling intensity and do primary set of lights against that (but show 24h view too).
 
 Fold in Sheffiled Solar and factor for on-shore wind.
