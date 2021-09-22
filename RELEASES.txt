@@ -15,7 +15,7 @@ Have grid intensity code report any excess FUELINST fields that it does not have
 
 Keep 7-day rolling intensity and do primary set of lights against that (but show 24h view too).
 
-Fold in Sheffiled Solar and factor for on-shore wind.
+Fold in Sheffield Solar and factor for on-shore wind.
 
 Fold in NatGrid 48h predictions.
 
