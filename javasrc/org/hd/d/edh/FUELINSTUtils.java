@@ -912,11 +912,14 @@ public final class FUELINSTUtils
 
 
     /**Extract (immutable) intensity map from configuration information for a given year; never null but may be empty.
-     * @param year  if non-null preferred year for intensity;
+     * @param year  if non-null preferred year for intensity and must be [2000,];
      *     this will use intensity values specific to the given year if possible,
      *     else the earliest date after the given year,
      *     else the default as for the no-argument call
      *
+     * <p>
+     * A default undated form such as <code>intensity.fuel.INTEW=0.45</code> is permitted,
+     * in part for backward compatibility.
      * <p>
      * Other forms allowed have a suffix of:
      * <ul>
@@ -925,8 +928,10 @@ public final class FUELINSTUtils
      * <li><code>.startYear--</code> from given year, inclusive</li>
      * <li><code>.--endYear</code> up to given year, inclusive</li>
      * </ul>
+     * Dates specified must be unique and non-overlapping,
+     * and startYear must not be after endYear.
      *
-     * FIXME
+     * TODO
      * 
      * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
      *
@@ -940,8 +945,21 @@ public final class FUELINSTUtils
         for(final String key : rawProperties.keySet())
             {
             if(!key.startsWith(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
-            // TODO: verify that fuel name is all upper-case ASCII and of reasonable length, else reject.
-            final String fuelname = key.substring(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX.length());
+            // Simple verification that fuel name may be valid, else reject.
+            final String keytail = key.substring(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX.length());
+            if(keytail.length() < 2)
+	            {
+            	System.err.println("Trivially invalid fuel name " + key);
+                continue;	
+	            }
+            // TODO: verify that fuel name is valid, else reject.
+            // For the case where year is null, the entire tail must be a valid fuel name.
+            if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches())
+	            {
+            	System.err.println("Invalid fuel name " + key);
+                continue;
+	            }
+
             // Reject non-parseable and illegal (eg -ve) values.
             final Float intensity;
             try { intensity = new Float(rawProperties.get(key)); }
@@ -955,7 +973,7 @@ public final class FUELINSTUtils
                 System.err.println("Invalid (non-positive) kgCO2/kWh intensity value for " + key);
                 continue;
                 }
-            result.put(fuelname, intensity);
+            result.put(keytail, intensity);
             }
 
         return(Collections.unmodifiableMap(result));
