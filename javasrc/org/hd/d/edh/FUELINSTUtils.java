@@ -921,9 +921,9 @@ public final class FUELINSTUtils
      * Other forms allowed have a suffix of:
      * <ul>
      * <li><code>.year</code> the given year, eg <code>intensity.fuel.INTEW.2021=0.45</code></li>
-     * <li><code>.startYear-</code> from given year, inclusive</li>
-     * <li><code>.-endYear</code> up to given year, inclusive</li>
-     * <li><code>.startYear-endYear</code> in given year range, inclusive</li>
+     * <li><code>.startYear--endYear</code> in given year range, inclusive</li>
+     * <li><code>.startYear--</code> from given year, inclusive</li>
+     * <li><code>.--endYear</code> up to given year, inclusive</li>
      * </ul>
      *
      * FIXME
