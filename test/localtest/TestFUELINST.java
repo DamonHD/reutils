@@ -143,7 +143,8 @@ public final class TestFUELINST extends TestCase
         assertTrue(configuredFuelNames.size() > 0);
 //System.out.println(configuredFuelNames); // {PS=Pumped Storage Hydro, INTNEM=Nemo (Belgian) Interconnector, OCGT=Open-Cycle Gas Turbine, INTEW=East-West (Irish) Interconnector, NPSHYD=Non-Pumped-Storage Hydro, INTIRL=Irish (Moyle) Interconnector, OTHER=Other (including biomass), CCGT=Combined-Cycle Gas Turbine, INTFR=French Interconnector, INTELEC=INTELEC (France) Interconnector, INTNED=Netherlands Interconnector, INTNSL=North Sea Link (Norway), INTIFA2=INTIFA2 (France) Interconnector}
 
-        
+        // Test for presence of one fuel/interconnector with name which is not pure-alpha.
+        assertNotNull(configuredFuelNames.get("INTIFA2"));
         
         
         
