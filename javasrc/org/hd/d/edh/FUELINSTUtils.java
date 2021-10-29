@@ -910,10 +910,17 @@ public final class FUELINSTUtils
         return(Collections.unmodifiableMap(result));
         }
 
-    /**Extract (immutable) intensity map from configuration information; never null but may be empty.
+
+    /**Extract (immutable) intensity map from configuration information for a given year; never null but may be empty.
      * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
+     *
+     * @param year  if non-null preferred year for intensity;
+     *     this will use intensity values specific to the given year if possible,
+     *     else the default as for the no-argument call
+     *
+     * FIXME
      */
-    public static Map<String, Float> getConfiguredIntensities()
+    public static Map<String, Float> getConfiguredIntensities(final Short year)
         {
         final Map<String, Float> result = new HashMap<String, Float>();
 
@@ -941,6 +948,17 @@ public final class FUELINSTUtils
             }
 
         return(Collections.unmodifiableMap(result));
+        }
+
+    /**Extract (immutable) intensity map from configuration information; never null but may be empty.
+     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
+     * 
+     * This will use the default (eg undated) intensity value for each fuel:
+     * <code>intensity.fuel.INTEW=0.45</code>
+     */
+    public static Map<String, Float> getConfiguredIntensities()
+        {
+        return(getConfiguredIntensities(null));
         }
 
     /**Fall-back category to assign uncategorised fuels to; single token not null nor empty. */
