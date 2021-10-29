@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2013, Damon Hart-Davis
+Copyright (c) 2008-2021, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -107,6 +107,30 @@ public final class TestFUELINST extends TestCase
 //                }
 //            }
 //        finally { sampleFile1.close(); }
+        }
+    
+    /**Test extended to allow parse of INTIFA2 interconnector name. */
+    public static void testCSVExtractINTIFA2()
+        throws Exception
+        {
+        final String template = "type,date,settlementperiod,timestamp,CCGT,OIL,COAL,NUCLEAR,WIND,PS,NPSHYD,OCGT,OTHER,INTFR,INTIRL,INTNED,INTEW,BIOMASS,INTNEM,INTELEC,INTIFA2,INTNSL";
+
+        // Try extract from single-record synthetic CSV data.
+        final String sampleCSV = "HDR\r\nFUELINST,20211028,22,20211028094500,11167,0,500,5242,8422,560,828,0,209,610,0,1043,0,2309,999,0,880,693\r\nFTR,1";
+        final List<List<String>> rows = DataUtils.parseBMRCSV(new StringReader(sampleCSV), null);
+        final List<Map<String, String>> namedFieldss = DataUtils.extractNamedFieldsByPositionFromRows(template, rows);
+        assertEquals("must produce exactly one row", namedFieldss.size(), 1);
+        final Map<String, String> namedFields = namedFieldss.get(0);
+//System.out.println(namedFields); // {WIND=8422, date=20211028, INTNEM=999, PS=560, NUCLEAR=5242, OCGT=0, INTEW=0, COAL=500, NPSHYD=828, type=FUELINST, INTIRL=0, OTHER=209, INTFR=610, CCGT=11167, OIL=0, settlementperiod=22, INTELEC=0, BIOMASS=2309, INTNED=1043, INTNSL=693, INTIFA2=880, timestamp=20211028094500}
+        // Check that some important fields have been correctly extracted.
+        assertEquals("FUELINST", namedFields.get("type"));
+        assertEquals("11167", namedFields.get("CCGT"));
+        assertEquals("500", namedFields.get("COAL"));
+        assertEquals("828", namedFields.get("NPSHYD"));
+        assertEquals("5242", namedFields.get("NUCLEAR"));
+        assertEquals("8422", namedFields.get("WIND"));
+        assertEquals("0", namedFields.get("OIL"));
+        assertEquals("880", namedFields.get("INTIFA2"));
         }
 
     /**Test that all possible grid status Tweets are legal with the current property set. */
