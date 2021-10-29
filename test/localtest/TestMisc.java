@@ -38,6 +38,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.hd.d.edh.DataUtils;
+import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
 
@@ -49,13 +50,10 @@ public final class TestMisc extends TestCase
     /**Verify that test harness is sane... */
     public static void testSanity() { }
 
-    /**Test loading and other aspects of the main properties/config.
-     */
-    public static void testMainProperties()
+    /**Test loading of the main properties/config. */
+    public static void testMainPropertiesLoad()
         {
         assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
-
-
         }
 
     /**Test handling of bmreports-style CSV files. */

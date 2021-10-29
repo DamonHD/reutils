@@ -43,6 +43,7 @@ import junit.framework.TestCase;
 import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.FUELINST;
 import org.hd.d.edh.FUELINSTUtils;
+import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
 import org.hd.d.edh.FUELINST.CurrentSummary;
@@ -131,6 +132,23 @@ public final class TestFUELINST extends TestCase
         assertEquals("8422", namedFields.get("WIND"));
         assertEquals("0", namedFields.get("OIL"));
         assertEquals("880", namedFields.get("INTIFA2"));  
+        }
+    
+    /**Test loading of the fuel names from main properties/config. */
+    public static void testConfiguredFuelNames()
+        {
+        assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
+        final Map<String, String> configuredFuelNames = FUELINSTUtils.getConfiguredFuelNames();
+        assertNotNull(configuredFuelNames);
+        assertTrue(configuredFuelNames.size() > 0);
+//System.out.println(configuredFuelNames); // {PS=Pumped Storage Hydro, INTNEM=Nemo (Belgian) Interconnector, OCGT=Open-Cycle Gas Turbine, INTEW=East-West (Irish) Interconnector, NPSHYD=Non-Pumped-Storage Hydro, INTIRL=Irish (Moyle) Interconnector, OTHER=Other (including biomass), CCGT=Combined-Cycle Gas Turbine, INTFR=French Interconnector, INTELEC=INTELEC (France) Interconnector, INTNED=Netherlands Interconnector, INTNSL=North Sea Link (Norway), INTIFA2=INTIFA2 (France) Interconnector}
+
+        
+        
+        
+        
+        
+        
         }
 
     /**Test that all possible grid status Tweets are legal with the current property set. */
