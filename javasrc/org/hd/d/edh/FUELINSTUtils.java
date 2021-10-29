@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +57,8 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+
+import javax.naming.InvalidNameException;
 
 import org.hd.d.edh.FUELINST.CurrentSummary;
 
@@ -81,8 +84,8 @@ public final class FUELINSTUtils
     /**If true, compress (GZIP) any persisted state. */
     static final boolean GZIP_CACHE = true;
 
-    /**Immutable regex pattern for matching a valid fuel name (all upper-case ASCII); non-null. */
-    public static final Pattern FUEL_NAME_REGEX = Pattern.compile("[A-Z]+");
+    /**Immutable regex pattern for matching a valid fuel name (all upper-case ASCII first char, digits also allowed subsequently); non-null. */
+    public static final Pattern FUEL_NAME_REGEX = Pattern.compile("[A-Z][A-Z0-9]+");
 
     /**SimpleDateFormat pattern to parse TIBCO FUELINST timestamp down to seconds (all assumed GMT/UTC); not null.
      * Example TIBCO timestamp: 2009:03:09:23:57:30:GMT
@@ -248,7 +251,11 @@ public final class FUELINSTUtils
             for(final String name : namedFields.keySet())
                 {
                 // Skip if something other than a valid fuel name.
-                if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(name).matches()) { continue; }
+                if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(name).matches())
+                    {
+                    System.err.println("Skipping invalid 'fuel' name "+name+" at " + namedFields.get("timestamp"));
+                	continue;
+                	}
                 // Store the MW for this fuel.
                 final int fuelMW = Integer.parseInt(namedFields.get(name), 10);
                 if(fuelMW < 0) { continue; } // NB: -ve INTerconnector values in TIBCO data as of 2012 // { throw new IOException("Bad (-ve) fuel generation MW value: "+row); }
@@ -867,6 +874,13 @@ public final class FUELINSTUtils
             if(!key.startsWith(FUELINST.FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX)) { continue; }
             final String fuelname = key.substring(FUELINST.FUELNAME_INTENSITY_MAIN_PROPNAME_PREFIX.length());
             final String descriptiveName = rawProperties.get(key).trim();
+
+            if(!FUEL_NAME_REGEX.matcher(fuelname).matches())
+                {
+            	// Stop things dead if a name is used that may break things later.
+            	throw new IllegalArgumentException("Invalid 'fuel' name " + fuelname);
+                }
+
             if(descriptiveName.isEmpty()) { continue; }
             result.put(fuelname, descriptiveName);
             }

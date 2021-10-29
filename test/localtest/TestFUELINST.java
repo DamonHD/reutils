@@ -145,11 +145,6 @@ public final class TestFUELINST extends TestCase
 
         // Test for presence of one fuel/interconnector with name which is not pure-alpha.
         assertNotNull(configuredFuelNames.get("INTIFA2"));
-        
-        
-        
-        
-        
         }
 
     /**Test that all possible grid status Tweets are legal with the current property set. */
