@@ -109,7 +109,7 @@ public final class TestFUELINST extends TestCase
 //        finally { sampleFile1.close(); }
         }
     
-    /**Test extended to allow parse of INTIFA2 interconnector name. */
+    /**Test extended to check use of INTIFA2 interconnector name in CSV with template. */
     public static void testCSVExtractINTIFA2()
         throws Exception
         {
@@ -130,7 +130,7 @@ public final class TestFUELINST extends TestCase
         assertEquals("5242", namedFields.get("NUCLEAR"));
         assertEquals("8422", namedFields.get("WIND"));
         assertEquals("0", namedFields.get("OIL"));
-        assertEquals("880", namedFields.get("INTIFA2"));
+        assertEquals("880", namedFields.get("INTIFA2"));  
         }
 
     /**Test that all possible grid status Tweets are legal with the current property set. */
