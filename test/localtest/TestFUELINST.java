@@ -145,6 +145,42 @@ public final class TestFUELINST extends TestCase
 
         // Test for presence of one fuel/interconnector with name which is not pure-alpha.
         assertNotNull(configuredFuelNames.get("INTIFA2"));
+        // It should have a non-empty description.
+        assertTrue(configuredFuelNames.get("INTIFA2").length() > 0);
+        
+        // Ensure that only valid fuel names are loaded.
+        for(String k : configuredFuelNames.keySet())
+            {
+        	// Ensure that name is generally valid.
+            assertTrue(FUELINSTUtils.FUEL_NAME_REGEX.matcher(k).matches());
+            }
+        }
+    
+    /**Test loading of the fuel intensities from main properties/config. */
+    public static void testConfiguredIntensities()
+        {
+        assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
+        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
+        assertNotNull(configuredIntensities);
+        assertTrue(configuredIntensities.size() > 0);
+System.out.println(configuredIntensities); // {PS=Pumped Storage Hydro, INTNEM=Nemo (Belgian) Interconnector, OCGT=Open-Cycle Gas Turbine, INTEW=East-West (Irish) Interconnector, NPSHYD=Non-Pumped-Storage Hydro, INTIRL=Irish (Moyle) Interconnector, OTHER=Other (including biomass), CCGT=Combined-Cycle Gas Turbine, INTFR=French Interconnector, INTELEC=INTELEC (France) Interconnector, INTNED=Netherlands Interconnector, INTNSL=North Sea Link (Norway), INTIFA2=INTIFA2 (France) Interconnector}
+
+        // Test for presence of one fuel/interconnector with name which is not pure-alpha.
+        assertNotNull(configuredIntensities.get("INTIFA2"));
+        // It should have a greater-than-zero intensity.
+        assertTrue(configuredIntensities.get("INTIFA2") > 0);
+        
+        // Ensure that date-qualified intensities are not being treated as literals,
+        // eg there should not be entries such as INTIRL.2009--2011=0.7 present.
+        // Ensure that only valid fuel names are loaded.
+        for(String k : configuredIntensities.keySet())
+            {
+        	// Ensure no '-' left in due to mis-parse.
+        	assertEquals("should be no '-' in key/name", -1, k.indexOf('-'));
+        	// Ensure that name is generally valid.
+            assertTrue(FUELINSTUtils.FUEL_NAME_REGEX.matcher(k).matches());
+            }
+
         }
 
     /**Test that all possible grid status Tweets are legal with the current property set. */
