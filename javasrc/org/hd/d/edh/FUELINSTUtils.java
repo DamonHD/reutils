@@ -822,7 +822,7 @@ public final class FUELINSTUtils
      * generation seen on the GB national grid.
      * 
      * The log is line-oriented with lines of the form (no leading spaces)
-     *     <IDO8601UTCSTAMPTOMIN> <kgCO2e/kWh>
+     *     [ISO8601UTCSTAMPTOMIN] [kgCO2e/kWh]
      * ie two space-separated columns, eg:
      *     # Other comment and one-of-data here.
      *     # Time gCO2e/kWh
@@ -912,13 +912,24 @@ public final class FUELINSTUtils
 
 
     /**Extract (immutable) intensity map from configuration information for a given year; never null but may be empty.
-     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
-     *
      * @param year  if non-null preferred year for intensity;
      *     this will use intensity values specific to the given year if possible,
+     *     else the earliest date after the given year,
      *     else the default as for the no-argument call
      *
+     * <p>
+     * Other forms allowed have a suffix of:
+     * <ul>
+     * <li><code>.year</code> the given year, eg <code>intensity.fuel.INTEW.2021=0.45</code></li>
+     * <li><code>.startYear-</code> from given year, inclusive</li>
+     * <li><code>.-endYear</code> up to given year, inclusive</li>
+     * <li><code>.startYear-endYear</code> in given year range, inclusive</li>
+     * </ul>
+     *
      * FIXME
+     * 
+     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
+     *
      */
     public static Map<String, Float> getConfiguredIntensities(final Short year)
         {
@@ -951,10 +962,11 @@ public final class FUELINSTUtils
         }
 
     /**Extract (immutable) intensity map from configuration information; never null but may be empty.
-     * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
-     * 
-     * This will use the default (eg undated) intensity value for each fuel:
+     * This will use the default (eg undated) intensity value for each fuel such as
      * <code>intensity.fuel.INTEW=0.45</code>
+     * else the latest-dated value.
+     * 
+     * @return map from each fuel name to kgCO2/kWh non-negative intensity; never null
      */
     public static Map<String, Float> getConfiguredIntensities()
         {
