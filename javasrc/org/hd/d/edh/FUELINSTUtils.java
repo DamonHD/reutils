@@ -913,8 +913,7 @@ public final class FUELINSTUtils
 
     /**Extract (immutable) intensity map from configuration information for a given year; never null but may be empty.
      * @param year  if non-null preferred year for intensity and must be [2000,];
-     *     this will use intensity values specific to the given year if possible,
-     *     else the earliest date after the given year,
+     *     this will use intensity values including the given year if possible,
      *     else the default as for the no-argument call
      *
      * <p>
@@ -924,9 +923,9 @@ public final class FUELINSTUtils
      * Other forms allowed have a suffix of:
      * <ul>
      * <li><code>.year</code> the given year, eg <code>intensity.fuel.INTEW.2021=0.45</code></li>
-     * <li><code>.startYear--endYear</code> in given year range, inclusive</li>
-     * <li><code>.startYear--</code> from given year, inclusive</li>
-     * <li><code>.--endYear</code> up to given year, inclusive</li>
+     * <li>[TODO] <code>.startYear--endYear</code> in given year range, inclusive</li>
+     * <li>[TODO] <code>.startYear--</code> from given year, inclusive</li>
+     * <li>[TODO] <code>.--endYear</code> up to given year, inclusive</li>
      * </ul>
      * Dates specified must be unique and non-overlapping,
      * and startYear must not be after endYear.
@@ -954,10 +953,17 @@ public final class FUELINSTUtils
 	            }
             // TODO: verify that fuel name is valid, else reject.
             // For the case where year is null, the entire tail must be a valid fuel name.
-            if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches())
+            if(year == null)
 	            {
-            	System.err.println("Invalid fuel name " + key);
-                continue;
+            	if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches())
+		            {
+	            	System.err.println("Invalid fuel name " + key);
+	                continue;
+		            }
+	            }
+            else // year != null
+	            {
+//	            final short y = year;
 	            }
 
             // Reject non-parseable and illegal (eg -ve) values.
