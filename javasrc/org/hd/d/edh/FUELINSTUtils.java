@@ -926,12 +926,14 @@ public final class FUELINSTUtils
      * Other forms allowed have a suffix of:
      * <ul>
      * <li><code>.year</code> the given year, eg <code>intensity.fuel.INTEW.2021=0.45</code></li>
-     * <li>[TODO] <code>.startYear-endYear</code> in given year range, inclusive</li>
-     * <li>[TODO] <code>.startYear-</code> from given year, inclusive</li>
-     * <li>[TODO] <code>.-endYear</code> up to given year, inclusive</li>
+     * <li>[TODO] <code>.startYear/endYear</code> in given year range, inclusive</li>
+     * <li>[TODO] <code>.startYear/</code> from given year, inclusive</li>
+     * <li>[TODO] <code>./endYear</code> up to given year, inclusive</li>
      * </ul>
      * Dates specified must be unique and non-overlapping,
      * and startYear must not be after endYear.
+     * <p>
+     * This date format is potentially partly extensible to ISO8601.
      *
      * TODO
      * 

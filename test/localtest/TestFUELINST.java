@@ -176,17 +176,17 @@ System.out.println(configuredIntensitiesDefault); // {PS=Pumped Storage Hydro, I
         for(String k : configuredIntensitiesDefault.keySet())
             {
         	// Ensure no '-' left in due to mis-parse.
-        	assertEquals("should be no '-' in key/name", -1, k.indexOf('-'));
+        	assertEquals("should be no '/' in key/name", -1, k.indexOf('/'));
         	// Ensure that name is generally valid.
             assertTrue(FUELINSTUtils.FUEL_NAME_REGEX.matcher(k).matches());
             }
  
 /* With the following in main.properties...
-#intensity.fuel.INTIRL.2009-2011=0.7
+#intensity.fuel.INTIRL.2009/2011=0.7
 intensity.fuel.INTIRL.2009=0.7
 intensity.fuel.INTIRL.2010=0.7
 intensity.fuel.INTIRL.2011=0.7
-intensity.fuel.INTIRL.2012-=0.45
+intensity.fuel.INTIRL.2012/=0.45
 #intensity.fuel.INTIRL.2012=0.45
 #intensity.fuel.INTIRL.2013=0.45
 #intensity.fuel.INTIRL.2014=0.45
