@@ -938,7 +938,7 @@ public final class FUELINSTUtils
      * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
      *
      */
-    public static Map<String, Float> getConfiguredIntensities(final Short year)
+    public static Map<String, Float> getConfiguredIntensities(final Integer year)
         {
         final Map<String, Float> result = new HashMap<String, Float>();
 
@@ -984,8 +984,13 @@ public final class FUELINSTUtils
 	            	System.err.println("Invalid fuel name " + key);
 	                continue;
 		            }
-//	            final short y = year;
-//            	FUEL_INTENSITY_YEAR_REGEX
+	            final int y = year;
+	            // Deal with simple fuelname.year case.
+            	if(FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(parts[1]).matches())
+	            	{
+	                final short iYear = Short.parseShort(parts[1]);
+	                if(iYear != y) { continue; } // Wrong year.
+            	    }
 	            }
 
             // Reject non-parseable and illegal (eg -ve) values.

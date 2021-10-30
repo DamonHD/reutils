@@ -180,6 +180,33 @@ System.out.println(configuredIntensitiesDefault); // {PS=Pumped Storage Hydro, I
         	// Ensure that name is generally valid.
             assertTrue(FUELINSTUtils.FUEL_NAME_REGEX.matcher(k).matches());
             }
+ 
+/* With the following in main.properties...
+#intensity.fuel.INTIRL.2009-2011=0.7
+intensity.fuel.INTIRL.2009=0.7
+intensity.fuel.INTIRL.2010=0.7
+intensity.fuel.INTIRL.2011=0.7
+intensity.fuel.INTIRL.2012-=0.45
+#intensity.fuel.INTIRL.2012=0.45
+#intensity.fuel.INTIRL.2013=0.45
+#intensity.fuel.INTIRL.2014=0.45
+#intensity.fuel.INTIRL.2015=0.45
+#intensity.fuel.INTIRL.2016=0.45
+#intensity.fuel.INTIRL.2017=0.45
+#intensity.fuel.INTIRL.2018=0.45
+#intensity.fuel.INTIRL.2019=0.45
+#intensity.fuel.INTIRL.2020=0.45
+#intensity.fuel.INTIRL.2021=0.45
+#intensity.fuel.INTIRL.2022=0.45
+intensity.fuel.INTIRL=0.45
+intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
+ */
+        final float eps = 0.001f;
+        assertEquals(0.45f, configuredIntensitiesDefault.get("INTIRL") , eps);
+        assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2009).get("INTIRL") , eps);
+        assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2010).get("INTIRL") , eps);
+        assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2011).get("INTIRL") , eps);
+        
         }
 
     /**Test that all possible grid status Tweets are legal with the current property set. */
