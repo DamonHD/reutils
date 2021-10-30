@@ -87,6 +87,9 @@ public final class FUELINSTUtils
     /**Immutable regex pattern for matching a valid fuel name (all upper-case ASCII first char, digits also allowed subsequently); non-null. */
     public static final Pattern FUEL_NAME_REGEX = Pattern.compile("[A-Z][A-Z0-9]+");
 
+    /**Immutable regex pattern for matching a valid fuel intensity year 20XX; non-null. */
+    public static final Pattern FUEL_INTENSITY_YEAR_REGEX = Pattern.compile("20[0-9][0-9]");
+
     /**SimpleDateFormat pattern to parse TIBCO FUELINST timestamp down to seconds (all assumed GMT/UTC); not null.
      * Example TIBCO timestamp: 2009:03:09:23:57:30:GMT
      * Note that SimpleDateFormat is not immutable nor thread-safe.
