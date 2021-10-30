@@ -954,6 +954,10 @@ public final class FUELINSTUtils
             	System.err.println("Trivially invalid fuel name " + key);
                 continue;	
 	            }
+            
+            // Extract fuel name.
+            final String fuel;
+            
             // TODO: verify that fuel name is valid, else reject.
             // For the case where year is null, the entire tail must be a valid fuel name.
             if(year == null)
@@ -963,10 +967,25 @@ public final class FUELINSTUtils
 	            	System.err.println("Invalid fuel name " + key);
 	                continue;
 		            }
+            	fuel = keytail;
 	            }
             else // year != null
 	            {
+            	// Split key tail in two at '.'.
+            	final String parts[] = keytail.split("[.]");
+            	if(2 != parts.length)
+	            	{
+            		System.err.println("Invalid fuel intensity key " + key);
+	                continue;	
+	            	}
+            	fuel = parts[0];
+            	if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(fuel).matches())
+		            {
+	            	System.err.println("Invalid fuel name " + key);
+	                continue;
+		            }
 //	            final short y = year;
+//            	FUEL_INTENSITY_YEAR_REGEX
 	            }
 
             // Reject non-parseable and illegal (eg -ve) values.
@@ -982,7 +1001,7 @@ public final class FUELINSTUtils
                 System.err.println("Invalid (non-positive) kgCO2/kWh intensity value for " + key);
                 continue;
                 }
-            result.put(keytail, intensity);
+            result.put(fuel, intensity);
             }
 
         return(Collections.unmodifiableMap(result));
