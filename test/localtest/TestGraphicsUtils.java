@@ -44,7 +44,7 @@ public final class TestGraphicsUtils extends TestCase
         {
         try { GraphicsUtils.writeSimpleIntensityIconPNG(null, 0, System.currentTimeMillis(), null, 0); fail("should have rejected bogus arguments"); } catch(final IllegalArgumentException e) { /* expected */ }
 
-        final File fbase = File.createTempFile("icon", null, new File("out"));
+        final File fbase = File.createTempFile("icon", null, new File("../out"));
         try
             {
             // Generate the icon and test it for basic sanity...
@@ -66,7 +66,7 @@ public final class TestGraphicsUtils extends TestCase
     /**Simple test of writing RED icon to place we can look at it with browser/etc. */
     public static void testSimpleIntensityIconPNGWrite() throws Exception
         {
-        final String fbase = "out/";
+        final String fbase = "../out/";
         for(final int size : new int[] { GraphicsUtils.MIN_ICON_SIZE_PX, 48, 64 } )
             {
             final String suffix = GraphicsUtils.writeSimpleIntensityIconPNG(fbase, size, System.currentTimeMillis(), TrafficLight.RED, rnd.nextInt(1100));
