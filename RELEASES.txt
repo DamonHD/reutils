@@ -44,7 +44,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING 201911XX:
-    DHD: try to grant 'all' real access to intensity log.
     DHD: start each day's intensity log with header row(s) including current FUELINST weights.
 
 
