@@ -209,13 +209,13 @@ intensity.fuel.INTIRL=0.45
 intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
  */
         assertEquals(0.45f, configuredIntensitiesDefault.get("INTIRL") , eps);
-        
+
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2008).get("INTIRL"), eps);
-        
+
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2009).get("INTIRL"), eps);
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2010).get("INTIRL"), eps);
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2011).get("INTIRL"), eps);
-        
+
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2012).get("INTIRL"), eps);
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2013).get("INTIRL"), eps);
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2014).get("INTIRL"), eps);
@@ -227,8 +227,12 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2020).get("INTIRL"), eps);
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2021).get("INTIRL"), eps);
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2022).get("INTIRL"), eps);
-        
+
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2023).get("INTIRL"), eps);
+
+        // Should be able to fall back to undated "always this" value.		
+        assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2009).get("NUCLEAR"), eps);
+        assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2023).get("NUCLEAR"), eps);
         }
 
     /**Test that all possible grid status Tweets are legal with the current property set. */

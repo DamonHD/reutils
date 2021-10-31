@@ -960,7 +960,6 @@ public final class FUELINSTUtils
             // Extract fuel name.
             final String fuel;
             
-            // TODO: verify that fuel name is valid, else reject.
             // For the case where year is null, the entire tail must be a valid fuel name.
             if(year == null)
 	            {
@@ -971,8 +970,14 @@ public final class FUELINSTUtils
 		            }
             	fuel = keytail;
 	            }
-            else // year != null
-	            {
+            else if(FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches() &&
+            	   !result.containsKey(keytail))
+            	{
+            	// This is a default (no date-range) default value.
+            	fuel = keytail;
+            	}	
+            else // year != null and this is not an unqualified entry...
+            	{
             	// Split key tail in two at '.'.
             	final String parts[] = keytail.split("[.]");
             	if(2 != parts.length)
