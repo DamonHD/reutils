@@ -50,7 +50,7 @@ PENDING 201911XX:
 
 
     DHD20211029: fixed FUEL_NAME_REGEX to allow INTIFA2 interconnector/'fuel' name.
-    DHD20210718: reduce PNG icon size by use of palette etc. 
+    DHD20210718: convert PNG icon to use 8-bit palette rather than full RGB true colour. 
 
 
 
