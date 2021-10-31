@@ -1073,6 +1073,7 @@ public final class FUELINSTUtils
      * 
      * @return map from each fuel name to kgCO2/kWh non-negative intensity; never null
      */
+    @Deprecated
     public static Map<String, Float> getConfiguredIntensities()
         {
         return(getConfiguredIntensities(null));
