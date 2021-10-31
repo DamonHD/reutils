@@ -121,7 +121,7 @@ public final class TestMisc extends TestCase
     public static void testAppendToRetailIntensityLog() throws IOException
 	    {
     	final Path tempDirectory = Files.createTempDirectory("testAppendToRetailIntensityLog");
-    	System.err.println("tempDir = " + tempDirectory);
+//    	System.err.println("tempDir = " + tempDirectory);
 
     	final long now = System.currentTimeMillis();
 
@@ -132,6 +132,16 @@ public final class TestMisc extends TestCase
     	    {
     	    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_1, br.readLine());
     	    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_2, br.readLine());
+    	    final String intensities = br.readLine();
+    	    assertNotNull(intensities);
+    	    assertTrue(intensities.startsWith(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX));
+    	    // Check for presence of NUCLEAR at intensity 0, mid string.
+    	    assertTrue(-1 != intensities.indexOf(" NUCLEAR=0 "));
+    	    final String datarow1 = br.readLine();
+    	    assertNotNull(datarow1);
+    	    // TODO: check timestamp.
+    	    assertTrue(datarow1.endsWith(" "+retailIntensity1));
+    	    assertNull(br.readLine());
     	    }
 
     	// Write second row and validate.
@@ -143,6 +153,17 @@ public final class TestMisc extends TestCase
 		    {
 		    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_1, br.readLine());
 		    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_2, br.readLine());
+    	    final String intensities = br.readLine();
+    	    assertNotNull(intensities);
+    	    assertTrue(intensities.startsWith(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX));
+            // Omit more detailed checking of intensities line this time.
+    	    final String datarow1 = br.readLine();
+    	    assertNotNull(datarow1);
+    	    final String datarow2 = br.readLine();
+    	    assertNotNull(datarow2);
+    	    // TODO: check timestamp.
+    	    assertTrue(datarow2.endsWith(" "+retailIntensity2));
+    	    assertNull(br.readLine());
 		    }
  
     	// Tidy up.
