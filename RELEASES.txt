@@ -63,6 +63,7 @@ SIGNIFICANT RELEASES (newest first)
     Changes since last freezepoint (developer/mgr initials and brief description):
     Previous significant freezepoint: V1.1.6
     DHD20211031: start each day's intensity log with header row of current FUELINST intensity weights.
+    DHD20211030: allow fuel intensities to be qualified by date (year or year range).
     DHD20211029: fixed FUEL_NAME_REGEX to allow INTIFA2 interconnector/'fuel' name.
     DHD20210718: have PNG icon use 8-bit palette rather than full RGB true colour. 
 
