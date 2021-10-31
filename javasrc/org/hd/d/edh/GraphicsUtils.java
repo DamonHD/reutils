@@ -69,7 +69,7 @@ public final class GraphicsUtils
     /**If true, aim to minimise PNG icon size, immediately or after (say) zopflipng postprocessing.
      * This may be using a palette, skipping anti-aliasing, and other techniques.
      */
-    public static final boolean MINIMISE_PNG_ICON_SIZE = true;
+    public static final boolean MINIMISE_PNG_ICON_SIZE = false;
 
     /**Write a simple PNG icon containing the current intensity and with the current traffic-light colour; never null.
      * This attempts to update the output atomically and leaving it globally readable at all times.
