@@ -1007,12 +1007,12 @@ public final class FUELINSTUtils
 	                    System.err.println("Unable to parse data range for intensity value for " + key);
 	                    continue;
 	                    }
-	                if(!FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(slashParts[0]).matches())
+	                if(!"".equals(slashParts[0]) && !FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(slashParts[0]).matches())
 	                    {
 	                    System.err.println("Unable to parse data range start for intensity value for " + key);
 	                    continue;
 	                    }
-	                final short isYear = Short.parseShort(slashParts[0]);
+	                final short isYear = "".equals(slashParts[0]) ? 0 : Short.parseShort(slashParts[0]);
 	                if(isYear > y)
 		                {
 		                // Range start year is after current year, so does not apply.
@@ -1027,6 +1027,11 @@ public final class FUELINSTUtils
 		                    continue;
 		                    }
 		                final short ieYear = Short.parseShort(slashParts[1]);
+		                if(ieYear < isYear)
+		                    {
+		                    System.err.println("Unable to parse data range (start>end) for intensity value for " + key);
+		                    continue;
+		                    }
 		                if(ieYear < y)
 			                {
 			                // Range end year is before current year, so does not apply.
