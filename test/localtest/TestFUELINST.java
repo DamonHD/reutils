@@ -165,6 +165,13 @@ public final class TestFUELINST extends TestCase
         assertTrue(configuredIntensitiesDefault.size() > 0);
 System.out.println(configuredIntensitiesDefault); // {PS=Pumped Storage Hydro, INTNEM=Nemo (Belgian) Interconnector, OCGT=Open-Cycle Gas Turbine, INTEW=East-West (Irish) Interconnector, NPSHYD=Non-Pumped-Storage Hydro, INTIRL=Irish (Moyle) Interconnector, OTHER=Other (including biomass), CCGT=Combined-Cycle Gas Turbine, INTFR=French Interconnector, INTELEC=INTELEC (France) Interconnector, INTNED=Netherlands Interconnector, INTNSL=North Sea Link (Norway), INTIFA2=INTIFA2 (France) Interconnector}
 
+		final float eps = 0.001f;
+
+        // Test for presence of 'always zero' fuel.
+		//intensity.fuel.NUCLEAR=0
+		assertNotNull(configuredIntensitiesDefault.get("NUCLEAR"));
+		assertEquals(0f, configuredIntensitiesDefault.get("NUCLEAR"), eps);
+
         // Test for presence of one fuel/interconnector with name which is not pure-alpha.
         assertNotNull(configuredIntensitiesDefault.get("INTIFA2"));
         // It should have a greater-than-zero intensity.
@@ -201,7 +208,6 @@ intensity.fuel.INTIRL.2012/=0.45
 intensity.fuel.INTIRL=0.45
 intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
  */
-        final float eps = 0.001f;
         assertEquals(0.45f, configuredIntensitiesDefault.get("INTIRL") , eps);
         
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2008).get("INTIRL"), eps);
