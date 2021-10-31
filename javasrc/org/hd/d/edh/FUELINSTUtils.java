@@ -763,6 +763,13 @@ public final class FUELINSTUtils
             catch(final IOException e) { e.printStackTrace(); }
         	}
         }
+    
+    /**First (comment) line of retail intensity log. */
+    public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_1 = "# Retail GB electricity carbon intensity as computed by earth.org.uk.";
+    /**Second (comment) line of retail intensity log. */
+    public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_2 = "# Time gCO2e/kWh";
+    /**Third (comment, intensities) line prefix of retail intensity log. */
+    public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX = "# Intensities gCO2/kWh:";
 
     /**Append to (or create if necessary) the (retail) intensity log.
      * If run more often than new data is available
@@ -814,17 +821,17 @@ public final class FUELINSTUtils
         	// Write a header if the file was new.
 	        if(!logFileExists)
 	            {
-	        	pw.println("# Retail GB electricity carbon intensity as computed by earth.org.uk.");
+	        	pw.println(RETAIL_INTENSITY_LOG_HEADER_LINE_1);
+	        	pw.println("# Time gCO2e/kWh");
 	        	// DHD20211031: write out intensities based on today's year (parsed for consistency!)
 	        	final Map<String, Float> configuredIntensities = getConfiguredIntensities(Integer.parseInt(todayDateUTC.substring(0, 4)));
 	        	final SortedSet<String> fuels = new TreeSet<String>(configuredIntensities.keySet());
-	        	final StringBuilder isb = new StringBuilder();
-	        	isb.append("# Intensities gCO2/kWh:");
+	        	final StringBuilder isb = new StringBuilder(RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX.length() + 16*fuels.size());
+	        	isb.append(RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX);
 	        	for(final String f : fuels)
 	        	    { isb.append(" "+f+"="+(Math.round(1000*configuredIntensities.get(f)))); }
 	        	pw.println(isb);
 //System.err.println("isb: " + isb);
-	        	pw.println("# Time gCO2e/kWh");
 	        	}
 	        // Append the new record <timestamp> <intensity>.
 	        pw.print(timestampUTC); pw.print(' '); pw.println(retailIntensity);

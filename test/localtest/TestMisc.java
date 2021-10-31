@@ -29,7 +29,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -118,16 +120,32 @@ public final class TestMisc extends TestCase
      */
     public static void testAppendToRetailIntensityLog() throws IOException
 	    {
-    	// appendToRetailIntensityLog(File id, long timestamp, int retailIntensity)
-
     	final Path tempDirectory = Files.createTempDirectory("testAppendToRetailIntensityLog");
     	System.err.println("tempDir = " + tempDirectory);
-    	
+
     	final long now = System.currentTimeMillis();
-    	final int retailIntensity = 123;
-    	final File logFile = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), now, retailIntensity);
-    	
-    	// Attempt to tidy up!
+
+    	// Write first row (and create file with header), and validate.
+    	final int retailIntensity1 = 123;
+    	final File logFile = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), now, retailIntensity1);	
+    	try(BufferedReader br = new BufferedReader(new FileReader(logFile)))
+    	    {
+    	    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_1, br.readLine());
+    	    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_2, br.readLine());
+    	    }
+
+    	// Write second row and validate.
+    	final long later = now + 1;
+    	final int retailIntensity2 = 321;
+    	final File logFile2 = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), now, retailIntensity2);
+    	assertEquals(logFile, logFile2);
+    	try(BufferedReader br = new BufferedReader(new FileReader(logFile2)))
+		    {
+		    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_1, br.readLine());
+		    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_2, br.readLine());
+		    }
+ 
+    	// Tidy up.
     	if(null != logFile) { logFile.delete(); }
     	Files.delete(tempDirectory);
 	    }
