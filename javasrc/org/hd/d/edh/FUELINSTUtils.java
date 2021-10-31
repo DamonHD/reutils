@@ -767,12 +767,15 @@ public final class FUELINSTUtils
     /**Append to (or create if necessary) the (retail) intensity log.
      * If run more often than new data is available
      * this may produce duplicate/repeated records.
+     * <p>
+     * Public for testability.
      * 
      * @param id   non-null writable directory for the log file
      * @param timestamp  +ve timestamp of latest input available data point
-     * @param retailIntensity  non-negative retail/domestic intensity kgCO2e/kWh
+     * @param retailIntensity  non-negative retail/domestic intensity gCO2e/kWh
+     * @return handle of log file, or null if none written
      */
-    private static void appendToRetailIntensityLog(File id, long timestamp, int retailIntensity)
+    public static File appendToRetailIntensityLog(File id, long timestamp, int retailIntensity)
         throws IOException
         {
         if(null == id) { throw new IllegalArgumentException(); }
@@ -798,7 +801,7 @@ public final class FUELINSTUtils
         if(!dateUTC.equals(todayDateUTC))
             {
         	System.err.println("WARNING: will not write to intensity log for "+dateUTC+" ("+timestampUTC+") at "+(new Date()));
-        	return;
+        	return(null);
             }
 
         // If multiple copies of this code run at once
@@ -815,9 +818,12 @@ public final class FUELINSTUtils
 	        	// DHD20211031: write out intensities based on today's year (parsed for consistency!)
 	        	final Map<String, Float> configuredIntensities = getConfiguredIntensities(Integer.parseInt(todayDateUTC.substring(0, 4)));
 	        	final SortedSet<String> fuels = new TreeSet<String>(configuredIntensities.keySet());
-	        	pw.print("# Intensities kgCO2/kWh:");
-	        	for(final String f : fuels) { pw.print(" "+f+"="+configuredIntensities.get(f)); }
-	        	pw.println();
+	        	final StringBuilder isb = new StringBuilder();
+	        	isb.append("# Intensities gCO2/kWh:");
+	        	for(final String f : fuels)
+	        	    { isb.append(" "+f+"="+(Math.round(1000*configuredIntensities.get(f)))); }
+	        	pw.println(isb);
+//System.err.println("isb: " + isb);
 	        	pw.println("# Time gCO2e/kWh");
 	        	}
 	        // Append the new record <timestamp> <intensity>.
@@ -825,6 +831,8 @@ public final class FUELINSTUtils
 	        }
         // Attempt to ensure that the log file is readable by all.
         logFile.setReadable(true, false);
+        
+        return(logFile);
 	    }
 
 	/**Base directory for embeddable intensity buttons/icons; not null.
@@ -974,21 +982,25 @@ public final class FUELINSTUtils
             // Extract fuel name.
             final String fuel;
             
+            // Is the whole keytail an unqualified fule name (no date range).
+            final boolean isUnqualified = FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches();
+            
             // For the case where year is null, the entire tail must be a valid fuel name.
             if(year == null)
 	            {
-            	if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches())
+            	if(!isUnqualified)
 		            {
-	            	System.err.println("Invalid fuel name " + key);
+	            	// Cannot use unqualified entry with null argument.
 	                continue;
 		            }
             	fuel = keytail;
 	            }
-            else if(FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches() &&
-            	   !result.containsKey(keytail))
+            else if(isUnqualified)   
             	{
             	// This is a default (no date-range) default value.
-            	fuel = keytail;
+            	// Usable with a non-null year iff no value already captured for this fuel.
+            	if(!result.containsKey(keytail)) { fuel = keytail; }
+            	else { continue; } 
             	}	
             else // year != null and this is not an unqualified entry...
             	{

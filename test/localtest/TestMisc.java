@@ -32,6 +32,8 @@ package localtest;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -111,9 +113,23 @@ public final class TestMisc extends TestCase
         assertFalse("YELLOW must not be better than GREEN", TrafficLight.YELLOW.betterThan(TrafficLight.GREEN));
         }
     
-    /**Test writing of intensity log. */
-    public static void testAppendToRetailIntensityLog()
+    /**Test writing of intensity log. 
+     * @throws IOException
+     */
+    public static void testAppendToRetailIntensityLog() throws IOException
 	    {
     	// appendToRetailIntensityLog(File id, long timestamp, int retailIntensity)
+
+    	final Path tempDirectory = Files.createTempDirectory("testAppendToRetailIntensityLog");
+    	System.err.println("tempDir = " + tempDirectory);
+    	
+    	final long now = System.currentTimeMillis();
+    	final int retailIntensity = 123;
+    	final File logFile = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), now, retailIntensity);
+    	
+    	// Attempt to tidy up!
+    	if(null != logFile) { logFile.delete(); }
+    	Files.delete(tempDirectory);
 	    }
-	    }
+	
+    }
