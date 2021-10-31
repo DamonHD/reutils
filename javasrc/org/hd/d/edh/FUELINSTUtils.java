@@ -933,7 +933,7 @@ public final class FUELINSTUtils
      * Dates specified must be unique and non-overlapping,
      * and startYear must not be after endYear.
      * <p>
-     * This date format is potentially partly extensible to ISO8601.
+     * This date format is potentially partly extensible to ISO8601 including ranges.
      *
      * TODO
      * 
@@ -987,8 +987,55 @@ public final class FUELINSTUtils
 	                continue;
 		            }
 	            final int y = year;
+	            // Deal with date range cases.
+	            final int slashPos = parts[1].indexOf('/');
+	            if(-1 != slashPos)
+		            {
+	            	// Note:
+//	                assertEquals(1, "2012/".split("/").length);
+//	                assertEquals("2012", "2012/".split("/")[0]);
+//	                assertEquals(2, "/2012".split("/").length);
+//	                assertEquals("", "/2012".split("/")[0]);
+//	                assertEquals("2012", "/2012".split("/")[1]);
+//	                assertEquals(2, "2011/2012".split("/").length);
+//	                assertEquals("2011", "2011/2012".split("/")[0]);
+//	                assertEquals("2012", "2011/2012".split("/")[1]);
+
+	            	final String slashParts[] = parts[1].split("/");
+	            	if(slashParts.length > 2)
+	                    {
+	                    System.err.println("Unable to parse data range for intensity value for " + key);
+	                    continue;
+	                    }
+	                if(!FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(slashParts[0]).matches())
+	                    {
+	                    System.err.println("Unable to parse data range start for intensity value for " + key);
+	                    continue;
+	                    }
+	                final short isYear = Short.parseShort(slashParts[0]);
+	                if(isYear > y)
+		                {
+		                // Range start year is after current year, so does not apply.
+	                	continue;
+		                }
+	                
+	                if(slashParts.length > 1)
+		                {
+		                if(!FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(slashParts[1]).matches())
+		                    {
+		                    System.err.println("Unable to parse data range end for intensity value for " + key);
+		                    continue;
+		                    }
+		                final short ieYear = Short.parseShort(slashParts[1]);
+		                if(ieYear < y)
+			                {
+			                // Range end year is before current year, so does not apply.
+		                	continue;
+			                }
+		                }
+		            }
 	            // Deal with simple fuelname.year case.
-            	if(FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(parts[1]).matches())
+	            else if(FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(parts[1]).matches())
 	            	{
 	                final short iYear = Short.parseShort(parts[1]);
 	                if(iYear != y) { continue; } // Wrong year.
