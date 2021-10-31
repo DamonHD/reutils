@@ -42,6 +42,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -129,6 +132,8 @@ public final class FUELINSTUtils
     /**Compute current status of fuel intensity; never null, but may be empty/default if data not available.
      * If cacheing is enabled, then this may revert to cache in case of
      * difficulty retrieving new data.
+     * <p>
+     * Uses fuel intensities as of this year, ie when this call is made.
      *
      * @param cacheFile  if non-null, file to cache (parsed) data in between calls in case of data-source problems
      * @throws IOException in case of data corruption
@@ -144,7 +149,9 @@ public final class FUELINSTUtils
         final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
         if(null == template)
             { throw new IllegalStateException("Property undefined for FUELINST row field names: " + FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES); }
-        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
+        // Use fuel intensities as of this year, ie when this call is made.
+        final LocalDate todayUTC = LocalDate.now(ZoneOffset.UTC);
+        final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities(todayUTC.getYear());
         if(configuredIntensities.isEmpty())
             { throw new IllegalStateException("Properties undefined for fuel intensities: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX + "*"); }
         final String maxIntensityAgeS = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_MAX_AGE);
@@ -1380,8 +1387,11 @@ public final class FUELINSTUtils
                     }
                 }
 
-            w.write("<p>Overall generation intensity (kgCO2/kWh) computed using the following fuel intensities (other fuels/sources are ignored):");
-            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities());
+            final LocalDate todayUTC = LocalDate.now(ZoneOffset.UTC);
+            final int intensityYear = todayUTC.getYear();
+            w.write("<p>Overall generation intensity (kgCO2/kWh) computed using the following fuel year-"+intensityYear+" intensities (other fuels/sources are ignored):");
+            final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities(intensityYear);
+            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities(intensityYear));
             for(final String fuel : intensities.keySet())
                 {
                 w.write(' '); w.write(fuel);
@@ -1477,6 +1487,7 @@ public final class FUELINSTUtils
         }
 
     /**Update (atomically if possible) the XML traffic-light data dump.
+     * Dumps current-year (at time call is run) fuel intensities.
      */
     public static void updateXMLFile(final long startTime,
                                            final String outputXMLFileName,
@@ -1628,7 +1639,10 @@ public final class FUELINSTUtils
 
             w.println("<fuel_intensities>");
             w.println("<timestamp>"+summary.timestamp+"</timestamp>");
-            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities());
+            // Note: current-year intensities are used.
+            final LocalDate todayUTC = LocalDate.now(ZoneOffset.UTC);
+            final int intensityYear = todayUTC.getYear();
+            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities(intensityYear));
             for(final String fuel : intensities.keySet()) { w.println("<"+fuel.toLowerCase()+">"+intensities.get(fuel)+"</"+fuel.toLowerCase()+">"); }
             w.println("</fuel_intensities>");
 

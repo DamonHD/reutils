@@ -337,8 +337,8 @@ public final class FUELINSTHistorical
             {
             final Calendar c = new GregorianCalendar(FUELINSTUtils.GMT_TIME_ZONE);
             c.setTimeInMillis(timestamp);
-            final int m = c.get(Calendar.YEAR);
-            return(String.valueOf(m));
+            final int y = c.get(Calendar.YEAR);
+            return(String.valueOf(y));
             }
         public BucketAlg getSubBucketAlg() { return(BUCKET_BY_YEAR_AND_DAY_GMT); }
         public String getTitle() { return("Year"); }
@@ -399,6 +399,7 @@ public final class FUELINSTHistorical
         final Set<String> fieldKeys = new HashSet<String>(Arrays.asList(new String[]{TIMESTAMP_FIELD,FUELTYPE_FIELD,FUELGEN_FIELD}));
         final List<TimestampedNonNegInt> intensities = new ArrayList<TimestampedNonNegInt>(512 * files.size());
         // Also collect underlying generation figures to be able to compute correlations.
+    	// FIXME: this assumes constant (default) ) fuel intensities for the entire run.
         final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
         final Map<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>> fuelinstCorrGrist = new HashMap<Long, Tuple.Pair<Map<String,Float>, Map<String,Integer>>>(512 * files.size());
         for(final File f : files)
@@ -874,6 +875,7 @@ public final class FUELINSTHistorical
     public static List<TimestampedNonNegInt> timestampedGenByFuelToIntensity(final List<Tuple.Pair<Long, Map<String,Integer>>> timestampedGenByFuel)
         throws ParseException
         {
+    	// FIXME: this assumes constant (default) ) fuel intensities for the entire run.
         final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities();
         if(configuredIntensities.isEmpty())
             { throw new IllegalStateException("Properties undefined for fuel intensities: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_PREFIX + "*"); }

@@ -160,7 +160,7 @@ public final class TestFUELINST extends TestCase
     public static void testConfiguredIntensities()
         {
         assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
-        final Map<String, Float> configuredIntensitiesDefault = FUELINSTUtils.getConfiguredIntensities();
+        final Map<String, Float> configuredIntensitiesDefault = FUELINSTUtils.getConfiguredIntensities(null);
         assertNotNull(configuredIntensitiesDefault);
         assertTrue(configuredIntensitiesDefault.size() > 0);
 System.out.println(configuredIntensitiesDefault); // {PS=Pumped Storage Hydro, INTNEM=Nemo (Belgian) Interconnector, OCGT=Open-Cycle Gas Turbine, INTEW=East-West (Irish) Interconnector, NPSHYD=Non-Pumped-Storage Hydro, INTIRL=Irish (Moyle) Interconnector, OTHER=Other (including biomass), CCGT=Combined-Cycle Gas Turbine, INTFR=French Interconnector, INTELEC=INTELEC (France) Interconnector, INTNED=Netherlands Interconnector, INTNSL=North Sea Link (Norway), INTIFA2=INTIFA2 (France) Interconnector}
