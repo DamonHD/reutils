@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
@@ -109,4 +110,10 @@ public final class TestMisc extends TestCase
         assertFalse("RED must not be better than YELLOW", TrafficLight.RED.betterThan(TrafficLight.YELLOW));
         assertFalse("YELLOW must not be better than GREEN", TrafficLight.YELLOW.betterThan(TrafficLight.GREEN));
         }
-    }
+    
+    /**Test writing of intensity log. */
+    public static void testAppendToRetailIntensityLog()
+	    {
+    	// appendToRetailIntensityLog(File id, long timestamp, int retailIntensity)
+	    }
+	    }

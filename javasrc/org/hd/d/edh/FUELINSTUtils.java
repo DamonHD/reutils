@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -792,7 +793,7 @@ public final class FUELINSTUtils
         final String timestampUTC = tsDF.format(new Date(timestamp));
         
         // Refuse to write to a log other than today's for safety.
-        // This may conceivably wrongly drop records at either end of the day.
+        // This may possibly wrongly drop records at either end of the day.
         final String todayDateUTC = fsDF.format(new Date());
         if(!dateUTC.equals(todayDateUTC))
             {
@@ -800,7 +801,7 @@ public final class FUELINSTUtils
         	return;
             }
 
-        // If multiple copied of this code run at once
+        // If multiple copies of this code run at once
         // then there may be a race creating/updating the file.
         // This especially applies to the header(s).
         final boolean logFileExists = logFile.exists();
@@ -811,6 +812,12 @@ public final class FUELINSTUtils
 	        if(!logFileExists)
 	            {
 	        	pw.println("# Retail GB electricity carbon intensity as computed by earth.org.uk.");
+	        	// DHD20211031: write out intensities based on today's year (parsed for consistency!)
+	        	final Map<String, Float> configuredIntensities = getConfiguredIntensities(Integer.parseInt(todayDateUTC.substring(0, 4)));
+	        	final SortedSet<String> fuels = new TreeSet<String>(configuredIntensities.keySet());
+	        	pw.print("# Intensities kgCO2/kWh:");
+	        	for(final String f : fuels) { pw.print(" "+f+"="+configuredIntensities.get(f)); }
+	        	pw.println();
 	        	pw.println("# Time gCO2e/kWh");
 	        	}
 	        // Append the new record <timestamp> <intensity>.
@@ -999,6 +1006,8 @@ public final class FUELINSTUtils
 	                continue;
 		            }
 	            final int y = year;
+	            if((y < 2000) || (y >= 3000))
+	                { throw new IllegalArgumentException("bad year " + y); }
 	            // Deal with date range cases.
 	            final int slashPos = parts[1].indexOf('/');
 	            if(-1 != slashPos)
