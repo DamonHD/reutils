@@ -264,7 +264,8 @@ public final class FUELINSTUtils
                 // Skip if something other than a valid fuel name.
                 if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(name).matches())
                     {
-                    System.err.println("Skipping invalid 'fuel' name "+name+" at " + namedFields.get("timestamp"));
+                	// DHD20211031: all inspected were benign 'date', 'type', 'settlementperiod', 'timestamp'.
+//                    System.err.println("Skipping invalid 'fuel' name "+name+" at " + namedFields.get("timestamp") + " from row " + row);
                 	continue;
                 	}
                 // Store the MW for this fuel.

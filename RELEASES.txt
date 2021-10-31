@@ -43,8 +43,8 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 
-PENDING 201911XX:
-
+PENDING 202111XX:
+    DHD20211031: turned off complaints about type,date,settlementperiod,timestamp not being valid fuel names.
 
 
 
