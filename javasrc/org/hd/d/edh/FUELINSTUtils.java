@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2013, Damon Hart-Davis,
+Copyright (c) 2008-2021, Damon Hart-Davis,
                          Ecotricity (Rob Clews).
 All rights reserved.
 
@@ -37,12 +37,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -51,7 +49,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,8 +58,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-
-import javax.naming.InvalidNameException;
 
 import org.hd.d.edh.FUELINST.CurrentSummary;
 

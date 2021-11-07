@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2013, Damon Hart-Davis
+Copyright (c) 2008-2021, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
-import junit.framework.TestCase;
-
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
-import org.hd.d.edh.TwitterUtils.TwitterDetails;
+
+import junit.framework.TestCase;
 
 /**Twitter tests.
  */

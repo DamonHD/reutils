@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2013, Damon Hart-Davis,
+Copyright (c) 2008-2021, Damon Hart-Davis,
                          Ecotricity (Rob Clews).
 All rights reserved.
 
