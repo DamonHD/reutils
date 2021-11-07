@@ -44,10 +44,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 
-PENDING 202111XX:
-    TODO: Inject intensity figure in tweet body: https://github.com/DamonHD/reutils/issues/3
-    DHD20211031: making PNGs true colour again for now (don't look good generated on RPi).
-    DHD20211031: turned off complaints about type,date,settlementperiod,timestamp not being valid fuel names.
+PENDING:
 
 
 
@@ -57,6 +54,17 @@ PENDING 202111XX:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20211107:
+    freezepoint name: V1.1.8
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.7
+    DHD20211107: Intensity figure now in tweet body: https://github.com/DamonHD/reutils/issues/3
+    DHD20211031: making PNGs true colour again for now (don't look good generated on RPi).
+    DHD20211031: turned off complaints about type,date,settlementperiod,timestamp not being valid fuel names.
 
 
 20211031:
