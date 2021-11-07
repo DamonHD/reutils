@@ -876,7 +876,7 @@ public final class FUELINSTUtils
      *
      * @param isDataStale  true if we are working on historical/predicted (non-live) data
      * @param statusUncapped  the uncapped current or predicted status; never null
-     * @param retailIntensity  intensity in gCO2/kWh as seen by retail customer
+     * @param retailIntensity  intensity in gCO2/kWh as seen by retail customer, non-negative
      * @return human-readable valid Tweet message
      */
     public static String generateTweetMessage(
@@ -885,8 +885,8 @@ public final class FUELINSTUtils
             final int retailIntensity) // TODO
         {
         if(null == statusUncapped) { throw new IllegalArgumentException(); }
-        final String statusMessage = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
-        final String tweetMessage = ((statusMessage != null) && !statusMessage.isEmpty()) ? statusMessage.trim() :
+        final String statusTemplate = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
+        final String tweetMessage = ((statusTemplate != null) && !statusTemplate.isEmpty()) ? String.format(statusTemplate, retailIntensity).trim() :
             ("Grid status " + statusUncapped);
         return(tweetMessage);
         }
