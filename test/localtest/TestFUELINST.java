@@ -226,9 +226,9 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2019).get("INTIRL"), eps);
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2020).get("INTIRL"), eps);
         assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2021).get("INTIRL"), eps);
-        assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2022).get("INTIRL"), eps);
+        assertEquals(0.458f, FUELINSTUtils.getConfiguredIntensities(2022).get("INTIRL"), eps);
 
-        assertEquals(0.45f, FUELINSTUtils.getConfiguredIntensities(2023).get("INTIRL"), eps);
+        assertEquals(0.458f, FUELINSTUtils.getConfiguredIntensities(2023).get("INTIRL"), eps);
 
         // Should be able to fall back to undated "always this" value.		
         assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2009).get("NUCLEAR"), eps);
