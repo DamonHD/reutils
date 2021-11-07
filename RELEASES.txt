@@ -45,7 +45,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING 202111XX:
-    TODO: Inject intensity figure in tweet body.
+    TODO: Inject intensity figure in tweet body: https://github.com/DamonHD/reutils/issues/3
     DHD20211031: making PNGs true colour again for now (don't look good generated on RPi).
     DHD20211031: turned off complaints about type,date,settlementperiod,timestamp not being valid fuel names.
 
