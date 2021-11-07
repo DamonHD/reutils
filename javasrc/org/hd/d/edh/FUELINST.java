@@ -56,8 +56,7 @@ public final class FUELINST
      */
     public static final String FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL = "intensity.URL.current.csv";
 
-    /**Field names for FUELINST csv file row; not null.
-     */
+    /**Field names for FUELINST csv file row; not null. */
     public static final String FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES = "intensity.csv.fueltype";
 
     /**Field name for maximum age (in seconds) of FUELINST data we will regard as 'current'; not null. */

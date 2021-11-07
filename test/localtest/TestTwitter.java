@@ -31,6 +31,8 @@ package localtest;
 
 import junit.framework.TestCase;
 
+import org.hd.d.edh.FUELINSTUtils;
+import org.hd.d.edh.TrafficLight;
 import org.hd.d.edh.TwitterUtils;
 import org.hd.d.edh.TwitterUtils.TwitterDetails;
 
@@ -38,22 +40,46 @@ import org.hd.d.edh.TwitterUtils.TwitterDetails;
  */
 public final class TestTwitter extends TestCase
     {
-    /**Test very basic access to our selected Twitter user.
+    /**Test that all possible grid status Tweets are legal with the current property set.
+     * Check that message are not null and not too long.
      */
-    public static void testBasics()
-        throws Exception
+    public static void testTweetValidity()
         {
-        final TwitterDetails td = TwitterUtils.getTwitterHandle(true);
-        if(null != td)
+        for(final boolean isDataStale : new boolean[]{ true, false } )
             {
-            // If we have a Twitter ID then we should be able to
-            // print our user's status with no exception.
-            System.out.println("Current status of "+td.username+": " + td.handle.getStatus(td.username));
+            for(final TrafficLight status : TrafficLight.values())
+                {
+				for(final int retailIntensity : new int[]{9, 99, 999})
+					{
+					final String message = FUELINSTUtils.generateTweetMessage(
+							isDataStale, status, retailIntensity);
+					System.err.println(message);		
+	                assertNotNull("Generated Tweet must not be null", message);
+	                System.out.println("LENGTH="+message.length()+": "+message);
+                    assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
+                    assertTrue("Generated Tweet must not be over-long: was "+message.length()+" vs max "+TwitterUtils.MAX_TWEET_CHARS+" message: "+message,
+                            message.length() <= TwitterUtils.MAX_TWEET_CHARS);
+					}
+                }
             }
-
-//        td.handle.setStatus("After the pip it will be: " + (new Date()));
-//        TwitterUtils.setTwitterStatusIfChanged(td, null, "Pip: "+(new Date()));
         }
+
+//    /**Test very basic access to our selected Twitter user.
+//     */
+//    public static void testBasics()
+//        throws Exception
+//        {
+//        final TwitterDetails td = TwitterUtils.getTwitterHandle(true);
+//        if(null != td)
+//            {
+//            // If we have a Twitter ID then we should be able to
+//            // print our user's status with no exception.
+//            System.out.println("Current status of "+td.username+": " + td.handle.getStatus(td.username));
+//            }
+//
+////        td.handle.setStatus("After the pip it will be: " + (new Date()));
+////        TwitterUtils.setTwitterStatusIfChanged(td, null, "Pip: "+(new Date()));
+//        }
 
 //    /**Test user-mediated extraction of auth token.
 //     * Also useful for gathering new secrets manually...

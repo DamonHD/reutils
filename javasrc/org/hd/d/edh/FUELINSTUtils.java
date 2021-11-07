@@ -651,6 +651,11 @@ public final class FUELINSTUtils
         // Is the data stale?
         final boolean isDataStale = summary.useByTime < startTime;
 
+        // Compute intensity as seen by typical GB domestic consumer, gCO2/kWh.
+        final int retailIntensity = Math.round((isDataStale ?
+        		summary.histAveIntensity :
+        	    summary.currentIntensity) * (1 + summary.totalGridLosses));
+
         if(outputHTMLFileName != null)
             {
             // Status to use to drive traffic-light measure.
@@ -719,17 +724,12 @@ public final class FUELINSTUtils
                     // and it has actually changed compared to what is at Twitter...
                     // If we can't get a hand-crafted message then we create a simple one on the fly...
                     // We use different messages for live and historical (stale) data.
-                    final String tweetMessage = FUELINSTUtils.generateTweetMessage(isDataStale, statusUncapped);
+                    final String tweetMessage = FUELINSTUtils.generateTweetMessage(isDataStale, statusUncapped, retailIntensity);
                     TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName), tweetMessage);
                     }
                 }
             catch(final IOException e) { e.printStackTrace(); }
             }
-
-        // Compute intensity as seen by typical GB domestic consumer.
-        final int retailIntensity = Math.round((isDataStale ?
-        		summary.histAveIntensity :
-        	    summary.currentIntensity) * (1 + summary.totalGridLosses));
 
         // Update button(s)/icon(s).
         try
@@ -749,7 +749,7 @@ public final class FUELINSTUtils
         // Append to the intensity log.
         // Only do this for current/live data, ie if not stale.
         if(isDataStale || (0 == summary.timestamp))
-            { System.err.println("Will not update log, data stale."); }
+            { System.err.println("Will not update log, input data is stale."); }
         else
         	{ 		
             try
@@ -881,10 +881,13 @@ public final class FUELINSTUtils
      *
      * @param isDataStale  true if we are working on historical/predicted (non-live) data
      * @param statusUncapped  the uncapped current or predicted status; never null
+     * @param retailIntensity  intensity in gCO2/kWh as seen by retail customer
      * @return human-readable valid Tweet message
      */
-    public static String generateTweetMessage(final boolean isDataStale,
-            final TrafficLight statusUncapped)
+    public static String generateTweetMessage(
+    		final boolean isDataStale,
+            final TrafficLight statusUncapped,
+            final int retailIntensity) // TODO
         {
         if(null == statusUncapped) { throw new IllegalArgumentException(); }
         final String statusMessage = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
