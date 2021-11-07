@@ -54,9 +54,9 @@ public final class TwitterUtils
     /**Maximum Twitter message length (tweet) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
      * <p>
-     * DHD20210404: lifted from 134 to 274 (max Tweet length now 280 chars).
+     * DHD20210404: could be lifted from 134 to 274 (max Tweet length now 280 chars), but may need JTwitter upgrade.
      */
-    public static final int MAX_TWEET_CHARS = 274; // 134;
+    public static final int MAX_TWEET_CHARS = 134; // 274;
 
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
     public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES = "Twitter.trafficlight.status.";

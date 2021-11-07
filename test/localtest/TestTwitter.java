@@ -44,6 +44,8 @@ public final class TestTwitter extends TestCase
      */
     public static void testTweetValidity()
         {
+    	final int max_chars = TwitterUtils.MAX_TWEET_CHARS - 5; // Allow for some traling decoration.
+    	
         for(final boolean isDataStale : new boolean[]{ true, false } )
             {
             for(final TrafficLight status : TrafficLight.values())
@@ -52,9 +54,8 @@ public final class TestTwitter extends TestCase
 					{
 					final String message = FUELINSTUtils.generateTweetMessage(
 							isDataStale, status, retailIntensity);
-					System.err.println(message);		
 	                assertNotNull("Generated Tweet must not be null", message);
-	                System.out.println("LENGTH="+message.length()+": "+message);
+System.err.println("LENGTH="+message.length()+": "+message);
                     assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
                     assertTrue("Generated Tweet must not be over-long: was "+message.length()+" vs max "+TwitterUtils.MAX_TWEET_CHARS+" message: "+message,
                             message.length() <= TwitterUtils.MAX_TWEET_CHARS);
