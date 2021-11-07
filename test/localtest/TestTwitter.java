@@ -59,6 +59,8 @@ System.err.println("LENGTH="+message.length()+": "+message);
                     assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
                     assertTrue("Generated Tweet must not be over-long: was "+message.length()+" vs max "+TwitterUtils.MAX_TWEET_CHARS+" message: "+message,
                             message.length() <= TwitterUtils.MAX_TWEET_CHARS);
+                    // Ensure that template has been filled in.
+                    assertFalse("Template not applied?", message.contains("{1}"));
 					}
                 }
             }
