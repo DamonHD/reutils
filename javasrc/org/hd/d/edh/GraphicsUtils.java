@@ -66,8 +66,10 @@ public final class GraphicsUtils
     /**Background colour for red traffic-light status; non-null. */
     public static final Color TL_RED_ICON_BG = new Color(0xffcccc);
     
-    /**If true, aim to minimise PNG icon size, immediately or after (say) zopflipng postprocessing.
+    /**If true, aim to minimise PNG icon size, immediately or after (say) zopflipng post-processing.
      * This may be using a palette, skipping anti-aliasing, and other techniques.
+     * <p>
+     * In practice this seems to make for a less-readable icon.
      */
     public static final boolean MINIMISE_PNG_ICON_SIZE = false;
 
@@ -140,7 +142,9 @@ public final class GraphicsUtils
             g.setColor(Color.BLACK);
             g.drawString(basicIconText, (int) (-boundsMain.getCenterX() + (sizePX/2.0)), (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
 
-            if(!MINIMISE_PNG_ICON_SIZE || (sizePX > MIN_ICON_SIZE_PX))
+            // Only add time and units lines when larger than the minimum dimensions.
+            // At minimum size these extra lines are essentially unreadable.
+            if(sizePX > MIN_ICON_SIZE_PX)
 	            {
 	            // Show units at the bottom of the icon, ie under the number.
 	            final String units = "gCO2/kWh";
@@ -156,7 +160,8 @@ public final class GraphicsUtils
 	            g.setColor(Color.BLACK);
 	            g.drawString(units, (int) (-boundsU.getCenterX() + (sizePX/2.0)), sizePX - ((int)(boundsU.getY() + boundsU.getHeight())) - ICON_BORDER_PX); // At bottom (with margin).
 	
-	            // If a timestamp is supplied, squeeze it into the display above the intensity (in grey).
+	            // If a timestamp is supplied
+	            // then squeeze it into the display above the intensity (in grey).
 	            if(0 != timestamp)
 	                {
 	                final SimpleDateFormat fmt = FUELINSTUtils.getHHMMTimestampParser();

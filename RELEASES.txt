@@ -45,6 +45,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
+    DHD20211107: eliminate (unreadable) timestamp and units text lines on smallest button.
     DHD20211107: captured 2022 intensities per NGESO and carbonintensity.org.uk
 
 
