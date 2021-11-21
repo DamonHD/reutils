@@ -136,7 +136,7 @@ public final class Main
             	    {
             	    final String messageText = args[1];
 	            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
-	            TwitterUtils.setTwitterStatusIfChanged(td, null, messageText);
+	            TwitterUtils.setTwitterStatusIfChanged(td, null, null, messageText);
             	    }
                 return; // Completed.
 	        }

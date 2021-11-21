@@ -243,7 +243,13 @@ public final class TwitterUtils
             }
         }
 
-    /**If true then resend tweet only when different to current Twitter status.
+//    /**If true then resend tweet only when different to previous tweeted status.
+//     * More robust than only sending when our message changes because Twitter can lose messages,
+//     * but will result in any manual tweet followed up by retweet of previous status.
+//     */
+//    private static final boolean SEND_TWEET_IF_TWITTER_TEXT_DIFFERENT = true;
+
+    /**If true then resend tweet only when different R/A/G status to previous tweeted status.
      * More robust than only sending when our message changes because Twitter can lose messages,
      * but will result in any manual tweet followed up by retweet of previous status.
      */
@@ -264,10 +270,12 @@ public final class TwitterUtils
      * @param td  non-null, non-read-only Twitter handle
      * @param TwitterCacheFileName  if non-null is the location to cache twitter status messages;
      *     if the new status supplied is the same as the cached value then we won't send an update
+     * @param status  overall R/A/G status, null if no attempt to regulate by this
      * @param statusMessage  short (max 140 chars) Twitter status message; never null
      */
     public static void setTwitterStatusIfChanged(final TwitterUtils.TwitterDetails td,
                                                  final File TwitterCacheFileName,
+                                                 final TrafficLight status,
                                                  final String statusMessage)
         throws IOException
         {
@@ -280,12 +288,12 @@ public final class TwitterUtils
         final boolean twitterCacheFileExists = (null != TwitterCacheFileName) && TwitterCacheFileName.canRead();
         if(!SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT)
             {
-            if(twitterCacheFileExists)
+            if(twitterCacheFileExists && (null != status))
                 {
                 try
                     {
-                    final String lastStatus = (String) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
-                    if(statusMessage.equals(lastStatus)) { return; }
+                    final TrafficLight lastStatus = (TrafficLight) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
+                    if((null != lastStatus) && (statusMessage.equals(lastStatus))) { return; }
                     }
                 catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
                 }
@@ -319,7 +327,8 @@ public final class TwitterUtils
             }
 
         final Status statusBefore = td.handle.getStatus(td.username);
-        // Don't send a repeat/redundant message to Twitter... Save follower money and patience...
+        // Don't send a repeat/redundant message to Twitter...
+        // Conserve follower bandwidth and patience...
         // If this fails with an exception then we won't update our cached status message either...
         final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
         final String statusBeforeText = (null == statusBefore) ? null : statusBefore.getText();
@@ -344,10 +353,10 @@ public final class TwitterUtils
             return; // Don't update cache.
             }
 
-        // Now try to cache the status message (uncompressed, since it will be small) if we can.
+        // Now try to cache the status (uncompressed, since it will be small) if we can.
         if(null != TwitterCacheFileName)
             {
-            try { DataUtils.serialiseToFile(statusMessage, TwitterCacheFileName, false, true); }
+            try { DataUtils.serialiseToFile(status, TwitterCacheFileName, false, true); }
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
             }
         }

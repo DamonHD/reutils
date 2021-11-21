@@ -719,8 +719,13 @@ public final class FUELINSTUtils
                     // and it has actually changed compared to what is at Twitter...
                     // If we can't get a hand-crafted message then we create a simple one on the fly...
                     // We use different messages for live and historical (stale) data.
-                    final String tweetMessage = FUELINSTUtils.generateTweetMessage(isDataStale, statusUncapped, retailIntensity);
-                    TwitterUtils.setTwitterStatusIfChanged(td, new File(TwitterCacheFileName), tweetMessage);
+                    final String tweetMessage = FUELINSTUtils.generateTweetMessage(
+                        isDataStale, statusUncapped, retailIntensity);
+                    TwitterUtils.setTwitterStatusIfChanged(
+                    		td,
+                    		new File(TwitterCacheFileName),
+                    		status,
+                    		tweetMessage);
                     }
                 }
             catch(final IOException e) { e.printStackTrace(); }
