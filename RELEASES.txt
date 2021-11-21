@@ -45,9 +45,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20211121: aim to only tweet intensity when R/A/G status changes.
-    DHD20211107: eliminate (unreadable) timestamp and units text lines on smallest button.
-    DHD20211107: captured 2022 intensities per NGESO and carbonintensity.org.uk
 
 
 
@@ -56,6 +53,17 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20211121:
+    freezepoint name: V1.1.9
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.8
+    DHD20211121: aim to only tweet intensity when R/A/G status changes.
+    DHD20211107: eliminate (unreadable) timestamp and units text lines on smallest button.
+    DHD20211107: captured 2022 intensities per NGESO and carbonintensity.org.uk
 
 
 20211107:
