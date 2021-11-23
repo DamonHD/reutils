@@ -358,7 +358,8 @@ public final class TwitterUtils
             }
 
         // Now try to cache the status (uncompressed, since it will be small) if we can.
-        if(null != TwitterCacheFileName)
+        // Only do this for non-null statuses.
+        if((null != TwitterCacheFileName) && (null != status))
             {
             try { DataUtils.serialiseToFile(status, TwitterCacheFileName, false, true); }
             catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
