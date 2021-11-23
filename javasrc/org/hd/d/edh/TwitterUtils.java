@@ -349,13 +349,16 @@ public final class TwitterUtils
             return; // Don't update cache.
             }
 
-        final Status statusAfter = td.handle.getStatus(td.username);
-        final String statusAfterText = (null == statusAfter) ? null : statusAfter.getText();
-        if(!statusAfterText.endsWith(time))
-            {
-            System.err.println("WARNING: status not updated at Twitter: '"+statusAfterText+"'");
-            return; // Don't update cache.
-            }
+        // DHD20211123: this check does not seem to be reliable currently, so causing excess tweeting.
+        //INFO: sent tweet for username EarthOrgUK: '272gCO2/kWh National Grid status GREEN: CO2 intensity is low so you can run your wash etc now! http://bit.ly/3usoe #green #energy #CO2' with trailer '0446', was 272gCO2/kWh National Grid status GREEN: CO2 intensity is low so you can run your wash etc now!… https://t.co/E850CKTrJw
+        //WARNING: status not updated at Twitter: '272gCO2/kWh National Grid status GREEN: CO2 intensity is low so you can run your wash etc now!… https://t.co/XraoRMFglI'
+//        final Status statusAfter = td.handle.getStatus(td.username);
+//        final String statusAfterText = (null == statusAfter) ? null : statusAfter.getText();
+//        if(!statusAfterText.endsWith(time))
+//            {
+//            System.err.println("WARNING: status not updated at Twitter: '"+statusAfterText+"'");
+//            return; // Don't update cache.
+//            }
 
         // Now try to cache the status (uncompressed, since it will be small) if we can.
         // Only do this for non-null statuses.
