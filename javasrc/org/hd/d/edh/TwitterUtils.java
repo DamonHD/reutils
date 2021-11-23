@@ -253,7 +253,7 @@ public final class TwitterUtils
      * More robust than only sending when our message changes because Twitter can lose messages,
      * but will result in any manual tweet followed up by retweet of previous status.
      */
-    private static final boolean SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT = true;
+    private static final boolean SEND_TWEET_ONLY_IF_TWITTER_STATUS_DIFFERENT = true;
 
     /**Character used to separate (trailing) variable part from main part of message.
      * Generally whitespace would also be inserted to avoid confusion.
@@ -286,7 +286,7 @@ public final class TwitterUtils
         // Don't try to resend unless different status from previous generated tweet.
         // Ignore for null status messages.
         final boolean twitterCacheFileExists = (null != TwitterCacheFileName) && TwitterCacheFileName.canRead();
-        if(!SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT)
+        if(SEND_TWEET_ONLY_IF_TWITTER_STATUS_DIFFERENT)
             {
             if(twitterCacheFileExists && (null != status))
                 {

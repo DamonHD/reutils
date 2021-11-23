@@ -56,6 +56,15 @@ SIGNIFICANT RELEASES (newest first)
 
 
 20211123:
+    freezepoint name: V1.1.11
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.10
+    DHD20211123: fixing yet another logic error causing excessive intensity tweeting.
+
+
+20211123:
     freezepoint name: V1.1.10
     branch name: HEAD
     Deployed where: earth.org.uk
