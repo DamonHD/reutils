@@ -283,8 +283,8 @@ public final class TwitterUtils
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
-        // Possibly don't try to resend unless different from previous tweet that we generated/cached
-        // or else send if different to current Twitter status (more robust)...
+        // Don't try to resend unless different status from previous generated tweet.
+        // Ignore for null status messages.
         final boolean twitterCacheFileExists = (null != TwitterCacheFileName) && TwitterCacheFileName.canRead();
         if(!SEND_TWEET_IF_TWITTER_STATUS_DIFFERENT)
             {
@@ -293,7 +293,11 @@ public final class TwitterUtils
                 try
                     {
                     final TrafficLight lastStatus = (TrafficLight) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
-                    if((null != lastStatus) && (statusMessage.equals(lastStatus))) { return; }
+                    if((null != lastStatus) && (status.equals(lastStatus)))
+                        {
+                        System.err.println("WARNING: previous tweet same status ("+lastStatus+") so skipping sending this one: " + statusMessage);
+                    	return;
+                    	}
                     }
                 catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
                 }
