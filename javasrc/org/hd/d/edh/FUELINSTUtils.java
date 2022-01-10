@@ -1483,7 +1483,7 @@ public final class FUELINSTUtils
         DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
         }
     
-    /**Update (atomically if possible) the plain text intensity value.
+    /**Update (atomically if possible) the plain-text bare gCO2e/kWh intensity value.
      * The file will be removed if the data is stale.
      * Predicted values are not published, only live fresh ones.
      */
@@ -1493,17 +1493,23 @@ public final class FUELINSTUtils
     									final boolean isDataStale)
         throws IOException
     	{
-    	// In case of stale data remove any result file.
-    	if(isDataStale)
+    	// In case of stale/missing data remove any result file.
+    	if(isDataStale || (null == summary))
     	    {
     		(new File(outputTXTFileName)).delete();
     		return;
     	    }
     	
-    	
-    	
-		// TODO Auto-generated method stub
-		
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
+        final PrintWriter w = new PrintWriter(baos);
+        try
+	    	{
+            w.write(String.valueOf(Math.round(summary.currentIntensity * (1 + summary.totalGridLosses))));
+	    	}
+        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
+
+        // Attempt atomic replacement of HTML page...
+        DataUtils.replacePublishedFile(outputTXTFileName, baos.toByteArray());
     	}
 
     /**Update (atomically if possible) the mobile-friendly XHTML traffic-light page.
