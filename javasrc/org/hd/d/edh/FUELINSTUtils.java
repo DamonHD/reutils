@@ -695,13 +695,26 @@ public final class FUELINSTUtils
                 {
                 final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
                     (outputHTMLFileName + ".xhtml");
-                if(null != outputXHTMLFileName)
-                    {
+//                if(null != outputXHTMLFileName)
+//                    {
                     FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary, isDataStale,
                         hourOfDayHistorical, status);
-                    }
+//                    }
                 }
             catch(final IOException e) { e.printStackTrace(); }
+            
+            // Update the plain-text intensity file.
+            try
+            {
+            final String outputTXTFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".txt") :
+                (outputHTMLFileName + ".txt");
+//            if(null != outputTXTFileName)
+//                {
+            	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, summary, isDataStale);
+//                }
+            }
+        catch(final IOException e) { e.printStackTrace(); }
+
 
             // Update Twitter if it is set up
             // and if this represents a change from the previous status.
@@ -764,8 +777,8 @@ public final class FUELINSTUtils
             catch(final IOException e) { e.printStackTrace(); }
         	}
         }
-    
-    /**First (comment) line of retail intensity log. */
+
+	/**First (comment) line of retail intensity log. */
     public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_1 = "# Retail GB electricity carbon intensity as computed by earth.org.uk.";
     /**Second (comment) line of retail intensity log. */
     public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_2 = "# Time gCO2e/kWh";
@@ -1469,6 +1482,28 @@ public final class FUELINSTUtils
         // Attempt atomic replacement of HTML page...
         DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
         }
+    
+    /**Update (atomically if possible) the plain text intensity value.
+     * The file will be removed if the data is stale.
+     */
+    static void updateTXTFile(final long startTime,
+    									final String outputTXTFileName,
+    									final CurrentSummary summary,
+    									final boolean isDataStale)
+        throws IOException
+    	{
+    	// In case of stale data remove the result file.
+    	if(isDataStale)
+    	    {
+    		(new File(outputTXTFileName)).delete();
+    		return;
+    	    }
+    	
+    	
+    	
+		// TODO Auto-generated method stub
+		
+    	}
 
     /**Update (atomically if possible) the mobile-friendly XHTML traffic-light page.
      * The generated page is designed to be very light-weight
