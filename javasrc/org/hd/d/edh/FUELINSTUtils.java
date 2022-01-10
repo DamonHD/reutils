@@ -1485,6 +1485,7 @@ public final class FUELINSTUtils
     
     /**Update (atomically if possible) the plain text intensity value.
      * The file will be removed if the data is stale.
+     * Predicted values are not published, only live fresh ones.
      */
     static void updateTXTFile(final long startTime,
     									final String outputTXTFileName,
@@ -1492,7 +1493,7 @@ public final class FUELINSTUtils
     									final boolean isDataStale)
         throws IOException
     	{
-    	// In case of stale data remove the result file.
+    	// In case of stale data remove any result file.
     	if(isDataStale)
     	    {
     		(new File(outputTXTFileName)).delete();
