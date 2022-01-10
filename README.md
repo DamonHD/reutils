@@ -3,7 +3,7 @@
 Various utilities for off-line and on-line/real-time processing of
 Renewable Energy data.
 
-See this running at [live](https://www.earth.org.uk/_gridCarbonIntensityGB.html).
+See this running [live](https://www.earth.org.uk/_gridCarbonIntensityGB.html).
 
 Please read RELEASES.txt for details of changes.
 
