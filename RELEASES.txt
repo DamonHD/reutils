@@ -55,12 +55,21 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 
+20220510:
+    freezepoint name: V1.1.13
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.12
+    DHD20220510: upgrading to JTwitter 3.8.5 (and JDK 18).
+
+
 20220110:
     freezepoint name: V1.1.12
     branch name: HEAD
     Deployed where: earth.org.uk
     Changes since last freezepoint (developer/mgr initials and brief description):
-    Previous significant freezepoint: V1.1.12
+    Previous significant freezepoint: V1.1.11
     DHD20220110: writing .txt bare gCO2e/kWh intensity figure that can be eg remotely polled over HTTP.
 
 
