@@ -44,7 +44,7 @@ public final class TestTwitter extends TestCase
      */
     public static void testTweetValidity()
         {
-    	final int max_chars = TwitterUtils.MAX_TWEET_CHARS - 5; // Allow for some traling decoration.
+    	final int max_chars = TwitterUtils.MAX_TWEET_CHARS - 5; // Allow for some trailing decoration.
     	
         for(final boolean isDataStale : new boolean[]{ true, false } )
             {

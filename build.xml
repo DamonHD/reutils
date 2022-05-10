@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <!-- Use Ant 1.6 or newer. -->
 
-<!-- All code runs under JDK 6. -->
+<!-- All code runs under JDK 18. -->
 
 <!--
     This builds one command-line app to regenerate Web pages
@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="app.name" value="reutils"/>
     <property name="app.version.major" value="1"/>
     <property name="app.version.minor" value="1"/>
-    <property name="app.version.micro" value="13"/>
+    <property name="app.version.micro" value="14"/>
     <property name="app.version" value="${app.version.major}.${app.version.minor}.${app.version.micro}"/>
     <!-- Version excluding the "micro" portion, thus reflecting only significant API/functionality changes. -->
     <property name="app.version.notmicro" value="${app.version.major}.${app.version.minor}"/>
@@ -67,7 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="dist.jar" value="${app.name}-${app.version}.jar"/>
 
     <!-- Target/minimum JDK/JSE version for build and run. -->
-    <property name="JDKVER" value="6"/>
+    <property name="JDKVER" value="18"/>
 
     <!-- Stub names, used in source and output dirs and package names. -->
     <!-- This is core code. -->

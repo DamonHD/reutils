@@ -56,7 +56,7 @@ public final class TwitterUtils
      * <p>
      * DHD20210404: could be lifted from 134 to 274 (max Tweet length now 280 chars), but may need JTwitter upgrade.
      */
-    public static final int MAX_TWEET_CHARS = 134; // 274;
+    public static final int MAX_TWEET_CHARS = 274; // 134 before upgrade to JTwitter 3.8.5.
 
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
     public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES = "Twitter.trafficlight.status.";

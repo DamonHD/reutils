@@ -56,6 +56,15 @@ SIGNIFICANT RELEASES (newest first)
 
 
 20220510:
+    freezepoint name: V1.1.14
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.13
+    DHD20220510: various fixups
+
+
+20220510:
     freezepoint name: V1.1.13
     branch name: HEAD
     Deployed where: earth.org.uk
