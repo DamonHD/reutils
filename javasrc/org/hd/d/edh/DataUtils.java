@@ -192,6 +192,8 @@ public final class DataUtils
      * This will stop reading once it has read a 'FTR' row.
      * This row's second value must be the number of data lines encountered.
      * <p>
+     * The HDR and FTR rows are omitted from the returned List.
+     * <p>
      * The outer and inner Lists implement RandomAccess.
      * <p>
      * This buffers its input for efficiency if not already a BufferedReader.
@@ -228,6 +230,8 @@ public final class DataUtils
      * Exactly the last row must have a 'FTR' type (first column value).
      * This will stop reading once it has read a 'FTR' row.
      * This row's second value must be the number of data lines encountered.
+     * <p>
+     * The HDR and FTR rows are omitted from the returned List.
      * <p>
      * The outer and inner Lists implement RandomAccess.
      * <p>

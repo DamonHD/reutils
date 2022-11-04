@@ -66,7 +66,7 @@ import org.hd.d.edh.FUELINST.CurrentSummary;
  */
 public final class FUELINSTUtils
     {
-    private FUELINSTUtils() { /* Prevent creation of an instance. */ }
+	private FUELINSTUtils() { /* Prevent creation of an instance. */ }
 
     /**Longest edge of graphics building block components in pixels for HTML generation; strictly positive. */
     static final int GCOMP_PX_MAX = 100;
@@ -128,7 +128,13 @@ public final class FUELINSTUtils
     /**Number of hours in a week. */
     public static final int HOURS_PER_WEEK = 7 * 24;
 
-    
+    /**Suffix to use for (serialised, gzipped) cache of last non-stale (24h) result. */
+    public static final String RESULT_CACHE_SUFFIX = ".cache";
+
+    /**Suffix to use for (ASCII, CSV, pseudo-FUELINST format) longish-term (7d+) store. */
+    public static final String LONG_STORE_SUFFIX = ".longstore.csv";
+
+
     /**Compute current status of fuel intensity; never null, but may be empty/default if data not available.
      * If cacheing is enabled, then this may revert to cache in case of
      * difficulty retrieving new data.
@@ -626,7 +632,7 @@ System.out.println("Cached current result at " + resultCacheFile);
         // Base/prefix onto which to append specific extensions.
         final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
 
-        final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
+        final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + RESULT_CACHE_SUFFIX));
 
         // Fetch and parse the CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
