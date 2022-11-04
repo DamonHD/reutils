@@ -39,11 +39,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -175,6 +178,44 @@ public final class DataUtils
      */
     public static final Pattern delimCSV = delimTM; // We can use delimTR to save an extra instance! // Pattern.compile(",");
 
+
+    /**Parse bmreports-style CSV file/stream with HDR and FTR check rows (which are not returned); never null but may be empty.
+     *
+     * @param URL  URL to read from; never null
+     * @param headerCheck  if non-null, the first/header row's second field is verified to have exactly this heading
+     *
+     * Each row's first field is a non-empty 'type' field.
+     * <p>
+     * Exactly the first row must have a 'HDR' type (first column value).
+     * <p>
+     * Exactly the last row must have a 'FTR' type (first column value).
+     * This will stop reading once it has read a 'FTR' row.
+     * This row's second value must be the number of data lines encountered.
+     * <p>
+     * The outer and inner Lists implement RandomAccess.
+     * <p>
+     * This buffers its input for efficiency if not already a BufferedReader.
+     *
+     * @throws IOException  if there is an I/O problem or the data is malformed
+     *
+     * @return a non-null but possibly-empty in-order immutable List of rows,
+     *    each of which is a non-null but possibly-empty in-order List of fields
+     */
+    public static List<List<String>> parseBMRCSV(final URL url, final String headerCheck)
+        throws IOException
+        {
+        // Set up URL connection to fetch the data.
+        final URLConnection conn = url.openConnection();
+        conn.setAllowUserInteraction(false);
+        conn.setUseCaches(false); // Ensure that we get non-stale values each time.
+        conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
+        conn.setReadTimeout(60000); // Set a long-ish read timeout.
+
+        final InputStreamReader is = new InputStreamReader(conn.getInputStream());
+        try { return(DataUtils.parseBMRCSV(is, headerCheck)); }
+        finally { is.close(); }
+        }
+    
     /**Parse bmreports-style CSV file/stream with HDR and FTR check rows (which are not returned); never null but may be empty.
      *
      * @param r  stream to read from, not closed by this routine; never null

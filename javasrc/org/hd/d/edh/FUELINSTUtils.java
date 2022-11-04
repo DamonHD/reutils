@@ -125,6 +125,10 @@ public final class FUELINSTUtils
     /**Number of hours in a day. */
     public static final int HOURS_PER_DAY = 24;
 
+    /**Number of hours in a week. */
+    public static final int HOURS_PER_WEEK = 7 * 24;
+
+    
     /**Compute current status of fuel intensity; never null, but may be empty/default if data not available.
      * If cacheing is enabled, then this may revert to cache in case of
      * difficulty retrieving new data.
@@ -182,15 +186,7 @@ public final class FUELINSTUtils
             {
             // Set up URL connection to fetch the data.
             url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
-            final URLConnection conn = url.openConnection();
-            conn.setAllowUserInteraction(false);
-            conn.setUseCaches(false); // Ensure that we get non-stale values each time.
-            conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
-            conn.setReadTimeout(60000); // Set a long-ish read timeout.
-
-            final InputStreamReader is = new InputStreamReader(conn.getInputStream());
-            try { parsedBMRCSV = DataUtils.parseBMRCSV(is, null); }
-            finally { is.close(); }
+            parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
             }
         catch(final IOException e)
             {
@@ -458,7 +454,10 @@ System.out.println("Last good record timestamp "+(new Date(lastGoodRecordTimesta
 
         // If cacheing is enabled AND the new result is not stale then persist this result, compressed.
         if((null != cacheFile) && (result.useByTime >= System.currentTimeMillis()))
-            { DataUtils.serialiseToFile(result, cacheFile, FUELINSTUtils.GZIP_CACHE, true); }
+            {
+        	DataUtils.serialiseToFile(result, cacheFile, FUELINSTUtils.GZIP_CACHE, true);
+System.out.println("Cached current result at " + cacheFile);
+        	}
 
         return(result);
         }
