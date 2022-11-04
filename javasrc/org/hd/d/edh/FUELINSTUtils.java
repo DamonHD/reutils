@@ -657,13 +657,15 @@ System.out.println("Record/row count of CSV FUELINST data: " + parsedBMRCSV.size
             System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
             }
 
+        List<List<String>> longStore = null;
         try {
         	// TODO: read long store
-	        // TODO: update long store with new records
-	        List<List<String>> longStore = parsedBMRCSV;
-	        // Save long store (atomically, world-readable).
-	        if(null != longStore)
+            // Update the long store only if there is something to update it with.
+	        if(null != parsedBMRCSV)
 	            {
+		        // TODO: update long store with new records
+		        longStore = parsedBMRCSV;
+		        // Save long store (atomically, world-readable).
 	        	DataUtils.saveBMRCSV(longStore, longStoreFile);
 	            }
         	}
