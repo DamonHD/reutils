@@ -159,20 +159,20 @@ public final class DataUtils
         return(Collections.unmodifiableList(result)); // Return immutable result.
         }
 
-    /**Immutable regex pattern we use to split TIBCO line-oriented records; never null.
+    /**Immutable regex pattern used to split TIBCO line-oriented records; never null.
      * This is basically just a simple " "
      * which with split() should preserve empty fields.
      */
     public static final Pattern delimTR = Pattern.compile(" ");
 
-    /**Immutable regex pattern we use to split TIBCO message component; never null.
+    /**Immutable regex pattern used to split TIBCO message component; never null.
      * This is basically just a simple ","
      * which with split() should preserve empty fields.
      */
     public static final Pattern delimTM = Pattern.compile(",");
 
 
-    /**Immutable regex pattern we use to split CSV lines; never null.
+    /**Immutable regex pattern used to split CSV lines; never null.
      * This is basically just a simple ","
      * which with split() should preserve empty fields.
      */
@@ -282,6 +282,20 @@ public final class DataUtils
                 // OK, all seems fine, so break out.
                 break;
                 }
+            
+//System.out.println("Data row: " + row);
+//Data row: FUELINST,20221104,20,20221104093500,15219,0,0,4640,7999,0,901,1,123,0,0,406,0,2229,122,0,0,1257
+//Data row: FUELINST,20221104,20,20221104094000,14981,0,0,4643,8140,0,901,0,122,0,0,406,0,2233,123,0,0,1257
+//Data row: FUELINST,20221104,20,20221104094500,14705,0,0,4644,8281,0,901,0,123,0,0,406,0,2232,122,0,0,1257
+//Data row: FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
+//Data row: FUELINST,20221104,20,20221104095500,14289,0,0,4642,8513,0,899,1,122,0,0,406,0,2235,122,0,0,1257
+//Data row: FUELINST,20221104,20,20221104100000,14269,0,0,4638,8646,0,883,0,125,0,0,301,0,2233,111,0,0,1257
+//Data row: FUELINST,20221104,21,20221104100500,14217,0,0,4638,8788,0,849,0,146,0,0,129,0,2230,0,0,0,1257
+//Data row: FUELINST,20221104,21,20221104101000,14209,0,0,4641,8936,0,848,0,141,0,0,129,0,2225,0,0,0,1257
+//Data row: FUELINST,20221104,21,20221104101500,14133,0,0,4639,9047,0,848,0,136,0,0,130,0,2224,0,0,0,1257
+//Data row: FUELINST,20221104,21,20221104102000,14025,0,0,4636,9078,0,848,0,132,0,0,129,0,2226,0,0,0,1257
+//Data row: FUELINST,20221104,21,20221104102500,13998,0,0,4637,9195,0,848,1,136,0,0,130,0,2225,0,0,0,1257
+//Data row: FUELINST,20221104,21,20221104103000,13964,0,0,4635,9332,0,848,0,134,0,0,129,0,2219,0,0,0,1257
 
             // Package up row data (and make it unmodifiable).
             result.add(Collections.unmodifiableList(Arrays.asList(fields)));
