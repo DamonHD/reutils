@@ -639,18 +639,18 @@ System.out.println("Cached current result at " + resultCacheFile);
         final File cacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
 
         // Compute 24hr summary.
-        final CurrentSummary summary = FUELINSTUtils.computeCurrentSummary(cacheFile);
+        final CurrentSummary summary24h = FUELINSTUtils.computeCurrentSummary(cacheFile);
 
         // Dump a summary of the current status re fuel.
-        System.out.println(summary);
+        System.out.println(summary24h);
 
         // Is the data stale?
-        final boolean isDataStale = summary.useByTime < startTime;
+        final boolean isDataStale = summary24h.useByTime < startTime;
 
         // Compute intensity as seen by typical GB domestic consumer, gCO2/kWh.
         final int retailIntensity = Math.round((isDataStale ?
-        		summary.histAveIntensity :
-        	    summary.currentIntensity) * (1 + summary.totalGridLosses));
+        		summary24h.histAveIntensity :
+        	    summary24h.currentIntensity) * (1 + summary24h.totalGridLosses));
 
         if(outputHTMLFileName != null)
             {
@@ -658,14 +658,14 @@ System.out.println("Cached current result at " + resultCacheFile);
             // If the data is current then use the latest data point,
             // else extract a suitable historical value to use in its place.
             final int hourOfDayHistorical = CurrentSummary.getGMTHourOfDay(startTime);
-            final TrafficLight statusHistorical = summary.selectColour(summary.histAveIntensityByHourOfDay.get(hourOfDayHistorical));
+            final TrafficLight statusHistorical = summary24h.selectColour(summary24h.histAveIntensityByHourOfDay.get(hourOfDayHistorical));
             final TrafficLight statusHistoricalCapped = (TrafficLight.GREEN != statusHistorical) ? statusHistorical : TrafficLight.YELLOW;
-            final TrafficLight statusUncapped = (!isDataStale) ? summary.status : statusHistorical;
-            final TrafficLight status = (!isDataStale) ? summary.status :
+            final TrafficLight statusUncapped = (!isDataStale) ? summary24h.status : statusHistorical;
+            final TrafficLight status = (!isDataStale) ? summary24h.status :
                 (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
 
             // Handle the flag files that can be tested by remote servers.
-            try { FUELINSTUtils.doFlagFiles(baseFileName, status, statusUncapped, summary.currentStorageDrawdownMW); }
+            try { FUELINSTUtils.doFlagFiles(baseFileName, status, statusUncapped, summary24h.currentStorageDrawdownMW); }
             catch(final IOException e) { e.printStackTrace(); }
 
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
@@ -673,7 +673,7 @@ System.out.println("Cached current result at " + resultCacheFile);
             // Update the HTML page.
             try
                 {
-                FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary, isDataStale,
+                FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary24h, isDataStale,
                     hourOfDayHistorical, status, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
@@ -685,7 +685,7 @@ System.out.println("Cached current result at " + resultCacheFile);
                     (outputHTMLFileName + ".xml");
                 if(null != outputXMLFileName)
                     {
-                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary, isDataStale,
+                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary24h, isDataStale,
                         hourOfDayHistorical, status);
                     }
                 }
@@ -698,7 +698,7 @@ System.out.println("Cached current result at " + resultCacheFile);
                     (outputHTMLFileName + ".xhtml");
 //                if(null != outputXHTMLFileName)
 //                    {
-                    FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary, isDataStale,
+                    FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary24h, isDataStale,
                         hourOfDayHistorical, status);
 //                    }
                 }
@@ -711,7 +711,7 @@ System.out.println("Cached current result at " + resultCacheFile);
                 (outputHTMLFileName + ".txt");
 //            if(null != outputTXTFileName)
 //                {
-            	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, summary, isDataStale);
+            	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, summary24h, isDataStale);
 //                }
             }
         catch(final IOException e) { e.printStackTrace(); }
@@ -751,9 +751,9 @@ System.out.println("Cached current result at " + resultCacheFile);
             final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
             if(bd.isDirectory() && bd.canWrite())
                 {
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary.timestamp, summary.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 48, summary.timestamp, summary.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary.timestamp, summary.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 48, summary24h.timestamp, summary24h.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
                 }
             else { System.err.println("Missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
             }
@@ -762,7 +762,7 @@ System.out.println("Cached current result at " + resultCacheFile);
         // New as of 2019-10.
         // Append to the intensity log.
         // Only do this for current/live data, ie if not stale.
-        if(isDataStale || (0 == summary.timestamp))
+        if(isDataStale || (0 == summary24h.timestamp))
             { System.err.println("Will not update log, input data is stale."); }
         else
         	{ 		
@@ -771,7 +771,7 @@ System.out.println("Cached current result at " + resultCacheFile);
 	            final File id = new File(DEFAULT_INTENSITY_LOG_BASE_DIR);
 	            if(id.isDirectory() && id.canWrite())
 	                {
-	            	appendToRetailIntensityLog(id, summary.timestamp, retailIntensity);
+	            	appendToRetailIntensityLog(id, summary24h.timestamp, retailIntensity);
 	                }
 	            else { System.err.println("Missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
 	            }
