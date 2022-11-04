@@ -45,6 +45,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
+    DHD20221104: avoid cacheing stale result
 
 
 

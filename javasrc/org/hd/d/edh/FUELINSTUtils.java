@@ -456,8 +456,8 @@ System.out.println("Last good record timestamp "+(new Date(lastGoodRecordTimesta
                                   tranLoss + distLoss,
                                   correlationIntensityToFuel);
 
-        // If cacheing is enabled then persist this result, compressed.
-        if(null != cacheFile)
+        // If cacheing is enabled AND the new result is not stale then persist this result, compressed.
+        if((null != cacheFile) && (result.useByTime >= System.currentTimeMillis()))
             { DataUtils.serialiseToFile(result, cacheFile, FUELINSTUtils.GZIP_CACHE, true); }
 
         return(result);
