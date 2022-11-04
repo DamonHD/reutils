@@ -342,6 +342,7 @@ public final class FUELINSTUtils
             if(weightedIntensity > maxIntensity)
                 { maxIntensity = weightedIntensity; maxIntensityRecordTimestamp = recordTimestamp; }
             }
+System.out.println("Last good record timestamp "+(new Date(lastGoodRecordTimestamp))+" vs now "+(new Date(System.currentTimeMillis())));
 
         // Note if the intensity dropped/improved in the final samples.
         TrafficLight recentChange = null;
