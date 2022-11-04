@@ -319,6 +319,8 @@ public final class DataUtils
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
      * Generate ASCII CSV, with newlines to terminate rows.
      * <p>
+     * Write atomically, world-readable.
+     * 
      * @throws IOException  may be thrown if asked to serialise invalid (eg misordered or non-FUELINST) data
      */
     public static void saveBMRCSV(final List<List<String>> data, final File longStoreFile)
@@ -331,7 +333,7 @@ public final class DataUtils
 
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
      * Generate ASCII CSV, with newlines to terminate rows.
-     * <p>
+     *
      * @throws IOException  may be thrown if asked to serialise invalid (eg misordered or non-FUELINST) data
      */
     public static byte[] saveBMRCSV(final List<List<String>> data)
@@ -361,7 +363,7 @@ public final class DataUtils
         	for(int f = 0; f < fields; ++f)
 	        	{
 	        	baos.writeBytes(row.get(f).getBytes(Charsets.US_ASCII));
-	        	baos.write((f <= fields-1) ? ',' : '\n');
+	        	baos.write((f < fields-1) ? ',' : '\n');
 	        	}
 	        }
 
