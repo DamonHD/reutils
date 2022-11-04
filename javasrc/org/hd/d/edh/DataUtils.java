@@ -317,24 +317,53 @@ public final class DataUtils
         }
     
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
-     * ASCII CSV, with newlines to terminate rows.
+     * Generate ASCII CSV, with newlines to terminate rows.
      * <p>
-     * @throws IOException  asked to serialise invalid (eg misordered or non-FUELINST) data
+     * @throws IOException  may be thrown if asked to serialise invalid (eg misordered or non-FUELINST) data
+     */
+    public static void saveBMRCSV(final List<List<String>> data, final File longStoreFile)
+        throws IOException
+	    {
+	    	if(null == longStoreFile) { throw new IllegalArgumentException(); }
+	    	final byte [] out = saveBMRCSV(data);
+	    	replacePublishedFile(longStoreFile.getPath(), out);
+	    }
+
+    /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
+     * Generate ASCII CSV, with newlines to terminate rows.
+     * <p>
+     * @throws IOException  may be thrown if asked to serialise invalid (eg misordered or non-FUELINST) data
      */
     public static byte[] saveBMRCSV(final List<List<String>> data)
         throws IOException
 	    {
     	// Write to an ASCII CSV byte[].
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        
+
         // Write header.
         baos.writeBytes("HDR\n".getBytes(Charsets.US_ASCII));
         final int rowCount = data.size();
-        
-        // Write body.
-        // TODO
 
-        // TODO: abort if not in order or obviously malformed
+        // Write body.
+        for(final List<String> row : data)
+	        {
+	        final int fields = row.size();
+
+	        // Do some simple validation.
+	        // Abort if data not valid FUELINST format.
+	        // TODO: more validation, eg of row time ordering, field format, etc.
+	        if(fields < 4)
+                { throw new IOException("too few fields for FUELINST"); }
+	        if(!row.isEmpty() && !"FUELINST".equals(row.get(0)))
+                { throw new IOException("not FUELINST records"); }
+
+	        // Write row.
+        	for(int f = 0; f < fields; ++f)
+	        	{
+	        	baos.writeBytes(row.get(f).getBytes(Charsets.US_ASCII));
+	        	baos.write((f <= fields-1) ? ',' : '\n');
+	        	}
+	        }
 
         // Write footer.
         baos.writeBytes(("FTR," + rowCount + "\n").getBytes(Charsets.US_ASCII));
