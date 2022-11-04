@@ -135,17 +135,20 @@ public final class FUELINSTUtils
      * <p>
      * Uses fuel intensities as of this year, ie when this call is made.
      *
+     * @param parsedBMRCSV  parsed (as strings) BMR CSV file data, or null if unavailable
      * @param resultCacheFile  if non-null, file to cache result in between calls in case of data-source problems
      * @throws IOException in case of data unavailabilty or corruption
      */
-    public static FUELINST.CurrentSummary computeCurrentSummary(final File resultCacheFile)
+    public static FUELINST.CurrentSummary computeCurrentSummary(
+    		final List<List<String>> parsedBMRCSV,
+    		final File resultCacheFile)
         throws IOException
         {
         // Get as much set up as we can before pestering the data source...
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
-        if(null == dataURL)
-            { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
+//        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
+//        if(null == dataURL)
+//            { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
         final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
         if(null == template)
             { throw new IllegalStateException("Property undefined for FUELINST row field names: " + FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES); }
@@ -177,26 +180,16 @@ public final class FUELINSTUtils
                 fuelsByCategory.get(FUELINST.FUELINST_CATNAME_STORAGE) :
                 Collections.<String>emptySet());
 
-        final List<List<String>> parsedBMRCSV;
-
-        // Fetch and parse the CSV file from the data source.
-        // Return an empty summary instance in case of IO error here.
-        URL url = null;
-        try
+        // If passed-in data is obviously broken
+        // then try to return a previously-cached result
+        // else an empty/default result.
+        if((null == parsedBMRCSV) || parsedBMRCSV.isEmpty())
             {
-            // Set up URL connection to fetch the data.
-            url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
-            parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
-            }
-        catch(final IOException e)
-            {
-            // Could not get data, so status is unknown.
-            System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
             // Try to retrieve from cache...
             FUELINST.CurrentSummary cached = null;
             try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(resultCacheFile, FUELINSTUtils.GZIP_CACHE); }
             catch(final IOException err) { /* Fall through... */ }
-            catch(final Exception err) { e.printStackTrace(); }
+            catch(final Exception err) { err.printStackTrace(); }
             if(null != cached)
                 {
                 System.err.println("WARNING: using previous response from cache...");
@@ -206,11 +199,8 @@ public final class FUELINSTUtils
             return(new FUELINST.CurrentSummary());
             }
 
-        final int rawRowCount = parsedBMRCSV.size();
-        System.out.println("Record/row count of CSV FUELINST data: " + rawRowCount + " from source: " + url);
-
         // All intensity sample values from good records (assuming roughly equally spaced).
-        final List<Integer> allIntensitySamples = new ArrayList<Integer>(rawRowCount);
+        final List<Integer> allIntensitySamples = new ArrayList<Integer>(parsedBMRCSV.size());
 
         // Compute summary.
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
@@ -638,8 +628,32 @@ System.out.println("Cached current result at " + resultCacheFile);
 
         final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
 
+        // Fetch and parse the CSV file from the data source.
+        // Will be null in case of inability to fetch or parse.
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
+        if(null == dataURL)
+            { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
+        List<List<String>> parsedBMRCSV = null;
+        URL url = null;
+        try
+            {
+            // Set up URL connection to fetch the data.
+            url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
+            parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
+System.out.println("Record/row count of CSV FUELINST data: " + parsedBMRCSV.size() + " from source: " + url);
+            }
+        catch(final IOException e)
+            {
+            // Could not get data, so status is unknown.
+            System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
+            }
+        
         // Compute 24hr summary.
-        final CurrentSummary summary24h = FUELINSTUtils.computeCurrentSummary(resultCacheFile);
+        // If parsedBMRCSV is null or otherwise invalid
+        // will attempt to return cached result or empty/default result.
+        final CurrentSummary summary24h =
+            FUELINSTUtils.computeCurrentSummary(parsedBMRCSV, resultCacheFile);
 
         // Dump a summary of the current status re fuel.
         System.out.println(summary24h);
