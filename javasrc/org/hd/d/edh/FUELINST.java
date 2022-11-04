@@ -140,7 +140,7 @@ public final class FUELINST
             }
         }
 
-    /**Immutable summary of current/recent fuel mix.
+    /**Immutable summary of current/recent fuel mix and intensity by hour of day.
      * Serialisable so as to be persistent;
      * not expected to have to be especially efficient or security-conscious.
      */
@@ -237,7 +237,8 @@ public final class FUELINST
                 final long minIntensityRecordTimestamp,
                 final int histAveIntensity,
                 final int histMaxIntensity,
-                final long maxIntensityRecordTimestamp, final long histWindowSize,
+                final long maxIntensityRecordTimestamp,
+                final long histWindowSize,
                 final int histSamples,
                 final int lowerThreshold, final int upperThreshold,
                 final List<Integer> histAveIntensityByHourOfDay,
