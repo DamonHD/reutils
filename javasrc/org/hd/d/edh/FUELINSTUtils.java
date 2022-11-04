@@ -378,7 +378,8 @@ public final class FUELINSTUtils
             else if(currentIntensity < lowerThreshold) { status = TrafficLight.GREEN; }
             else { status = TrafficLight.YELLOW; }
             }
-        else { System.err.println("Newest data point too old"); }
+        //else { System.err.println("Newest data point too old"); }
+        else { System.err.println("Too few samples: " + allSamplesSize); }
 
         // Compute mean intensity by time slot.
         final List<Integer> aveIntensityByHourOfDay = new ArrayList<Integer>(24);
