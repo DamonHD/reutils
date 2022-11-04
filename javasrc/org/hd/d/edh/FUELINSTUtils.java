@@ -656,15 +656,21 @@ System.out.println("Record/row count of CSV FUELINST data: " + parsedBMRCSV.size
             // Could not get data, so status is unknown.
             System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
             }
-        
-        // TODO: read long store
-        // TODO: update long store with new records
-        List<List<String>> longStore = parsedBMRCSV;
-        // Save long store (atomically, world-readable).
-        if(null != longStore)
-            {
-        	DataUtils.saveBMRCSV(longStore, longStoreFile);
-            }
+
+        try {
+        	// TODO: read long store
+	        // TODO: update long store with new records
+	        List<List<String>> longStore = parsedBMRCSV;
+	        // Save long store (atomically, world-readable).
+	        if(null != longStore)
+	            {
+	        	DataUtils.saveBMRCSV(longStore, longStoreFile);
+	            }
+        	}
+        catch(final IOException e)
+	        {
+	        System.err.println("Could not load/update/save long store "+longStoreFile+" error: " + e.getMessage());
+	        }
         
         // Compute 24hr summary.
         // If parsedBMRCSV is null or otherwise invalid
