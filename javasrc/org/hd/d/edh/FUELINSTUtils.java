@@ -638,7 +638,7 @@ System.out.println("Cached current result at " + resultCacheFile);
 
         final File cacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
 
-        // Retrieve summary.
+        // Compute 24hr summary.
         final CurrentSummary summary = FUELINSTUtils.computeCurrentSummary(cacheFile);
 
         // Dump a summary of the current status re fuel.
