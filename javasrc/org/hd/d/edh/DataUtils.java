@@ -47,6 +47,7 @@ import java.io.Reader;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +58,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
+
+import org.apache.commons.codec.Charsets;
 
 
 /**Data utilities.
@@ -312,6 +315,31 @@ public final class DataUtils
         result.trimToSize(); // Free resources...
         return(Collections.unmodifiableList(result)); // Make outer list immutable...
         }
+    
+    /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
+     * ASCII CSV, with newlines to terminate rows.
+     * <p>
+     * @throws IOException  asked to serialise invalid (eg misordered or non-FUELINST) data
+     */
+    public static byte[] saveBMRCSV(final List<List<String>> data)
+        throws IOException
+	    {
+    	// Write to an ASCII CSV byte[].
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        
+        // Write header.
+        baos.writeBytes("HDR\n".getBytes(Charsets.US_ASCII));
+        final int rowCount = data.size();
+        
+        // Write body.
+        // TODO
+
+        // TODO: abort if not in order or obviously malformed
+
+        // Write footer.
+        baos.writeBytes(("FTR," + rowCount + "\n").getBytes(Charsets.US_ASCII));
+        return(baos.toByteArray());
+	    }
 
     /**Convert positional encoding of row values to Map form; never null but may be empty.
      * Returned value is immutable.

@@ -30,18 +30,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package localtest;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.codec.Charsets;
 import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.MainProperties;
@@ -89,6 +93,18 @@ public final class TestMisc extends TestCase
         // Parse again, but this time checking for the correct type/heading.
         assertNotNull(DataUtils.parseBMRCSV(new StringReader(tinyTestCSV), "type"));
         }
+    
+    /**Test serialising/saving of BMRCSV data. */
+    public static void testSaveBMRCSV()
+        throws Exception
+	    {
+	    // No-data case.
+    	final String nodataOutExpected = "HDR\nFTR,0\n";
+    	final byte[] nodataOut = DataUtils.saveBMRCSV(new ArrayList<List<String>>());
+        assertTrue("Should generate expected ASCII output", Arrays.equals(nodataOut, nodataOutExpected.getBytes(Charsets.US_ASCII)));
+        assertTrue("Should parse as empty list", DataUtils.parseBMRCSV(new StringReader(nodataOutExpected), null).isEmpty());
+        assertTrue("Should parse as empty list", DataUtils.parseBMRCSV(new InputStreamReader(new ByteArrayInputStream(nodataOut)), null).isEmpty());
+	    }
 
     /**Test the extraction of fields from parsed CSV to named values.
      */
