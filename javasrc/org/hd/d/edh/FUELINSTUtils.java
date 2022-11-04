@@ -135,10 +135,10 @@ public final class FUELINSTUtils
      * <p>
      * Uses fuel intensities as of this year, ie when this call is made.
      *
-     * @param cacheFile  if non-null, file to cache (parsed) data in between calls in case of data-source problems
-     * @throws IOException in case of data corruption
+     * @param resultCacheFile  if non-null, file to cache result in between calls in case of data-source problems
+     * @throws IOException in case of data unavailabilty or corruption
      */
-    public static FUELINST.CurrentSummary computeCurrentSummary(final File cacheFile)
+    public static FUELINST.CurrentSummary computeCurrentSummary(final File resultCacheFile)
         throws IOException
         {
         // Get as much set up as we can before pestering the data source...
@@ -194,7 +194,7 @@ public final class FUELINSTUtils
             System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
             // Try to retrieve from cache...
             FUELINST.CurrentSummary cached = null;
-            try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(cacheFile, FUELINSTUtils.GZIP_CACHE); }
+            try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(resultCacheFile, FUELINSTUtils.GZIP_CACHE); }
             catch(final IOException err) { /* Fall through... */ }
             catch(final Exception err) { e.printStackTrace(); }
             if(null != cached)
@@ -453,10 +453,10 @@ System.out.println("Last good record timestamp "+(new Date(lastGoodRecordTimesta
                                   correlationIntensityToFuel);
 
         // If cacheing is enabled AND the new result is not stale then persist this result, compressed.
-        if((null != cacheFile) && (result.useByTime >= System.currentTimeMillis()))
+        if((null != resultCacheFile) && (result.useByTime >= System.currentTimeMillis()))
             {
-        	DataUtils.serialiseToFile(result, cacheFile, FUELINSTUtils.GZIP_CACHE, true);
-System.out.println("Cached current result at " + cacheFile);
+        	DataUtils.serialiseToFile(result, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
+System.out.println("Cached current result at " + resultCacheFile);
         	}
 
         return(result);
