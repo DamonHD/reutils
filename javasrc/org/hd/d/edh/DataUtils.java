@@ -194,6 +194,8 @@ public final class DataUtils
      * <p>
      * The HDR and FTR rows are omitted from the returned List.
      * <p>
+     * FUELINST rows are expected to be in increasing time order.
+     * <p>
      * The outer and inner Lists implement RandomAccess.
      * <p>
      * This buffers its input for efficiency if not already a BufferedReader.
@@ -232,6 +234,8 @@ public final class DataUtils
      * This row's second value must be the number of data lines encountered.
      * <p>
      * The HDR and FTR rows are omitted from the returned List.
+     * <p>
+     * FUELINST rows are expected to be in increasing time order.
      * <p>
      * The outer and inner Lists implement RandomAccess.
      * <p>

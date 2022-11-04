@@ -632,8 +632,10 @@ System.out.println("Cached current result at " + resultCacheFile);
         // Base/prefix onto which to append specific extensions.
         final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
 
+        // Compute relative paths for caches/stores.
         final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + RESULT_CACHE_SUFFIX));
-
+        final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));        
+        
         // Fetch and parse the CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
