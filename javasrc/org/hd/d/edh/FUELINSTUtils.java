@@ -636,10 +636,10 @@ System.out.println("Cached current result at " + resultCacheFile);
         // Base/prefix onto which to append specific extensions.
         final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
 
-        final File cacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
+        final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + ".cache"));
 
         // Compute 24hr summary.
-        final CurrentSummary summary24h = FUELINSTUtils.computeCurrentSummary(cacheFile);
+        final CurrentSummary summary24h = FUELINSTUtils.computeCurrentSummary(resultCacheFile);
 
         // Dump a summary of the current status re fuel.
         System.out.println(summary24h);
