@@ -203,14 +203,26 @@ public final class DataUtils
 		if(nRows < 2) { return(null); }
 		
 		// Compute oldest timestamp allowed.
-		final String lastTimestampRaw = parsedBMRCSV.get(nRows-1).get(3);
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
-        Date df;
-		try { df = timestampParser.parse(lastTimestampRaw); }
+		final String lastTimestampRaw = parsedBMRCSV.get(nRows-1).get(3);
+        Date dl;
+		try { dl = timestampParser.parse(lastTimestampRaw); }
 		catch (ParseException e) { e.printStackTrace(); return(null); }
-        final long finalTimestamp = df.getTime();
+        final long finalTimestamp = dl.getTime();
         final long oldestAllowedTimestamp = finalTimestamp - (maxHoursSpan*3600*1000) + 1;
-		
+        
+        // Find timestamp of existing first record.
+		final String firstTimestampRaw = parsedBMRCSV.get(0).get(3);
+        Date df;
+		try { df = timestampParser.parse(firstTimestampRaw); }
+		catch (ParseException e) { e.printStackTrace(); return(null); }
+        final long firstTimestamp = df.getTime();
+
+        // If oldest existing record is not too old then there is nothing to do.
+        if(firstTimestamp >= oldestAllowedTimestamp)
+        	{ return(null); }
+
+System.err.print("FIXME!");
 		
 		// FIXME
 		
