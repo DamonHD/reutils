@@ -198,19 +198,30 @@ public final class DataUtils
 			final int maxHoursSpan)
 	    {
 		if(null == parsedBMRCSV) { return(false); }
+
+// Sample data...
+//FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
+//FUELINST,20221104,20,20221104095500,14289,0,0,4642,8513,0,899,1,122,0,0,406,0,2235,122,0,0,1257
+//FUELINST,20221104,20,20221104100000,14269,0,0,4638,8646,0,883,0,125,0,0,301,0,2233,111,0,0,1257
+//FUELINST,20221104,21,20221104100500,14217,0,0,4638,8788,0,849,0,146,0,0,129,0,2230,0,0,0,1257
+//FUELINST,20221104,21,20221104101000,14209,0,0,4641,8936,0,848,0,141,0,0,129,0,2225,0,0,0,1257
+//FUELINST,20221104,21,20221104101500,14133,0,0,4639,9047,0,848,0,136,0,0,130,0,2224,0,0,0,1257
+
+		long previousTimestamp = -1;
 		for(List<String> row : parsedBMRCSV)
 			{
-				if(null == row) { return(false); }
-				if(row.isEmpty()) { return(false); }
-				if(!"FUELINST".equals(row.get(0))) { return(false); }
-				
-				// TODO Validate timestamp values and order.
-				
-				// FIXME actually validate!
+			if(null == row) { return(false); }
+			if(row.size() < 5) { return(false); }
+			if(!"FUELINST".equals(row.get(0))) { return(false); }
+			final String timestampRaw = row.get(3);
+			if(14 != timestampRaw.length()) { return(false); }
+			
+			// TODO Validate timestamp values and order.
+			
+			// FIXME actually validate!
 
 			}
-		
-		
+
 		// Did not find any problems.
 		return(true);
 	    }
