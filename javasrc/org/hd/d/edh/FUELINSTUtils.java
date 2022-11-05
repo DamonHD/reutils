@@ -39,6 +39,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -121,6 +123,9 @@ public final class FUELINSTUtils
      * We may share this (read-only) between threads and within this package.
      */
     static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
+    
+    /**Charset for FUELINST data (ASCII 7-bit). */
+    public static final Charset FUELINST_CHARSET = StandardCharsets.US_ASCII;
 
     /**Number of hours in a day. */
     public static final int HOURS_PER_DAY = 24;

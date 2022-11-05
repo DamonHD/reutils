@@ -45,8 +45,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.codec.Charsets;
 import org.hd.d.edh.DataUtils;
+import org.hd.d.edh.FUELINST;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
@@ -101,7 +101,7 @@ public final class TestMisc extends TestCase
 	    // No-data case.
     	final String nodataOutExpected = "HDR\nFTR,0\n";
     	final byte[] nodataOut = DataUtils.saveBMRCSV(new ArrayList<List<String>>());
-        assertTrue("Should generate expected ASCII output", Arrays.equals(nodataOut, nodataOutExpected.getBytes(Charsets.US_ASCII)));
+        assertTrue("Should generate expected ASCII output", Arrays.equals(nodataOut, nodataOutExpected.getBytes(FUELINSTUtils.FUELINST_CHARSET)));
         assertTrue("Should parse as empty list", DataUtils.parseBMRCSV(new StringReader(nodataOutExpected), null).isEmpty());
         assertTrue("Should parse as empty list", DataUtils.parseBMRCSV(new InputStreamReader(new ByteArrayInputStream(nodataOut)), null).isEmpty());
 	    }

@@ -63,8 +63,6 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.Charsets;
-
 
 /**Data utilities.
  * Handles the bmreports style of CSV (with an initial HDR row and a trailing FTR row),
@@ -521,7 +519,7 @@ public final class DataUtils
         throws IOException
         {
     	if(null == longStoreFile) { throw new IllegalArgumentException(); }
-    	try(FileReader fr = new FileReader(longStoreFile, Charsets.US_ASCII);
+    	try(FileReader fr = new FileReader(longStoreFile, FUELINSTUtils.FUELINST_CHARSET);
    	        BufferedReader br = new BufferedReader(fr))
 			{ return(parseBMRCSV(fr, null)); }
         }
@@ -553,7 +551,7 @@ public final class DataUtils
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         // Write header.
-        baos.writeBytes("HDR\n".getBytes(Charsets.US_ASCII));
+        baos.writeBytes("HDR\n".getBytes(FUELINSTUtils.FUELINST_CHARSET));
         final int rowCount = data.size();
 
         // Write body.
@@ -572,13 +570,13 @@ public final class DataUtils
 	        // Write row.
         	for(int f = 0; f < fields; ++f)
 	        	{
-	        	baos.writeBytes(row.get(f).getBytes(Charsets.US_ASCII));
+	        	baos.writeBytes(row.get(f).getBytes(FUELINSTUtils.FUELINST_CHARSET));
 	        	baos.write((f < fields-1) ? ',' : '\n');
 	        	}
 	        }
 
         // Write footer.
-        baos.writeBytes(("FTR," + rowCount + "\n").getBytes(Charsets.US_ASCII));
+        baos.writeBytes(("FTR," + rowCount + "\n").getBytes(FUELINSTUtils.FUELINST_CHARSET));
         return(baos.toByteArray());
 	    }
 
