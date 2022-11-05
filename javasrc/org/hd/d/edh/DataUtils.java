@@ -188,6 +188,7 @@ public final class DataUtils
     /**Trim BMR FUELINST data to span at most the specified number of hours.
      * Trims away the oldest records until the limit is met.
      * 
+     * @param parsedBMRCSV  BMR FUELINST list to trim
      * @param maxHoursSpan  maximum span of hours between newest and oldest record;
      *             strictly positive
      *
@@ -201,7 +202,7 @@ public final class DataUtils
 		if(null == parsedBMRCSV) { return(null); }
 		final int nRows = parsedBMRCSV.size();
 		if(nRows < 2) { return(null); }
-		
+
 		// Compute oldest timestamp allowed.
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
 		final String lastTimestampRaw = parsedBMRCSV.get(nRows-1).get(3);
@@ -210,7 +211,7 @@ public final class DataUtils
 		catch (ParseException e) { e.printStackTrace(); return(null); }
         final long finalTimestamp = dl.getTime();
         final long oldestAllowedTimestamp = finalTimestamp - (maxHoursSpan*3600*1000) + 1;
-        
+
         // Find timestamp of existing first record.
 		final String firstTimestampRaw = parsedBMRCSV.get(0).get(3);
         Date df;
@@ -222,11 +223,30 @@ public final class DataUtils
         if(firstTimestamp >= oldestAllowedTimestamp)
         	{ return(null); }
 
-System.err.print("FIXME!");
-		
-		// FIXME
-		
-		return(null); // Not trimmed.
+        // Discard records that are too old.
+        // Return the rest in a new immutable List.
+        // Find first record that is new enough to retain.
+        // (All the rest should be newer, and the last record is a sentinel.)
+        // Skip the first record, since it is already known to be too old.
+        int firstRecordOldEnough = nRows - 1;
+        for(int i = 2; i < nRows-1; ++i)
+	        {
+        	// Find timestamp of next record.
+    		final String timestampRaw = parsedBMRCSV.get(i).get(3);
+            Date d;
+    		try { d = timestampParser.parse(timestampRaw); }
+    		catch (ParseException e) { e.printStackTrace(); return(null); }
+            final long timestamp = d.getTime();
+	        if(timestamp >= oldestAllowedTimestamp)
+		        {
+	        	firstRecordOldEnough = i;
+	        	break;
+		        }
+	        }
+
+		// Make outer list immutable...
+		return(Collections.unmodifiableList(
+			parsedBMRCSV.subList(firstRecordOldEnough, nRows-1)));
 	    }
 
     /**Validate BMR FUELINST data on a number of key points.
