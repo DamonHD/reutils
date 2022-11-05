@@ -218,10 +218,11 @@ public final class DataUtils
 		catch (ParseException e) { e.printStackTrace(); return(null); }
         final long lastExistingTimestamp = dle.getTime();
 
-        // Compute newest/last timestamp in new data.
+		// Compute newest/last timestamp in new data.
         // If it is not newer than the newest existing record
         // then there is nothing to append.
-        final String lastNewTimestampRaw = newRecords.get(newRecords.size()-1).get(3);
+        final int nRowsNew = newRecords.size();
+        final String lastNewTimestampRaw = newRecords.get(nRowsNew-1).get(3);
         Date dln;
         try { dln = timestampParser.parse(lastNewTimestampRaw); }
 		catch (ParseException e) { e.printStackTrace(); return(null); }
@@ -229,13 +230,33 @@ public final class DataUtils
         if(lastNewTimestamp <= lastExistingTimestamp)
         	{ return(null); }
 
+        // Work backwards through the new records,
+        // finding the oldest one that can be appended.
+        // The assumption is that usually only a few trailing records
+        // will be appended.
+        //
+        // For speed a lexical timestamp comparison suffices
+        // to find the number of new records to append.
+        int oldestNewRecordToInsert = nRowsNew - 1;
+        for(int i = nRowsNew - 2; i >= 0; --i)
+	        {
+	        final String rawTimestamp = newRecords.get(i).get(3);
+	        // Stop when this record is not newer than the last existing record.
+	        if(rawTimestamp.compareTo(lastExistingTimestampRaw) <= 0) { break; }
+	        oldestNewRecordToInsert = i;
+	        }
+        // Sub-list of new records to append.
+        final List<List<String>> newRecordsToAppend =
+    		newRecords.subList(oldestNewRecordToInsert, nRowsNew - 1);
 
+        // Initially-empty result...
+        final ArrayList<List<String>> result =
+            new ArrayList<List<String>>(nRowsExisting + newRecordsToAppend.size());
+        result.addAll(existingRecords);
+        result.addAll(newRecordsToAppend);
 
-	    // FIXME
-
-
-
-	    return(null); // Nothing appended...
+        result.trimToSize(); // Free resources...
+        return(Collections.unmodifiableList(result)); // Make outer list immutable...
 	    }
     
     /**Trim BMR FUELINST data to span at most the specified number of hours.
