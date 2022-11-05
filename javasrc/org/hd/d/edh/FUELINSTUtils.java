@@ -663,8 +663,9 @@ System.out.println("Record/row count of CSV FUELINST data: " + parsedBMRCSV.size
             // Update the long store only if there is something to update it with.
 	        if(null != parsedBMRCSV)
 	            {
-		        // TODO: update long store with new records
+		        // TODO: append to long store new records
 		        longStore = parsedBMRCSV;
+		        // TODO: trim history in long store to max of 7 days.
 		        // Save long store (atomically, world-readable).
 	        	DataUtils.saveBMRCSV(longStore, longStoreFile);
 	            }
