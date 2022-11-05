@@ -674,10 +674,13 @@ System.err.println("Invalid CSV FUELINST data rejected.");
             // Update the long store only if there is something valid to update it with.
 	        if(null != parsedBMRCSV)
 	            {
-		        // TODO: append to long store new records
-		        longStore = parsedBMRCSV;
-		        // Trim history in long store to max of 7 days.
-		        final List<List<String>> trimmedLongStore = DataUtils.trimBMRData(longStore, HOURS_PER_WEEK);
+		        // Append any new records to long store.
+		        final List<List<String>> appendedlongStore = DataUtils.appendNewBMRDataRecords(
+		        		longStore, parsedBMRCSV);
+		        if(null != appendedlongStore) { longStore = appendedlongStore; }
+		        // Trim history in long store to maximum of 7 days.
+		        final List<List<String>> trimmedLongStore = DataUtils.trimBMRData(
+		        		longStore, HOURS_PER_WEEK);
 		        if(null != trimmedLongStore) { longStore = trimmedLongStore; }
 		        // Save long store (atomically, world-readable).
 	        	DataUtils.saveBMRCSV(longStore, longStoreFile);

@@ -185,6 +185,34 @@ public final class DataUtils
      */
     public static final Pattern delimCSV = delimTM; // We can use delimTR to save an extra instance! // Pattern.compile(",");
 
+    
+    /**Append newer records to existing data.
+     * This can be used new data to an existing archive,
+     * and fill in temporarily-missing records from new data.
+     * <p>
+     * No existing records will be altered,
+     * nor will anything older than the newest one be inserted.
+     * <p>
+     * If the existing record set is null
+     * then the new record set is returned as-is.
+     * 
+     * @return  new List if the records were appended, else null
+     */
+    public static List<List<String>> appendNewBMRDataRecords(
+    		final List<List<String>> existingRecords,
+    		final List<List<String>> newRecords)
+	    {
+    	// If no existing data then return the new data as-is.
+	    if(null == existingRecords) { return(newRecords); }
+
+
+	    // FIXME
+
+
+
+	    return(null); // Nothing appended...
+	    }
+    
     /**Trim BMR FUELINST data to span at most the specified number of hours.
      * Trims away the oldest records until the limit is met.
      * 
@@ -192,7 +220,7 @@ public final class DataUtils
      * @param maxHoursSpan  maximum span of hours between newest and oldest record;
      *             strictly positive
      *
-     * @return  new List if the result was trimmed
+     * @return  new List if the result was trimmed, else null
      */
     public static List<List<String>> trimBMRData(
 			final List<List<String>> parsedBMRCSV,
