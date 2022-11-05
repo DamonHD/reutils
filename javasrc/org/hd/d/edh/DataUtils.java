@@ -186,11 +186,12 @@ public final class DataUtils
     public static final Pattern delimCSV = delimTM; // We can use delimTR to save an extra instance! // Pattern.compile(",");
 
     /**Trim BMR FUELINST data to span at most the specified number of hours.
+     * Trims away the oldest records until the limit is met.
      * 
      * @param maxHoursSpan  maximum span of hours between newest and oldest record;
      *             strictly positive
      *
-     * @return  new value if the result was trimmed
+     * @return  new List if the result was trimmed
      */
     public static List<List<String>> trimBMRData(
 			final List<List<String>> parsedBMRCSV,
@@ -198,7 +199,17 @@ public final class DataUtils
 	    {
     	// Nothing to do if null store or at most 1 record.
 		if(null == parsedBMRCSV) { return(null); }
-		if(parsedBMRCSV.size() < 2) { return(null); }
+		final int nRows = parsedBMRCSV.size();
+		if(nRows < 2) { return(null); }
+		
+		// Compute oldest timestamp allowed.
+		final String lastTimestampRaw = parsedBMRCSV.get(nRows-1).get(3);
+        final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
+        Date df;
+		try { df = timestampParser.parse(lastTimestampRaw); }
+		catch (ParseException e) { e.printStackTrace(); return(null); }
+        final long finalTimestamp = df.getTime();
+        final long oldestAllowedTimestamp = finalTimestamp - (maxHoursSpan*3600*1000) + 1;
 		
 		
 		// FIXME
@@ -232,7 +243,7 @@ public final class DataUtils
 //FUELINST,20221104,21,20221104101000,14209,0,0,4641,8936,0,848,0,141,0,0,129,0,2225,0,0,0,1257
 //FUELINST,20221104,21,20221104101500,14133,0,0,4639,9047,0,848,0,136,0,0,130,0,2224,0,0,0,1257
 
-		String lastTimestamp = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
+		String lastTimestampRaw = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
 		for(List<String> row : parsedBMRCSV)
 			{
 			if(null == row) { return(false); }
@@ -242,14 +253,14 @@ public final class DataUtils
 			if(14 != timestampRaw.length()) { return(false); }
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
-			if(lastTimestamp.compareTo(timestampRaw) >= 0) { return(false); }
-			lastTimestamp = timestampRaw;
+			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return(false); }
+			lastTimestampRaw = timestampRaw;
 			}
 
 		// Check that the last/newest record is not too new to be valid.
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
         Date d;
-		try { d = timestampParser.parse(lastTimestamp); }
+		try { d = timestampParser.parse(lastTimestampRaw); }
 		catch (ParseException e) { return(false); }
         final long finalTimestamp = d.getTime();
         if(finalTimestamp > newestPossibleValidRecord) { return(false); }
