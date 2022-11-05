@@ -670,6 +670,19 @@ System.err.println("Invalid CSV FUELINST data rejected.");
 	        {
 	        System.err.println("Could not load long store "+longStoreFile+" error: " + e.getMessage());
 	        }
+        // As of 2022-10 sometimes last few records are omitted apparently when server is busy.
+        // Attempt to patch them up here...
+        if((null != parsedBMRCSV) && (null != longStoreFile))
+	        {
+        	final List<List<String>> appendedNewData = DataUtils.appendNewBMRDataRecords(
+        			parsedBMRCSV, longStore);
+        	if(null != appendedNewData)
+	        	{
+System.err.println("Some recent records omitted from this data fetch: filled in.");
+				parsedBMRCSV = appendedNewData;
+	        	}
+	        }
+        // Attempt to update the long store with new records, and keep trimmed in length.
         try {
             // Update the long store only if there is something valid to update it with.
 	        if(null != parsedBMRCSV)
