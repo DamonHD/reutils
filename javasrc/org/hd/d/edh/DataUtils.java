@@ -207,7 +207,7 @@ public final class DataUtils
 //FUELINST,20221104,21,20221104101000,14209,0,0,4641,8936,0,848,0,141,0,0,129,0,2225,0,0,0,1257
 //FUELINST,20221104,21,20221104101500,14133,0,0,4639,9047,0,848,0,136,0,0,130,0,2224,0,0,0,1257
 
-		long previousTimestamp = -1;
+		String previousTimestamp = "20000101000000";
 		for(List<String> row : parsedBMRCSV)
 			{
 			if(null == row) { return(false); }
@@ -215,6 +215,9 @@ public final class DataUtils
 			if(!"FUELINST".equals(row.get(0))) { return(false); }
 			final String timestampRaw = row.get(3);
 			if(14 != timestampRaw.length()) { return(false); }
+			// Check for strictly monotonic (lexical) ordering.
+			// Avoids an expensive time conversion...
+			if(previousTimestamp.compareTo(timestampRaw) >= 0) { return(false); }
 			
 			// TODO Validate timestamp values and order.
 			
