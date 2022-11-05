@@ -202,8 +202,33 @@ public final class DataUtils
     		final List<List<String>> existingRecords,
     		final List<List<String>> newRecords)
 	    {
+    	// If no new data then nothing to append.
+    	if(null == newRecords) { return(null); }
+    	if(newRecords.isEmpty()) { return(null); }
     	// If no existing data then return the new data as-is.
-	    if(null == existingRecords) { return(newRecords); }
+	    if(null == existingRecords) { return(newRecords); }	    
+		final int nRowsExisting = existingRecords.size();
+		if(0 == nRowsExisting) { return(newRecords); }
+
+		// Compute newest/last timestamp in existing data.
+        final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
+		final String lastExistingTimestampRaw = existingRecords.get(nRowsExisting-1).get(3);
+        Date dle;
+		try { dle = timestampParser.parse(lastExistingTimestampRaw); }
+		catch (ParseException e) { e.printStackTrace(); return(null); }
+        final long lastExistingTimestamp = dle.getTime();
+
+        // Compute newest/last timestamp in new data.
+        // If it is not newer than the newest existing record
+        // then there is nothing to append.
+        final String lastNewTimestampRaw = newRecords.get(newRecords.size()-1).get(3);
+        Date dln;
+        try { dln = timestampParser.parse(lastNewTimestampRaw); }
+		catch (ParseException e) { e.printStackTrace(); return(null); }
+        final long lastNewTimestamp = dln.getTime();
+        if(lastNewTimestamp <= lastExistingTimestamp)
+        	{ return(null); }
+
 
 
 	    // FIXME
@@ -237,8 +262,8 @@ public final class DataUtils
         Date dl;
 		try { dl = timestampParser.parse(lastTimestampRaw); }
 		catch (ParseException e) { e.printStackTrace(); return(null); }
-        final long finalTimestamp = dl.getTime();
-        final long oldestAllowedTimestamp = finalTimestamp - (maxHoursSpan*3600*1000) + 1;
+        final long lastTimestamp = dl.getTime();
+        final long oldestAllowedTimestamp = lastTimestamp - (maxHoursSpan*3600*1000) + 1;
 
         // Find timestamp of existing first record.
 		final String firstTimestampRaw = parsedBMRCSV.get(0).get(3);
