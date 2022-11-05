@@ -678,7 +678,7 @@ System.err.println("Invalid CSV FUELINST data rejected.");
         			parsedBMRCSV, longStore);
         	if(null != appendedNewData)
 	        	{
-System.err.println("Some recent records omitted from this data fetch: filled in.");
+System.err.println("Some recent records omitted from this data fetch: patched in.");
 				parsedBMRCSV = appendedNewData;
 	        	}
 	        }
