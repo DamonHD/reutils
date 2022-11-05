@@ -207,7 +207,7 @@ public final class DataUtils
 //FUELINST,20221104,21,20221104101000,14209,0,0,4641,8936,0,848,0,141,0,0,129,0,2225,0,0,0,1257
 //FUELINST,20221104,21,20221104101500,14133,0,0,4639,9047,0,848,0,136,0,0,130,0,2224,0,0,0,1257
 
-		String previousTimestamp = "20000101000000";
+		String previousTimestamp = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
 		for(List<String> row : parsedBMRCSV)
 			{
 			if(null == row) { return(false); }

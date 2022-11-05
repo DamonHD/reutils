@@ -74,6 +74,9 @@ public final class FUELINST
     /**Distinguished fuel category name for for storage sources; not null. */
     public static final String FUELINST_CATNAME_STORAGE = "storage";
 
+    /**Just-too-old FUELINST timestamp; nothing this old or older will be considered valid. */
+	public static final String FUELINST_TIMESTAMP_JUST_TOO_OLD = "20000101000000";
+
     /**Immutable summary by hour (GMT) of a single Integer parameter.
      * Behaves as if a List of Integer with exactly 24 slots.
      * <p>
