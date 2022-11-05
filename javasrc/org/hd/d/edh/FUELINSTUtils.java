@@ -659,7 +659,7 @@ System.out.println("INFO: record/row count of CSV FUELINST data: " + parsedBMRCS
         catch(final IOException e)
             {
             // Could not get data, so status is unknown.
-            System.err.println("ERROR: could not fetch data from " + url + " error: " + e.getMessage());
+System.err.println("ERROR: could not fetch data from " + url + " error: " + e.getMessage());
             }
         // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
         // Reject entirely if problem found.
@@ -673,7 +673,7 @@ System.err.println("ERROR: invalid CSV FUELINST data rejected.");
         try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
         catch(final IOException e)
 	        {
-System.err.println("ERROR: could not load long store "+longStoreFile+" error: " + e.getMessage());
+System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
 	        }
         // As of 2022-10 sometimes last few records are omitted apparently when server is busy.
         // Attempt to patch them up here...
@@ -683,7 +683,7 @@ System.err.println("ERROR: could not load long store "+longStoreFile+" error: " 
         			parsedBMRCSV, longStore);
         	if(null != appendedNewData)
 	        	{
-System.err.println("ERROR: some recent records omitted from this data fetch: patched back in.");
+System.err.println("WARNING: some recent records omitted from this data fetch: patched back in.");
 				parsedBMRCSV = appendedNewData;
 	        	}
 	        }
