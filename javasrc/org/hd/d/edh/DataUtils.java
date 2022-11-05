@@ -181,6 +181,39 @@ public final class DataUtils
      */
     public static final Pattern delimCSV = delimTM; // We can use delimTR to save an extra instance! // Pattern.compile(",");
 
+    /**Reject BMR FUELINST data if invalid for a number of key checks.
+     * 
+     * @param parsedBMRCSV  parsed FUELINST records (minus HDR and FTR);
+     *             never null
+     * @param newestPossibleValidRecord  no record may be newer than (timestamped after) this;
+     *             positive and can be set to maximum long value to avoid the check
+     * @param maxHoursSpan  maximum span of hours between newest and oldest record;
+     *             strictly positive
+     * 
+     * @return false if any problem found.
+     */
+	public static boolean isnotinvalidBMRData(
+			final List<List<String>> parsedBMRCSV,
+			final long newestPossibleValidRecord,
+			final int maxHoursSpan)
+	    {
+		if(null == parsedBMRCSV) { return(false); }
+		for(List<String> row : parsedBMRCSV)
+			{
+				if(null == row) { return(false); }
+				if(row.isEmpty()) { return(false); }
+				if(!"FUELINST".equals(row.get(0))) { return(false); }
+				
+				// TODO Validate timestamp values and order.
+				
+				// FIXME actually validate!
+
+			}
+		
+		
+		// Did not find any problems.
+		return(true);
+	    }
 
     /**Parse bmreports-style CSV file/stream with HDR and FTR check rows (which are not returned); never null but may be empty.
      *

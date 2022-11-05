@@ -656,11 +656,18 @@ System.out.println("Record/row count of CSV FUELINST data: " + parsedBMRCSV.size
             // Could not get data, so status is unknown.
             System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
             }
+        // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
+        // Reject entirely if problem found.
+        if(!DataUtils.isnotinvalidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1))
+            {
+System.err.println("Invalid CSV FUELINST data rejected.");
+        	parsedBMRCSV = null;
+        	}
 
         List<List<String>> longStore = null;
         try {
         	// TODO: read long store
-            // Update the long store only if there is something to update it with.
+            // Update the long store only if there is something valid to update it with.
 	        if(null != parsedBMRCSV)
 	            {
 		        // TODO: append to long store new records
