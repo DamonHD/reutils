@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -181,7 +182,8 @@ public final class DataUtils
      */
     public static final Pattern delimCSV = delimTM; // We can use delimTR to save an extra instance! // Pattern.compile(",");
 
-    /**Reject BMR FUELINST data if invalid for a number of key checks.
+
+    /**Validate BMR FUELINST data on a number of key points.
      * 
      * @param parsedBMRCSV  parsed FUELINST records (minus HDR and FTR);
      *             never null
@@ -192,7 +194,7 @@ public final class DataUtils
      * 
      * @return false if any problem found.
      */
-	public static boolean isnotinvalidBMRData(
+	public static boolean isValidBMRData(
 			final List<List<String>> parsedBMRCSV,
 			final long newestPossibleValidRecord,
 			final int maxHoursSpan)
@@ -218,10 +220,8 @@ public final class DataUtils
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
 			if(previousTimestamp.compareTo(timestampRaw) >= 0) { return(false); }
-			
-			// TODO Validate timestamp values and order.
-			
-			// FIXME actually validate!
+
+			// FIXME Validate timestamp values and order and range.
 
 			}
 
@@ -362,7 +362,20 @@ public final class DataUtils
         result.trimToSize(); // Free resources...
         return(Collections.unmodifiableList(result)); // Make outer list immutable...
         }
-    
+
+    /**Load from file parsed FUELINST data in a form that parseBMRCSV() can read.
+     * 
+     * @throws IOException  if file not present or unreadable/unparseable.
+     */
+    public static List<List<String>> loadBMRCSV(final File longStoreFile)
+        throws IOException
+        {
+    	if(null == longStoreFile) { throw new IllegalArgumentException(); }
+    	try(FileReader fr = new FileReader(longStoreFile, Charsets.US_ASCII);
+   	        BufferedReader br = new BufferedReader(fr))
+			{ return(parseBMRCSV(fr, null)); }
+        }
+
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
      * Generate ASCII CSV, with newlines to terminate rows.
      * <p>

@@ -658,15 +658,19 @@ System.out.println("Record/row count of CSV FUELINST data: " + parsedBMRCSV.size
             }
         // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
         // Reject entirely if problem found.
-        if(!DataUtils.isnotinvalidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1))
+        if(!DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1))
             {
 System.err.println("Invalid CSV FUELINST data rejected.");
         	parsedBMRCSV = null;
         	}
 
         List<List<String>> longStore = null;
+        try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
+        catch(final IOException e)
+	        {
+	        System.err.println("Could not load long store "+longStoreFile+" error: " + e.getMessage());
+	        }
         try {
-        	// TODO: read long store
             // Update the long store only if there is something valid to update it with.
 	        if(null != parsedBMRCSV)
 	            {
@@ -679,7 +683,7 @@ System.err.println("Invalid CSV FUELINST data rejected.");
         	}
         catch(final IOException e)
 	        {
-	        System.err.println("Could not load/update/save long store "+longStoreFile+" error: " + e.getMessage());
+	        System.err.println("Could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 	        }
         
         // Compute 24hr summary.
