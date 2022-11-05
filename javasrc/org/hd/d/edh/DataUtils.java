@@ -49,9 +49,12 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -209,7 +212,7 @@ public final class DataUtils
 //FUELINST,20221104,21,20221104101000,14209,0,0,4641,8936,0,848,0,141,0,0,129,0,2225,0,0,0,1257
 //FUELINST,20221104,21,20221104101500,14133,0,0,4639,9047,0,848,0,136,0,0,130,0,2224,0,0,0,1257
 
-		String previousTimestamp = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
+		String lastTimestamp = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
 		for(List<String> row : parsedBMRCSV)
 			{
 			if(null == row) { return(false); }
@@ -219,11 +222,21 @@ public final class DataUtils
 			if(14 != timestampRaw.length()) { return(false); }
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
-			if(previousTimestamp.compareTo(timestampRaw) >= 0) { return(false); }
-
-			// FIXME Validate timestamp values and order and range.
-
+			if(lastTimestamp.compareTo(timestampRaw) >= 0) { return(false); }
+			lastTimestamp = timestampRaw;
 			}
+
+		// Check that the last/newest record is not too new to be valid.
+        final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
+        Date d;
+		try { d = timestampParser.parse(lastTimestamp); }
+		catch (ParseException e) { return(false); }
+        final long finalTimestamp = d.getTime();
+        if(finalTimestamp > newestPossibleValidRecord) { return(false); }
+
+
+		// FIXME Validate timestamp range.
+
 
 		// Did not find any problems.
 		return(true);
