@@ -45,9 +45,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20221104: avoid cacheing already-stale result.
-    DHD20221105: 7-day 'long store' initial implementation.
-    DHD20221105: patching back in missing recent records c/o 'long store'.
 
 
 
@@ -55,6 +52,17 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20221105:
+    freezepoint name: V1.1.15
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.14
+    DHD20221104: avoid cacheing an already-stale result.
+    DHD20221105: 7-day 'long store' initial implementation.
+    DHD20221105: patching back in missing recent records c/o 'long store'.
 
 
 20220510:
