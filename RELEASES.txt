@@ -45,8 +45,9 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20221104: avoid cacheing already-stale result
-    DHD20221104: WIP working on 7-day store
+    DHD20221104: avoid cacheing already-stale result.
+    DHD20221105: 7-day 'long store' initial implementation.
+    DHD20221105: patching back in missing recent records c/o 'long store'.
 
 
 
