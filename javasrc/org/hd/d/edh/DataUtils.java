@@ -185,6 +185,26 @@ public final class DataUtils
      */
     public static final Pattern delimCSV = delimTM; // We can use delimTR to save an extra instance! // Pattern.compile(",");
 
+    /**Trim BMR FUELINST data to span at most the specified number of hours.
+     * 
+     * @param maxHoursSpan  maximum span of hours between newest and oldest record;
+     *             strictly positive
+     *
+     * @return  new value if the result was trimmed
+     */
+    public static List<List<String>> trimBMRData(
+			final List<List<String>> parsedBMRCSV,
+			final int maxHoursSpan)
+	    {
+    	// Nothing to do if null store or at most 1 record.
+		if(null == parsedBMRCSV) { return(null); }
+		if(parsedBMRCSV.size() < 2) { return(null); }
+		
+		
+		// FIXME
+		
+		return(null); // Not trimmed.
+	    }
 
     /**Validate BMR FUELINST data on a number of key points.
      * 
