@@ -247,7 +247,7 @@ public final class DataUtils
 	        }
         // Sub-list of new records to append.
         final List<List<String>> newRecordsToAppend =
-    		newRecords.subList(oldestNewRecordToInsert, nRowsNew - 1);
+    		newRecords.subList(oldestNewRecordToInsert, nRowsNew);
 
         // Initially-empty result...
         final ArrayList<List<String>> result =
@@ -320,7 +320,7 @@ public final class DataUtils
 
 		// Make outer list immutable...
 		return(Collections.unmodifiableList(
-			parsedBMRCSV.subList(firstRecordOldEnough, nRows-1)));
+			parsedBMRCSV.subList(firstRecordOldEnough, nRows)));
 	    }
 
     /**Validate BMR FUELINST data on a number of key points.
