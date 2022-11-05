@@ -278,7 +278,7 @@ public final class FUELINSTUtils
             // Reject bad (-ve) records.
             if(weightedIntensity < 0)
                 {
-                System.err.println("Skipping non-positive weighed intensity record at " + namedFields.get("timestamp"));
+                System.err.println("ERROR: skipping non-positive weighed intensity record at " + namedFields.get("timestamp"));
                 continue;
                 }
 
@@ -305,7 +305,7 @@ public final class FUELINSTUtils
             final String rawTimestamp = namedFields.get("timestamp");
             long recordTimestamp = 0; // Will be non-zero after a successful parse.
             if(null == rawTimestamp)
-                { System.err.println("missing FUELINST row timestamp"); }
+                { System.err.println("ERROR: missing FUELINST row timestamp"); }
             else
                 {
                 try
@@ -330,7 +330,7 @@ public final class FUELINSTUtils
                     }
                 catch(final ParseException e)
                     {
-                    System.err.println("Unable to parse FUELINST record timestamp " + rawTimestamp + ": " + e.getMessage());
+                    System.err.println("ERROR: unable to parse FUELINST record timestamp " + rawTimestamp + ": " + e.getMessage());
                     }
                 }
 
@@ -339,7 +339,7 @@ public final class FUELINSTUtils
             if(weightedIntensity > maxIntensity)
                 { maxIntensity = weightedIntensity; maxIntensityRecordTimestamp = recordTimestamp; }
             }
-System.out.println("Last good record timestamp "+(new Date(lastGoodRecordTimestamp))+" vs now "+(new Date(System.currentTimeMillis())));
+System.out.println("INFO: last good record timestamp "+(new Date(lastGoodRecordTimestamp))+" vs now "+(new Date(System.currentTimeMillis())));
 
         // Note if the intensity dropped/improved in the final samples.
         TrafficLight recentChange = null;
@@ -457,7 +457,7 @@ System.out.println("Last good record timestamp "+(new Date(lastGoodRecordTimesta
         if((null != resultCacheFile) && (result.useByTime >= System.currentTimeMillis()))
             {
         	DataUtils.serialiseToFile(result, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
-System.out.println("Cached current result at " + resultCacheFile);
+System.out.println("INFO: cached current result at " + resultCacheFile);
         	}
 
         return(result);
@@ -566,7 +566,7 @@ System.out.println("Cached current result at " + resultCacheFile);
         // (If no extension is present then ".flag" is simply appended.)
         final File outputFlagFile = new File(baseFileName + ".flag");
         final boolean basicFlagState = TrafficLight.GREEN != statusCapped;
-        System.out.println("Basic flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
+        System.out.println("INFO: basic flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputFlagFile, basicFlagState);
 
@@ -576,7 +576,7 @@ System.out.println("Cached current result at " + resultCacheFile);
         // When live data is available then this should be the same as the basic flag.
         final File outputPredictedFlagFile = new File(baseFileName + ".predicted.flag");
         final boolean predictedFlagState = TrafficLight.GREEN != statusUncapped;
-        System.out.println("Predicted flag file is " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
+        System.out.println("INFO: predicted flag file is " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputPredictedFlagFile, predictedFlagState);
 
@@ -584,7 +584,7 @@ System.out.println("Cached current result at " + resultCacheFile);
         // AND there storage is not being drawn from.
         final File outputSupergreenFlagFile = new File(baseFileName + ".supergreen.flag");
         final boolean supergreenFlagState = (basicFlagState) || (currentStorageDrawdownMW > 0);
-        System.out.println("Supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
+        System.out.println("INFO: supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputSupergreenFlagFile, supergreenFlagState);
         
@@ -592,7 +592,7 @@ System.out.println("Cached current result at " + resultCacheFile);
         // Flag is computed even with stale data.
         final File outputRedFlagFile = new File(baseFileName + ".red.flag");
         final boolean redFlagState = TrafficLight.RED == statusUncapped;
-        System.out.println("Red flag file is " + outputRedFlagFile + ": " + (redFlagState ? "set" : "clear"));
+        System.out.println("INFO: red flag file is " + outputRedFlagFile + ": " + (redFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is not RED, else create it (for GREEN/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputRedFlagFile, redFlagState);
         }
@@ -611,11 +611,11 @@ System.out.println("Cached current result at " + resultCacheFile);
             if(outputFlagFile.createNewFile())
                 {
                 outputFlagFile.setReadable(true);
-                System.out.println("Flag file created: "+outputFlagFile);
+                System.out.println("INFO: flag file created: "+outputFlagFile);
                 }
             }
         else
-            { if(outputFlagFile.delete()) { System.out.println("Flag file deleted: "+outputFlagFile); } }
+            { if(outputFlagFile.delete()) { System.out.println("INFO: flag file deleted: "+outputFlagFile); } }
         }
 
 
@@ -630,7 +630,7 @@ System.out.println("Cached current result at " + resultCacheFile);
 
         final long startTime = System.currentTimeMillis();
 
-        System.out.println("Generating traffic-light summary "+Arrays.asList(args)+"...");
+        System.out.println("INFO: generating traffic-light summary "+Arrays.asList(args)+"...");
 
         final String outputHTMLFileName = (args.length < 1) ? null : args[0];
         final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
@@ -654,18 +654,18 @@ System.out.println("Cached current result at " + resultCacheFile);
             // Set up URL connection to fetch the data.
             url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
             parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
-System.out.println("Record/row count of CSV FUELINST data: " + parsedBMRCSV.size() + " from source: " + url);
+System.out.println("INFO: record/row count of CSV FUELINST data: " + parsedBMRCSV.size() + " from source: " + url);
             }
         catch(final IOException e)
             {
             // Could not get data, so status is unknown.
-            System.err.println("Could not fetch data from " + url + " error: " + e.getMessage());
+            System.err.println("ERROR: could not fetch data from " + url + " error: " + e.getMessage());
             }
         // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
         // Reject entirely if problem found.
         if(!DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1))
             {
-System.err.println("Invalid CSV FUELINST data rejected.");
+System.err.println("ERROR: invalid CSV FUELINST data rejected.");
         	parsedBMRCSV = null;
         	}
 
@@ -673,7 +673,7 @@ System.err.println("Invalid CSV FUELINST data rejected.");
         try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
         catch(final IOException e)
 	        {
-	        System.err.println("Could not load long store "+longStoreFile+" error: " + e.getMessage());
+System.err.println("ERROR: could not load long store "+longStoreFile+" error: " + e.getMessage());
 	        }
         // As of 2022-10 sometimes last few records are omitted apparently when server is busy.
         // Attempt to patch them up here...
@@ -683,7 +683,7 @@ System.err.println("Invalid CSV FUELINST data rejected.");
         			parsedBMRCSV, longStore);
         	if(null != appendedNewData)
 	        	{
-System.err.println("Some recent records omitted from this data fetch: patched back in.");
+System.err.println("ERROR: some recent records omitted from this data fetch: patched back in.");
 				parsedBMRCSV = appendedNewData;
 	        	}
 	        }
@@ -706,7 +706,7 @@ System.err.println("Some recent records omitted from this data fetch: patched ba
         	}
         catch(final IOException e)
 	        {
-	        System.err.println("Could not update/save long store "+longStoreFile+" error: " + e.getMessage());
+System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 	        }
         
         // Compute 24hr summary.
@@ -716,7 +716,7 @@ System.err.println("Some recent records omitted from this data fetch: patched ba
             FUELINSTUtils.computeCurrentSummary(parsedBMRCSV, resultCacheFile);
 
         // Dump a summary of the current status re fuel.
-        System.out.println(summary24h);
+System.out.println("INFO: " + summary24h);
 
         // Is the data stale?
         final boolean isDataStale = summary24h.useByTime < startTime;
@@ -829,7 +829,7 @@ System.err.println("Some recent records omitted from this data fetch: patched ba
                 GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 48, summary24h.timestamp, summary24h.status, retailIntensity);
                 GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
                 }
-            else { System.err.println("Missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
+            else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
             }
         catch(final IOException e) { e.printStackTrace(); }
         
@@ -837,7 +837,7 @@ System.err.println("Some recent records omitted from this data fetch: patched ba
         // Append to the intensity log.
         // Only do this for current/live data, ie if not stale.
         if(isDataStale || (0 == summary24h.timestamp))
-            { System.err.println("Will not update log, input data is stale."); }
+            { System.err.println("WARNING: will not update log, input data is stale."); }
         else
         	{ 		
             try
@@ -847,7 +847,7 @@ System.err.println("Some recent records omitted from this data fetch: patched ba
 	                {
 	            	appendToRetailIntensityLog(id, summary24h.timestamp, retailIntensity);
 	                }
-	            else { System.err.println("Missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
+	            else { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
 	            }
             catch(final IOException e) { e.printStackTrace(); }
         	}
