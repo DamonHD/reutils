@@ -20,6 +20,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20221106: long store file now GZIPped to reduce storage traffic ~3x.
+    DHD20221106: HTML output mentions if longer-term view differs from 24h view.
 
 
 

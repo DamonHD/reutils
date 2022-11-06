@@ -1339,7 +1339,7 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             w.write(open+((status == TrafficLight.GREEN) ? ";background-color:green\">Grid is "+weaselWord+"good; you might run major loads such as your dishwasher and/or washing machine now to minimise CO2 emissions" : "\">&nbsp;")+close);
             w.write("</table></div>");
             w.println();
-            
+
             // Note very gently when the 7d status view is different.
             if(summary24h.status != summary7d.status)
 	            {
