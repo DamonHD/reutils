@@ -579,6 +579,11 @@ public final class FUELINSTUtils
         System.out.println("INFO: red flag file is " + outputRedFlagFile + ": " + (redFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is not RED, else create it (for GREEN/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputRedFlagFile, redFlagState);
+        // 7d version.
+        final File output7dRedFlagFile = new File(baseFileName + ".7d.red.flag");
+        final boolean red7dFlagState = TrafficLight.RED == status7dCapped;
+        System.out.println("INFO: 7d red flag file is " + output7dRedFlagFile + ": " + (red7dFlagState ? "set" : "clear"));
+        FUELINSTUtils.doPublicFlagFile(output7dRedFlagFile, red7dFlagState);
         }
 
     /**Create/remove public (readable by everyone) flag file as needed to match required state.
