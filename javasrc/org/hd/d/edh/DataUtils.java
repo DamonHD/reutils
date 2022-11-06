@@ -520,9 +520,6 @@ public final class DataUtils
         throws IOException
         {
     	if(null == longStoreFile) { throw new IllegalArgumentException(); }
-//    	try(FileReader fr = new FileReader(longStoreFile, FUELINSTUtils.FUELINST_CHARSET);
-//   	        BufferedReader br = new BufferedReader(fr))
-//			{ return(parseBMRCSV(fr, null)); }
     	try(InputStream is = new FileInputStream(longStoreFile);
     			BufferedInputStream bis = new BufferedInputStream(is);
     			InputStream gis = new GZIPInputStream(bis);
