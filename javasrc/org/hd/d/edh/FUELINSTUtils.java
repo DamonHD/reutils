@@ -718,7 +718,7 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             catch(final Exception err) { err.printStackTrace(); }
             if(null != cached)
                 {
-                System.err.println("WARNING: using previous response from cache...");
+                System.err.println("WARNING: using previous result from cache...");
                 summary24h = cached;
                 }
             // Use place-holder value.
@@ -765,8 +765,8 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             // Update the HTML page.
             try
                 {
-                FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary24h, isDataStale,
-                    hourOfDayHistorical, status, summary7d, td);
+                FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary24h, summary7d,
+                    isDataStale, hourOfDayHistorical, status, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
 
@@ -1303,11 +1303,11 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
     /**Update (atomically if possible) the HTML traffic-light page. */
     public static void updateHTMLFile(final long startTime,
                                            final String outputHTMLFileName,
-                                           final FUELINST.CurrentSummary summary,
+                                           final FUELINST.CurrentSummary summary24h,
+                                           final FUELINST.CurrentSummary summary7d,
                                            final boolean isDataStale,
                                            final int hourOfDayHistorical,
                                            final TrafficLight status,
-                                           final FUELINST.CurrentSummary longSummary,
                                            final TwitterUtils.TwitterDetails td)
         throws IOException
         {
@@ -1340,21 +1340,21 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             w.write("</table></div>");
             w.println();
 
-            if(summary.histMinIntensity < summary.histMaxIntensity)
+            if(summary24h.histMinIntensity < summary24h.histMaxIntensity)
                 {
-                w.println("<p style=\"text-align:center\">You might have saved as much as <strong style=\"font-size:xx-large\">"+FUELINSTUtils.computeVariability(summary.histMinIntensity, summary.histMaxIntensity)+"%</strong> carbon emissions by choosing the best time to run your washing and other major loads.</p>");
+                w.println("<p style=\"text-align:center\">You might have saved as much as <strong style=\"font-size:xx-large\">"+FUELINSTUtils.computeVariability(summary24h.histMinIntensity, summary24h.histMaxIntensity)+"%</strong> carbon emissions by choosing the best time to run your washing and other major loads.</p>");
                 }
 
             // Note any recent change/delta iff the data is not stale.
             if(SHOW_INTENSITY_DELTA && !isDataStale)
                 {
-                if(summary.recentChange == TrafficLight.GREEN)
+                if(summary24h.recentChange == TrafficLight.GREEN)
                     { w.println("<p style=\"color:green\">Good: carbon intensity (CO2 per kWh) is currently dropping.</p>"); }
-                else if(summary.recentChange == TrafficLight.RED)
+                else if(summary24h.recentChange == TrafficLight.RED)
                     { w.println("<p style=\"color:red\">Bad: carbon intensity (CO2 per kWh) is currently rising.</p>"); }
                 }
 
-            w.println("<p>Latest data is from <strong>"+(new Date(summary.timestamp))+"</strong>. This page should be updated every few minutes: use your browser's refresh/reload button if you need to check again.</p>");
+            w.println("<p>Latest data is from <strong>"+(new Date(summary24h.timestamp))+"</strong>. This page should be updated every few minutes: use your browser's refresh/reload button if you need to check again.</p>");
 
             // If we have a Twitter account set up then brag about it here,
             // but only if we believe that we actually have write access to be doing updates...
@@ -1381,26 +1381,26 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                      "Recent effective carbon intensity for a domestic user at this time of day was " :
                      "Effective grid carbon intensity for a domestic user is currently ");
                 if(null != status) { w.write("<span style=\"font-size:xx-large;color:"+statusColour+";background-color:black\">"); }
-                w.write(String.valueOf(Math.round((isDataStale ? summary.histAveIntensity : summary.currentIntensity) * (1 + summary.totalGridLosses))));
+                w.write(String.valueOf(Math.round((isDataStale ? summary24h.histAveIntensity : summary24h.currentIntensity) * (1 + summary24h.totalGridLosses))));
                 w.write("gCO2/kWh");
                 if(null != status) { w.write("</span>"); }
                 w.write(" including transmission and distribution losses of ");
-                w.write(String.valueOf(Math.round(100 * summary.totalGridLosses)));
+                w.write(String.valueOf(Math.round(100 * summary24h.totalGridLosses)));
                 w.write("%.</p>");
             w.println();
 
-            w.println("<p>Latest available grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) is approximately <strong>"+summary.currentIntensity+"gCO2/kWh</strong> at "+(new Date(summary.timestamp))+" over "+
-                        summary.currentMW+"MW of generation, with a rolling average over "+((summary.histWindowSize+1800000) / 3600000)+"h of <strong>"+summary.histAveIntensity+"gCO2/kWh</strong>.</p>");
-            w.println("<p>Minimum grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) was approximately <strong>"+summary.histMinIntensity+"gCO2/kWh</strong> at "+(new Date(summary.minIntensityRecordTimestamp))+".</p>");
-            w.println("<p>Maximum grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) was approximately <strong>"+summary.histMaxIntensity+"gCO2/kWh</strong> at "+(new Date(summary.maxIntensityRecordTimestamp))+".</p>");
-            w.println("<p>Average/mean grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) was approximately <strong>"+summary.histAveIntensity+"gCO2/kWh</strong> over the sample data set, with an effective end-user intensity including transmission and distribution losses of <strong>"+(Math.round(summary.histAveIntensity * (1 + summary.totalGridLosses)))+"gCO2/kWh</strong>.</p>");
+            w.println("<p>Latest available grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) is approximately <strong>"+summary24h.currentIntensity+"gCO2/kWh</strong> at "+(new Date(summary24h.timestamp))+" over "+
+                        summary24h.currentMW+"MW of generation, with a rolling average over "+((summary24h.histWindowSize+1800000) / 3600000)+"h of <strong>"+summary24h.histAveIntensity+"gCO2/kWh</strong>.</p>");
+            w.println("<p>Minimum grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) was approximately <strong>"+summary24h.histMinIntensity+"gCO2/kWh</strong> at "+(new Date(summary24h.minIntensityRecordTimestamp))+".</p>");
+            w.println("<p>Maximum grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) was approximately <strong>"+summary24h.histMaxIntensity+"gCO2/kWh</strong> at "+(new Date(summary24h.maxIntensityRecordTimestamp))+".</p>");
+            w.println("<p>Average/mean grid <strong>generation</strong> carbon intensity (ignoring transmission/distribution losses) was approximately <strong>"+summary24h.histAveIntensity+"gCO2/kWh</strong> over the sample data set, with an effective end-user intensity including transmission and distribution losses of <strong>"+(Math.round(summary24h.histAveIntensity * (1 + summary24h.totalGridLosses)))+"gCO2/kWh</strong>.</p>");
 
             // Intensity (and generation) by hour of day.
             final int newSlot = FUELINST.CurrentSummary.getGMTHourOfDay(startTime);
             w.write("<div><table style=\"margin-left:auto;margin-right:auto\">");
             w.write("<tr><th colspan=\"24\">");
                 w.write(isDataStale ? "Last available historical" : "Recent");
-                w.write(" mean GMT hourly generation intensity gCO2/kWh (average="+summary.histAveIntensity+"); *now (="+summary.currentIntensity+")</th></tr>");
+                w.write(" mean GMT hourly generation intensity gCO2/kWh (average="+summary24h.histAveIntensity+"); *now (="+summary24h.currentIntensity+")</th></tr>");
             w.write("<tr>");
             // Always start at midnight GMT if the data is stale.
             final int startSlot = isDataStale ? 0 : (1 + Math.max(0, newSlot)) % 24;
@@ -1416,16 +1416,16 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             w.write("</tr>");
             w.write("<tr>");
             boolean usedLessGreen = false;
-            final int maxHourlyIntensity = summary.histAveIntensityByHourOfDay.max0();
+            final int maxHourlyIntensity = summary24h.histAveIntensityByHourOfDay.max0();
             for(int h = 0; h < 24; ++h)
                 {
                 final int displayHourGMT = (h + startSlot) % 24;
-                final Integer hIntensity = summary.histAveIntensityByHourOfDay.get(displayHourGMT);
+                final Integer hIntensity = summary24h.histAveIntensityByHourOfDay.get(displayHourGMT);
                 if((null == hIntensity) || (0 == hIntensity)) { w.write("<td></td>"); continue; /* Skip empty slot. */ }
-                final TrafficLight rawHourStatus = summary.selectColour(hIntensity);
+                final TrafficLight rawHourStatus = summary24h.selectColour(hIntensity);
                 // But if the colour is GREEN but we're using pumped storage
                 // then switch to a paler shade instead (ie mainly green, but not fully)...
-                final boolean lessGreen = ((TrafficLight.GREEN == rawHourStatus) && (summary.histAveStorageDrawdownByHourOfDay.get(displayHourGMT) > 0));
+                final boolean lessGreen = ((TrafficLight.GREEN == rawHourStatus) && (summary24h.histAveStorageDrawdownByHourOfDay.get(displayHourGMT) > 0));
                 if(lessGreen) { usedLessGreen = true; }
                 final String barColour = lessGreen ? FUELINSTUtils.LESS_GREEN_STORAGE_DRAWDOWN :
                     rawHourStatus.toString().toLowerCase();
@@ -1441,11 +1441,11 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             w.write("<tr>");
             // Compute the maximum generation in any of the hourly slots
             // to give us maximum scaling of the displayed bars.
-            final int maxGenerationMW = summary.histAveGenerationByHourOfDay.max0();
+            final int maxGenerationMW = summary24h.histAveGenerationByHourOfDay.max0();
             for(int h = 0; h < 24; ++h)
                 {
                 final int displayHourGMT = (h + startSlot) % 24;
-                final Integer hGeneration = summary.histAveGenerationByHourOfDay.get(displayHourGMT);
+                final Integer hGeneration = summary24h.histAveGenerationByHourOfDay.get(displayHourGMT);
                 if((null == hGeneration) || (0 == hGeneration)) { w.write("<td></td>"); continue; /* Skip empty slot. */ }
                 final int height = (GCOMP_PX_MAX*hGeneration) / Math.max(1, maxGenerationMW);
                 final int scaledToGW = (hGeneration + 500) / 1000;
@@ -1453,7 +1453,7 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                     w.write("<li style=\"background-color:gray;height:"+height+"px;left:0\">");
                     w.write(String.valueOf(scaledToGW));
                     w.write("</li>");
-                    final int hZCGeneration = summary.histAveZCGenerationByHourOfDay.get0(displayHourGMT);
+                    final int hZCGeneration = summary24h.histAveZCGenerationByHourOfDay.get0(displayHourGMT);
                     if(0 != hZCGeneration)
                         {
                         w.write("<li style=\"background-color:green;height:"+((GCOMP_PX_MAX*hZCGeneration) / Math.max(1, maxGenerationMW))+"px;left:0\">");
@@ -1483,9 +1483,9 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                 // Show some stats only relevant for live data...
 
                 w.write("<p>Current/latest fuel mix at ");
-                    w.write(String.valueOf(new Date(summary.timestamp)));
+                    w.write(String.valueOf(new Date(summary24h.timestamp)));
                     w.write(':');
-                    final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary.currentGenerationMWByFuelMW);
+                    final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary24h.currentGenerationMWByFuelMW);
                     for(final String fuel : power.keySet())
                         {
                         w.write(' '); w.write(fuel);
@@ -1494,10 +1494,10 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                     w.write(".</p>");
                 w.println();
 
-                if(summary.currentStorageDrawdownMW > 0)
+                if(summary24h.currentStorageDrawdownMW > 0)
                     {
                     w.write("<p>Current draw-down from storage is ");
-                        w.write(Long.toString(summary.currentStorageDrawdownMW));
+                        w.write(Long.toString(summary24h.currentStorageDrawdownMW));
                         w.write("MW.</p>");
                     w.println();
                     }
@@ -1506,13 +1506,13 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                 final Map<String, Set<String>> byCategory = getFuelsByCategory();
                 if(!byCategory.isEmpty())
                     {
-                    final Map<String,Integer> byCat = getFuelMWByCategory(summary.currentGenerationMWByFuelMW, byCategory);
+                    final Map<String,Integer> byCat = getFuelMWByCategory(summary24h.currentGenerationMWByFuelMW, byCategory);
                     w.write("<p>Generation by fuel category (may overlap):</p><dl>");
                     final SortedMap<String,Integer> powerbyCat = new TreeMap<String, Integer>(byCat);
                     for(final String category : powerbyCat.keySet())
                         {
                         final Integer genMW = powerbyCat.get(category);
-                        final int percent = Math.round((100.0f * genMW) / Math.max(1, summary.currentMW));
+                        final int percent = Math.round((100.0f * genMW) / Math.max(1, summary24h.currentMW));
                         w.write("<dt>"); w.write(category); w.write(" @ "); w.write(Integer.toString(percent)); w.write("%</dt>");
                         w.write("<dd>");
                         // Write MW under this category.
@@ -1540,7 +1540,7 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             w.println();
 
             w.write("<p>Rolling correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
-            final SortedMap<String,Float> goodness = new TreeMap<String, Float>(summary.correlationIntensityToFuel);
+            final SortedMap<String,Float> goodness = new TreeMap<String, Float>(summary24h.correlationIntensityToFuel);
             for(final String fuel : goodness.keySet())
                 {
                 w.format(" %s=%.4f", fuel, goodness.get(fuel));
@@ -1561,6 +1561,15 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                     w.write("</dl>");
                 w.println();
                 }
+
+            // Some coverage information from the summaries.
+            w.write("<p>(Histogram input windows: ");
+            w.write(Long.toString((summary24h.histWindowSize + (1800*1000)) / (3600*1000)));
+            	w.write("h, ");
+            w.write(Long.toString((summary7d.histWindowSize + (1800*1000)) / (3600*1000)));
+            	w.write("h");
+            w.write(".)</p>");
+            w.println();            
 
             w.println("<h3>Methodology</h3>");
             w.println(rawProperties.get("methodology.HTML"));
