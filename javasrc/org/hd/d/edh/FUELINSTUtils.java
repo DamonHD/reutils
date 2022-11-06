@@ -551,9 +551,14 @@ public final class FUELINSTUtils
         // (If no extension is present then ".flag" is simply appended.)
         final File outputFlagFile = new File(baseFileName + ".flag");
         final boolean basicFlagState = TrafficLight.GREEN != statusCapped;
-        System.out.println("INFO: basic flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
+        System.out.println("INFO: basic (green) flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputFlagFile, basicFlagState);
+        // 7d version.
+        final File output7dFlagFile = new File(baseFileName + ".7d.flag");
+        final boolean basic7dFlagState = TrafficLight.GREEN != status7dCapped;
+        System.out.println("INFO: basic 7d (green) flag file is " + output7dFlagFile + ": " + (basic7dFlagState ? "set" : "clear"));
+        FUELINSTUtils.doPublicFlagFile(output7dFlagFile, basic7dFlagState);
 
         // Now deal with the flag that is prepared to make predictions from historical data,
         // ie helps to ensure that the flag will probably be cleared some time each day
@@ -575,7 +580,7 @@ public final class FUELINSTUtils
         // 7d version.
         final File outputSupergreen7dFlagFile = new File(baseFileName + ".7d.supergreen.flag");
         final boolean supergreen7dFlagState = (TrafficLight.GREEN != status7dCapped) ||
-    		(isDataStale) || (currentStorageDrawdownMW > 0);
+    		(isDataStale) || (basic7dFlagState) || (currentStorageDrawdownMW > 0);
         System.out.println("INFO: supergreen 7d flag file is " + outputSupergreen7dFlagFile + ": " + (supergreen7dFlagState ? "set" : "clear"));
         FUELINSTUtils.doPublicFlagFile(outputSupergreen7dFlagFile, supergreen7dFlagState);
 
