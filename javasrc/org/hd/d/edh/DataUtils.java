@@ -62,6 +62,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 
 /**Data utilities.
@@ -511,7 +512,7 @@ public final class DataUtils
         return(Collections.unmodifiableList(result)); // Make outer list immutable...
         }
 
-    /**Load from file parsed FUELINST data in a form that parseBMRCSV() can read.
+    /**Load from file gzipped parsed FUELINST data in a form that parseBMRCSV() can read.
      * 
      * @throws IOException  if file not present or unreadable/unparseable.
      */
@@ -519,12 +520,17 @@ public final class DataUtils
         throws IOException
         {
     	if(null == longStoreFile) { throw new IllegalArgumentException(); }
-    	try(FileReader fr = new FileReader(longStoreFile, FUELINSTUtils.FUELINST_CHARSET);
-   	        BufferedReader br = new BufferedReader(fr))
-			{ return(parseBMRCSV(fr, null)); }
+//    	try(FileReader fr = new FileReader(longStoreFile, FUELINSTUtils.FUELINST_CHARSET);
+//   	        BufferedReader br = new BufferedReader(fr))
+//			{ return(parseBMRCSV(fr, null)); }
+    	try(InputStream is = new FileInputStream(longStoreFile);
+    			BufferedInputStream bis = new BufferedInputStream(is);
+    			InputStream gis = new GZIPInputStream(bis);
+    			Reader r = new InputStreamReader(gis, FUELINSTUtils.FUELINST_CHARSET))
+    		{ return(parseBMRCSV(r, null)); }
         }
 
-    /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
+    /**Save/serialise, gzipped to file, parsed BMR FUELINST data in a form that parseBMRCSV() can read.
      * Generate ASCII CSV, with newlines to terminate rows.
      * <p>
      * Write atomically, world-readable.
@@ -535,8 +541,15 @@ public final class DataUtils
         throws IOException
 	    {
 	    	if(null == longStoreFile) { throw new IllegalArgumentException(); }
-	    	final byte [] out = saveBMRCSV(data);
-	    	replacePublishedFile(longStoreFile.getPath(), out);
+	    	final byte[] csv = saveBMRCSV(data);
+	    	// GZIP to a new byte[].
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            // We may gzip the stream to remove some of the redundancy and thus storage traffic.
+            final java.util.zip.GZIPOutputStream gos =
+                new java.util.zip.GZIPOutputStream(baos);
+            gos.write(csv);
+            gos.close();
+	    	replacePublishedFile(longStoreFile.getPath(), baos.toByteArray());
 	    }
 
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.

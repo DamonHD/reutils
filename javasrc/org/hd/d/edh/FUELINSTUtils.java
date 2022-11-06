@@ -136,8 +136,8 @@ public final class FUELINSTUtils
     /**Suffix to use for (serialised, gzipped) cache of last non-stale (24h) result. */
     public static final String RESULT_CACHE_SUFFIX = ".cache";
 
-    /**Suffix to use for (ASCII, CSV, pseudo-FUELINST format) longish-term (7d+) store. */
-    public static final String LONG_STORE_SUFFIX = ".longstore.csv";
+    /**Suffix to use for (gzipped, ASCII, CSV, pseudo-FUELINST format) longish-term (7d+) store. */
+    public static final String LONG_STORE_SUFFIX = ".longstore.csv.gz";
 
 
     /**Compute current status of fuel intensity; never null, but may be empty/default if data not available.
