@@ -533,11 +533,13 @@ public final class FUELINSTUtils
      * @param baseFileName  base file name to make flags; if null then don't do flags.
      * @param statusCapped  status capped to YELLOW if there is no live data
      * @param statusUncapped  uncapped status (can be green from prediction even if no live data)
+     * @param status7dCapped  7d status capped to YELLOW if there is no live data
      * @throws IOException  in case of problems
      */
     static void doFlagFiles(final String baseFileName,
             final TrafficLight statusCapped, final TrafficLight statusUncapped,
-            final long currentStorageDrawdownMW)
+            final long currentStorageDrawdownMW,
+            final TrafficLight status7dCapped)
         throws IOException
         {
         if(null == baseFileName) { return; }
@@ -755,9 +757,12 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
             final TrafficLight statusUncapped = (!isDataStale) ? summary24h.status : statusHistorical;
             final TrafficLight status = (!isDataStale) ? summary24h.status :
                 (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
+            // Status over (up to) 7d; reverts to 24h versions if no live data.
+            final TrafficLight status7d = (!isDataStale) ? summary7d.status :
+                (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
 
             // Handle the flag files that can be tested by remote servers.
-            try { FUELINSTUtils.doFlagFiles(baseFileName, status, statusUncapped, summary24h.currentStorageDrawdownMW); }
+            try { FUELINSTUtils.doFlagFiles(baseFileName, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
             catch(final IOException e) { e.printStackTrace(); }
 
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
