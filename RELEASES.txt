@@ -19,14 +19,23 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20221106: long store file now GZIPped to reduce storage traffic ~3x.
-    DHD20221106: HTML output mentions if longer-term view differs from 24h view.
 
 
 
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20221106:
+    freezepoint name: V1.1.17
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.16
+    DHD20221106: long store file now GZIPped to reduce storage traffic ~3x.
+    DHD20221106: HTML output quietly mentions when longer-term status differs from 24h view.
+    DHD20221106: 7d versions of basic/green, supergreen and red flags now maintained.
 
 
 20221105:
