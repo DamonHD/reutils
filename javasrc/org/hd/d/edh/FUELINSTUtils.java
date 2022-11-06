@@ -147,14 +147,17 @@ public final class FUELINSTUtils
      * Uses fuel intensities as of this year, ie when this call is made.
      *
      * @param parsedBMRCSV  parsed (as strings) BMR CSV file data, or null if unavailable
-     * @param resultCacheFile  if non-null, file to cache result in between calls in case of data-source problems
      * @throws IOException in case of data unavailabilty or corruption
      */
     public static FUELINST.CurrentSummary computeCurrentSummary(
-    		final List<List<String>> parsedBMRCSV,
-    		final File resultCacheFile)
+    		final List<List<String>> parsedBMRCSV)
         throws IOException
         {
+        // If passed-in data is obviously broken
+        // then return an empty/default result.
+        if((null == parsedBMRCSV) || parsedBMRCSV.isEmpty())
+            { return(new FUELINST.CurrentSummary()); }
+
         // Get as much set up as we can before pestering the data source...
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
 //        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
@@ -190,25 +193,6 @@ public final class FUELINSTUtils
         final Set<String> storageTypes = (fuelsByCategory.containsKey(FUELINST.FUELINST_CATNAME_STORAGE) ?
                 fuelsByCategory.get(FUELINST.FUELINST_CATNAME_STORAGE) :
                 Collections.<String>emptySet());
-
-        // If passed-in data is obviously broken
-        // then try to return a previously-cached result
-        // else an empty/default result.
-        if((null == parsedBMRCSV) || parsedBMRCSV.isEmpty())
-            {
-            // Try to retrieve from cache...
-            FUELINST.CurrentSummary cached = null;
-            try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(resultCacheFile, FUELINSTUtils.GZIP_CACHE); }
-            catch(final IOException err) { /* Fall through... */ }
-            catch(final Exception err) { err.printStackTrace(); }
-            if(null != cached)
-                {
-                System.err.println("WARNING: using previous response from cache...");
-                return(cached);
-                }
-            // Return empty place-holder value.
-            return(new FUELINST.CurrentSummary());
-            }
 
         // All intensity sample values from good records (assuming roughly equally spaced).
         final List<Integer> allIntensitySamples = new ArrayList<Integer>(parsedBMRCSV.size());
@@ -452,13 +436,6 @@ System.out.println("INFO: last good record timestamp "+(new Date(lastGoodRecordT
                                   aveStorageDrawdownByHourOfDay,
                                   tranLoss + distLoss,
                                   correlationIntensityToFuel);
-
-        // If cacheing is enabled AND the new result is not stale then persist this result, compressed.
-        if((null != resultCacheFile) && (result.useByTime >= System.currentTimeMillis()))
-            {
-        	DataUtils.serialiseToFile(result, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
-System.out.println("INFO: cached current result at " + resultCacheFile);
-        	}
 
         return(result);
         }
@@ -708,12 +685,48 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        {
 System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 	        }
+
+
+        // Compute 24hr summary if we have fresh data.
+        //
+        // If parsedBMRCSV is null or empty
+        // this will attempt to use cached result
+        // else fall back to empty/default result.
+        CurrentSummary summary24h = null;
+        if((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty())
+        	{
+        	final FUELINST.CurrentSummary result =
+        			FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
+        	summary24h = result;
+            // If cacheing is enabled AND the new result is not stale
+        	// then persist this result, compressed.
+            if((null != resultCacheFile) && (result.useByTime >= System.currentTimeMillis()))
+                {
+            	DataUtils.serialiseToFile(result, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
+//System.out.println("INFO: cached current result at " + resultCacheFile);
+            	}
+        	}
+        else
+            {
+            // Try to retrieve from cache...
+            FUELINST.CurrentSummary cached = null;
+            try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(resultCacheFile, FUELINSTUtils.GZIP_CACHE); }
+            catch(final IOException err) { /* Fall through... */ }
+            catch(final Exception err) { err.printStackTrace(); }
+            if(null != cached)
+                {
+                System.err.println("WARNING: using previous response from cache...");
+                summary24h = cached;
+                }
+            // Return use place-holder value.
+            else
+            	{ summary24h = new FUELINST.CurrentSummary(); }
+            }
+
+        // Compute 7-day summary if long store is available.
+        // FIXME
+        final CurrentSummary summary7d = null;
         
-        // Compute 24hr summary.
-        // If parsedBMRCSV is null or otherwise invalid
-        // will attempt to return cached result or empty/default result.
-        final CurrentSummary summary24h =
-            FUELINSTUtils.computeCurrentSummary(parsedBMRCSV, resultCacheFile);
 
         // Dump a summary of the current status re fuel.
 System.out.println("INFO: " + summary24h);
@@ -748,7 +761,7 @@ System.out.println("INFO: " + summary24h);
             try
                 {
                 FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary24h, isDataStale,
-                    hourOfDayHistorical, status, td);
+                    hourOfDayHistorical, status, summary7d, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
 
@@ -1289,6 +1302,7 @@ System.out.println("INFO: " + summary24h);
                                            final boolean isDataStale,
                                            final int hourOfDayHistorical,
                                            final TrafficLight status,
+                                           final FUELINST.CurrentSummary longSummary,
                                            final TwitterUtils.TwitterDetails td)
         throws IOException
         {
