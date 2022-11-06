@@ -537,6 +537,7 @@ public final class FUELINSTUtils
      * @throws IOException  in case of problems
      */
     static void doFlagFiles(final String baseFileName,
+    		final boolean isDataStale,
             final TrafficLight statusCapped, final TrafficLight statusUncapped,
             final long currentStorageDrawdownMW,
             final TrafficLight status7dCapped)
@@ -565,13 +566,19 @@ public final class FUELINSTUtils
         FUELINSTUtils.doPublicFlagFile(outputPredictedFlagFile, predictedFlagState);
 
         // Present unless 'capped' value is green (and thus must also be from live data)
-        // AND there storage is not being drawn from.
+        // AND storage is not being drawn from.
         final File outputSupergreenFlagFile = new File(baseFileName + ".supergreen.flag");
         final boolean supergreenFlagState = (basicFlagState) || (currentStorageDrawdownMW > 0);
         System.out.println("INFO: supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputSupergreenFlagFile, supergreenFlagState);
-        
+        // 7d version.
+        final File outputSupergreen7dFlagFile = new File(baseFileName + ".7d.supergreen.flag");
+        final boolean supergreen7dFlagState = (TrafficLight.GREEN != status7dCapped) ||
+    		(isDataStale) || (currentStorageDrawdownMW > 0);
+        System.out.println("INFO: supergreen 7d flag file is " + outputSupergreen7dFlagFile + ": " + (supergreen7dFlagState ? "set" : "clear"));
+        FUELINSTUtils.doPublicFlagFile(outputSupergreen7dFlagFile, supergreen7dFlagState);
+
         // Present when red, ie not in most carbon-intensive part of the day.
         // Flag is computed even with stale data.
         final File outputRedFlagFile = new File(baseFileName + ".red.flag");
@@ -767,7 +774,7 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                 (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
 
             // Handle the flag files that can be tested by remote servers.
-            try { FUELINSTUtils.doFlagFiles(baseFileName, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
+            try { FUELINSTUtils.doFlagFiles(baseFileName, isDataStale, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
             catch(final IOException e) { e.printStackTrace(); }
 
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
