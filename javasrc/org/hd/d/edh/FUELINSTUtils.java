@@ -1346,19 +1346,23 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                 w.println("<p style=\"text-align:center\">(Over a longer period, the current status is "+summary7d.status+".)</p>");	
 	            }
 
+            // Note carbon savings that were available.
             if(summary24h.histMinIntensity < summary24h.histMaxIntensity)
                 {
                 w.println("<p style=\"text-align:center\">You might have saved as much as <strong style=\"font-size:xx-large\">"+FUELINSTUtils.computeVariability(summary24h.histMinIntensity, summary24h.histMaxIntensity)+"%</strong> carbon emissions by choosing the best time to run your washing and other major loads.</p>");
                 }
 
             // Note any recent change/delta iff the data is not stale.
-            if(SHOW_INTENSITY_DELTA && !isDataStale)
+            if(SHOW_INTENSITY_DELTA)
                 {
-                if(summary24h.recentChange == TrafficLight.GREEN)
-                    { w.println("<p style=\"color:green\">Good: carbon intensity (CO2 per kWh) is currently dropping.</p>"); }
-                else if(summary24h.recentChange == TrafficLight.RED)
-                    { w.println("<p style=\"color:red\">Bad: carbon intensity (CO2 per kWh) is currently rising.</p>"); }
-                }
+				if(!isDataStale)
+				    {
+	                if(summary24h.recentChange == TrafficLight.GREEN)
+	                    { w.println("<p style=\"color:green\">Good: carbon intensity (CO2 per kWh) is currently dropping.</p>"); }
+	                else if(summary24h.recentChange == TrafficLight.RED)
+	                    { w.println("<p style=\"color:red\">Bad: carbon intensity (CO2 per kWh) is currently rising.</p>"); }
+                    }
+			    }
 
             w.println("<p>Latest data is from <strong>"+(new Date(summary24h.timestamp))+"</strong>. This page should be updated every few minutes: use your browser's refresh/reload button if you need to check again.</p>");
 
