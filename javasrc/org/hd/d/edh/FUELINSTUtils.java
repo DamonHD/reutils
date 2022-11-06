@@ -145,8 +145,12 @@ public final class FUELINSTUtils
      * difficulty retrieving new data.
      * <p>
      * Uses fuel intensities as of this year, ie when this call is made.
+     * <p>
+     * Purely functional other than some writes to stdout/stdere:
+     * has no side-effects and does not alter the input.
      *
      * @param parsedBMRCSV  parsed (as strings) BMR CSV file data, or null if unavailable
+     * @return summary; never null
      * @throws IOException in case of data unavailabilty or corruption
      */
     public static FUELINST.CurrentSummary computeCurrentSummary(
@@ -323,7 +327,8 @@ public final class FUELINSTUtils
             if(weightedIntensity > maxIntensity)
                 { maxIntensity = weightedIntensity; maxIntensityRecordTimestamp = recordTimestamp; }
             }
-System.out.println("INFO: last good record timestamp "+(new Date(lastGoodRecordTimestamp))+" vs now "+(new Date(System.currentTimeMillis())));
+//System.out.println("INFO: first good record timestamp "+(new Date(firstGoodRecordTimestamp)));
+//System.out.println("INFO: last good record timestamp "+(new Date(lastGoodRecordTimestamp))+" vs now "+(new Date(System.currentTimeMillis())));
 
         // Note if the intensity dropped/improved in the final samples.
         TrafficLight recentChange = null;
@@ -695,14 +700,12 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
         CurrentSummary summary24h = null;
         if((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty())
         	{
-        	final FUELINST.CurrentSummary result =
-        			FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
-        	summary24h = result;
+    	    summary24h = FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
             // If cacheing is enabled AND the new result is not stale
         	// then persist this result, compressed.
-            if((null != resultCacheFile) && (result.useByTime >= System.currentTimeMillis()))
+            if((null != resultCacheFile) && (summary24h.useByTime >= System.currentTimeMillis()))
                 {
-            	DataUtils.serialiseToFile(result, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
+            	DataUtils.serialiseToFile(summary24h, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
 //System.out.println("INFO: cached current result at " + resultCacheFile);
             	}
         	}
@@ -718,18 +721,20 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
                 System.err.println("WARNING: using previous response from cache...");
                 summary24h = cached;
                 }
-            // Return use place-holder value.
+            // Use place-holder value.
             else
             	{ summary24h = new FUELINST.CurrentSummary(); }
             }
 
         // Compute 7-day summary if long store is available.
-        // FIXME
-        final CurrentSummary summary7d = null;
-        
+        CurrentSummary summary7d = null;
+        if((null != longStore) && !longStore.isEmpty())
+            { summary7d = FUELINSTUtils.computeCurrentSummary(longStore); }
 
-        // Dump a summary of the current status re fuel.
-System.out.println("INFO: " + summary24h);
+
+        // Dump a summary of the current status.
+        System.out.println("INFO: 24h summary: " + summary24h);
+        System.out.println("INFO: 7d summary: " + summary7d);
 
         // Is the data stale?
         final boolean isDataStale = summary24h.useByTime < startTime;
