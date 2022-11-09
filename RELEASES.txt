@@ -20,7 +20,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20221109: added some timings to help decide if parallelisation worthwhile.
-    DHD20221109: starting to parallelise some I/O operations.
+    DHD20221109: parallelising I/O operations.
 
 
 

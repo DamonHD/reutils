@@ -676,6 +676,7 @@ System.err.println("ERROR: invalid CSV FUELINST data rejected.");
         	parsedBMRCSV = null;
         	}
 
+        // Load long (7d) store if possible.
         List<List<String>> longStore = null;
         final long longStoreFetchStart = System.currentTimeMillis();
         try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
@@ -697,7 +698,8 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 				parsedBMRCSV = appendedNewData;
 	        	}
 	        }
-        // Attempt to update the long store with new records, and keep trimmed in length.
+        // Attempt to update the long store with new records.
+        // Keep the store length trimmed.
         Future<Long> longStoreSave = null;
         // Update the long store only if there is something valid to update it with.
         if(null != parsedBMRCSV)
@@ -722,22 +724,28 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	            });
             }
 
-
         // Compute 24hr summary if we have fresh data.
         //
         // If parsedBMRCSV is null or empty
         // this will attempt to use cached result
         // else fall back to empty/default result.
         CurrentSummary summary24h = null;
+        Future<Long> resultCacheSave = null;
         if((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty())
         	{
-    	    summary24h = FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
+        	final CurrentSummary result = FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
+        	summary24h = result;
             // If cacheing is enabled AND the new result is not stale
         	// then persist this result, compressed.
             if((null != resultCacheFile) && (summary24h.useByTime >= System.currentTimeMillis()))
                 {
-            	DataUtils.serialiseToFile(summary24h, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
-//System.out.println("INFO: cached current result at " + resultCacheFile);
+            	resultCacheSave = executor.submit(() ->
+	            	{
+	            	final long s = System.currentTimeMillis();
+                	DataUtils.serialiseToFile(result, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
+	            	final long e = System.currentTimeMillis();
+			        return(e - s);
+	            	});
             	}
         	}
         else
@@ -903,8 +911,19 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	            }
             catch(final IOException e) { e.printStackTrace(); }
         	}
-        
+
         // Wait for/reap any side tasks.
+        if(null != resultCacheSave)
+	    	{
+	    	try {
+	        	final Long rcT = resultCacheSave.get();
+	        	System.out.println("Result cache save in "+rcT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not update/save result cache: " + e.getMessage());
+		        }
+	    	}
         if(null != longStoreSave)
         	{
         	try {
@@ -916,8 +935,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 		        }
         	}
-
-        // Kill off the thread pool.
+        // Kill off the thread pool, completing any running task(s).
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
         }
