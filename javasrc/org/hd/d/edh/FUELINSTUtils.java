@@ -35,10 +35,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -59,6 +57,10 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import org.hd.d.edh.FUELINST.CurrentSummary;
@@ -632,6 +634,8 @@ public final class FUELINSTUtils
         final long startTime = System.currentTimeMillis();
 
         System.out.println("INFO: generating traffic-light summary "+Arrays.asList(args)+"...");
+        
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
 
         final String outputHTMLFileName = (args.length < 1) ? null : args[0];
         final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
@@ -694,29 +698,29 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        	}
 	        }
         // Attempt to update the long store with new records, and keep trimmed in length.
-        try {
-            // Update the long store only if there is something valid to update it with.
-	        if(null != parsedBMRCSV)
+        Future<Long> longStoreSave = null;
+        // Update the long store only if there is something valid to update it with.
+        if(null != parsedBMRCSV)
+            {
+	        // Append any new records to long store.
+	        final List<List<String>> appendedlongStore = DataUtils.appendNewBMRDataRecords(
+	        		longStore, parsedBMRCSV);
+	        if(null != appendedlongStore) { longStore = appendedlongStore; }
+	        // Trim history in long store to maximum of 7 days.
+	        final List<List<String>> trimmedLongStore = DataUtils.trimBMRData(
+	        		longStore, HOURS_PER_WEEK);
+	        if(null != trimmedLongStore) { longStore = trimmedLongStore; }
+	        // Save long store (asynchronously, atomically, world-readable).
+	        final List<List<String>> lsf = longStore;
+	        longStoreSave = executor.submit(() ->
 	            {
-		        // Append any new records to long store.
-		        final List<List<String>> appendedlongStore = DataUtils.appendNewBMRDataRecords(
-		        		longStore, parsedBMRCSV);
-		        if(null != appendedlongStore) { longStore = appendedlongStore; }
-		        // Trim history in long store to maximum of 7 days.
-		        final List<List<String>> trimmedLongStore = DataUtils.trimBMRData(
-		        		longStore, HOURS_PER_WEEK);
-		        if(null != trimmedLongStore) { longStore = trimmedLongStore; }
-		        // Save long store (atomically, world-readable).
-		        final long longStoreSaveStart = System.currentTimeMillis();
-	        	DataUtils.saveBMRCSV(longStore, longStoreFile);
+				final long longStoreSaveStart = System.currentTimeMillis();
+	        	DataUtils.saveBMRCSV(lsf, longStoreFile);
 		        final long longStoreSaveEnd = System.currentTimeMillis();
-System.out.println("Long store save in "+(longStoreSaveEnd-longStoreSaveStart)+"ms.");
-	            }
-        	}
-        catch(final IOException e)
-	        {
-System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
-	        }
+//System.out.println("Long store save in "+(longStoreSaveEnd-longStoreSaveStart)+"ms.");
+		        return(longStoreSaveEnd - longStoreSaveStart);
+	            });
+            }
 
 
         // Compute 24hr summary if we have fresh data.
@@ -899,6 +903,23 @@ System.err.println("ERROR: could not update/save long store "+longStoreFile+" er
 	            }
             catch(final IOException e) { e.printStackTrace(); }
         	}
+        
+        // Wait for/reap any side tasks.
+        if(null != longStoreSave)
+        	{
+        	try {
+            	final Long lsT = longStoreSave.get();
+            	System.out.println("Long store save in "+lsT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
+		        }
+        	}
+
+        // Kill off the thread pool.
+        // TODO: should probably be part of a finally for robustness.
+        executor.shutdown();
         }
 
 	/**First (comment) line of retail intensity log. */
