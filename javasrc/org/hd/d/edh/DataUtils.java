@@ -530,6 +530,8 @@ public final class DataUtils
     /**Save/serialise, gzipped to file, parsed BMR FUELINST data in a form that parseBMRCSV() can read.
      * Generate ASCII CSV, with newlines to terminate rows.
      * <p>
+     * May be run as async task, so no logging output generated.
+     * <p>
      * Write atomically, world-readable.
      * 
      * @throws IOException  may be thrown if asked to serialise invalid (eg misordered or non-FUELINST) data
@@ -546,7 +548,7 @@ public final class DataUtils
                 new java.util.zip.GZIPOutputStream(baos);
             gos.write(csv);
             gos.close();
-	    	replacePublishedFile(longStoreFile.getPath(), baos.toByteArray());
+	    	replacePublishedFile(longStoreFile.getPath(), baos.toByteArray(), true);
 	    }
 
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.

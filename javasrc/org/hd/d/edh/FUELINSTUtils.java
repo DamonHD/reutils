@@ -685,7 +685,7 @@ System.err.println("ERROR: invalid CSV FUELINST data rejected.");
 System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
 	        }
         final long longStoreFetchEnd = System.currentTimeMillis();
-System.out.println("Long store load and parse in "+(longStoreFetchEnd-longStoreFetchStart)+"ms.");
+System.out.println("INFO: long store load and parse in "+(longStoreFetchEnd-longStoreFetchStart)+"ms.");
         // As of 2022-10 sometimes last few records are omitted apparently when server is busy.
         // Attempt to patch them up here...
         if((null != parsedBMRCSV) && (null != longStoreFile))
@@ -713,21 +713,21 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        		longStore, HOURS_PER_WEEK);
 	        if(null != trimmedLongStore) { longStore = trimmedLongStore; }
 	        // Save long store (asynchronously, atomically, world-readable).
+	        // Long store must not be mutated.
 	        final List<List<String>> lsf = longStore;
 	        longStoreSave = executor.submit(() ->
 	            {
 				final long longStoreSaveStart = System.currentTimeMillis();
 	        	DataUtils.saveBMRCSV(lsf, longStoreFile);
 		        final long longStoreSaveEnd = System.currentTimeMillis();
-//System.out.println("Long store save in "+(longStoreSaveEnd-longStoreSaveStart)+"ms.");
 		        return(longStoreSaveEnd - longStoreSaveStart);
 	            });
             }
 
-        // Compute 24hr summary if we have fresh data.
+        // Compute 24hr summary if we have fresh data, and cache.
         //
         // If parsedBMRCSV is null or empty
-        // this will attempt to use cached result
+        // this will attempt to use previously cached result
         // else fall back to empty/default result.
         CurrentSummary summary24h = null;
         Future<Long> resultCacheSave = null;
@@ -783,6 +783,12 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         		summary24h.histAveIntensity :
         	    summary24h.currentIntensity) * (1 + summary24h.totalGridLosses));
 
+//if(null != resultCacheSave) { System.out.println("resultCacheSave.isDone(): " + resultCacheSave.isDone()); }
+//if(null != longStoreSave) { System.out.println("longStoreSave.isDone(): " + longStoreSave.isDone()); }
+
+        // Update pages, XML and plain text.
+        // Also post to social media if enabled.
+        // FIMXE: consider dropping XML output if nothing is using it.
         if(outputHTMLFileName != null)
             {
             // Status to use to drive traffic-light measure.
@@ -840,15 +846,13 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             
             // Update the plain-text intensity file.
             try
-            {
-            final String outputTXTFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".txt") :
-                (outputHTMLFileName + ".txt");
-//            if(null != outputTXTFileName)
-//                {
-            	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, summary24h, isDataStale);
-//                }
-            }
-        catch(final IOException e) { e.printStackTrace(); }
+	            {
+	            final String outputTXTFileName = (-1 != lastDot) ?
+	                (outputHTMLFileName.substring(0, lastDot) + ".txt") :
+	                (outputHTMLFileName + ".txt");
+	        	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, summary24h, isDataStale);
+	            }
+            catch(final IOException e) { e.printStackTrace(); }
 
 
             // Update Twitter if it is set up
@@ -879,6 +883,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             catch(final IOException e) { e.printStackTrace(); }
             }
 
+
         // Update button(s)/icon(s).
         try
             {
@@ -892,7 +897,8 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
             }
         catch(final IOException e) { e.printStackTrace(); }
-        
+
+
         // New as of 2019-10.
         // Append to the intensity log.
         // Only do this for current/live data, ie if not stale.
@@ -912,12 +918,13 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             catch(final IOException e) { e.printStackTrace(); }
         	}
 
+
         // Wait for/reap any side tasks.
         if(null != resultCacheSave)
 	    	{
 	    	try {
 	        	final Long rcT = resultCacheSave.get();
-	        	System.out.println("Result cache save in "+rcT+"ms.");
+	        	System.out.println("INFO: result cache save in "+rcT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
 		        {
@@ -928,7 +935,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         	{
         	try {
             	final Long lsT = longStoreSave.get();
-            	System.out.println("Long store save in "+lsT+"ms.");
+            	System.out.println("INFO: long store save in "+lsT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
 		        {
@@ -940,7 +947,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         executor.shutdown();
 
         final long endTime = System.currentTimeMillis();
-System.out.println("doTrafficLights(): "+(endTime-startTime)+"ms.");
+System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         }
 
 	/**First (comment) line of retail intensity log. */
