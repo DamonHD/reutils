@@ -786,6 +786,27 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 //if(null != resultCacheSave) { System.out.println("resultCacheSave.isDone(): " + resultCacheSave.isDone()); }
 //if(null != longStoreSave) { System.out.println("longStoreSave.isDone(): " + longStoreSave.isDone()); }
 
+
+        // New as of 2019-10.
+        // Append to the intensity log.
+        // Only do this for current/live data, ie if not stale.
+        if(isDataStale || (0 == summary24h.timestamp))
+            { System.err.println("WARNING: will not update log, input data is stale."); }
+        else
+        	{ 		
+            try
+	            {
+	            final File id = new File(DEFAULT_INTENSITY_LOG_BASE_DIR);
+	            if(id.isDirectory() && id.canWrite())
+	                {
+	            	appendToRetailIntensityLog(id, summary24h.timestamp, retailIntensity);
+	                }
+	            else { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
+	            }
+            catch(final IOException e) { e.printStackTrace(); }
+        	}
+
+
         // Update pages, XML and plain text.
         // Also post to social media if enabled.
         // FIMXE: consider dropping XML output if nothing is using it.
@@ -897,26 +918,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
             }
         catch(final IOException e) { e.printStackTrace(); }
-
-
-        // New as of 2019-10.
-        // Append to the intensity log.
-        // Only do this for current/live data, ie if not stale.
-        if(isDataStale || (0 == summary24h.timestamp))
-            { System.err.println("WARNING: will not update log, input data is stale."); }
-        else
-        	{ 		
-            try
-	            {
-	            final File id = new File(DEFAULT_INTENSITY_LOG_BASE_DIR);
-	            if(id.isDirectory() && id.canWrite())
-	                {
-	            	appendToRetailIntensityLog(id, summary24h.timestamp, retailIntensity);
-	                }
-	            else { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
-	            }
-            catch(final IOException e) { e.printStackTrace(); }
-        	}
 
 
         // Wait for/reap any side tasks.
