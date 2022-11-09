@@ -938,6 +938,9 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Kill off the thread pool, completing any running task(s).
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
+
+        final long endTime = System.currentTimeMillis();
+System.out.println("doTrafficLights(): "+(endTime-startTime)+"ms.");
         }
 
 	/**First (comment) line of retail intensity log. */
