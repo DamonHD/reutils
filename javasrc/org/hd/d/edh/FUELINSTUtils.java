@@ -654,8 +654,10 @@ public final class FUELINSTUtils
             {
             // Set up URL connection to fetch the data.
             url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
+            final long dataFetchStart = System.currentTimeMillis();
             parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
-System.out.println("INFO: record/row count of CSV FUELINST data: " + parsedBMRCSV.size() + " from source: " + url);
+            final long dataFetchEnd = System.currentTimeMillis();
+System.out.println("INFO: record/row count of CSV FUELINST data: " + parsedBMRCSV.size() + " from source: " + url + " fetch and parse "+(dataFetchEnd-dataFetchStart)+"ms");
             }
         catch(final IOException e)
             {
@@ -671,11 +673,14 @@ System.err.println("ERROR: invalid CSV FUELINST data rejected.");
         	}
 
         List<List<String>> longStore = null;
+        final long longStoreFetchStart = System.currentTimeMillis();
         try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
         catch(final IOException e)
 	        {
 System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
 	        }
+        final long longStoreFetchEnd = System.currentTimeMillis();
+System.out.println("Long store load and parse in "+(longStoreFetchEnd-longStoreFetchStart)+"ms.");
         // As of 2022-10 sometimes last few records are omitted apparently when server is busy.
         // Attempt to patch them up here...
         if((null != parsedBMRCSV) && (null != longStoreFile))
@@ -702,7 +707,10 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 		        		longStore, HOURS_PER_WEEK);
 		        if(null != trimmedLongStore) { longStore = trimmedLongStore; }
 		        // Save long store (atomically, world-readable).
+		        final long longStoreSaveStart = System.currentTimeMillis();
 	        	DataUtils.saveBMRCSV(longStore, longStoreFile);
+		        final long longStoreSaveEnd = System.currentTimeMillis();
+System.out.println("Long store save in "+(longStoreSaveEnd-longStoreSaveStart)+"ms.");
 	            }
         	}
         catch(final IOException e)

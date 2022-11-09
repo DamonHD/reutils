@@ -19,6 +19,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
+    DHD20221109: added some timings to help decide if parallelisation worthwhile.
 
 
 
