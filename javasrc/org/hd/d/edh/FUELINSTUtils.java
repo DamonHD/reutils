@@ -1694,12 +1694,15 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
     		(new File(outputTXTFileName)).delete();
     		return;
     	    }
-    	
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
+
+        final int retailIntensity = Math.round(summary.currentIntensity * (1 + summary.totalGridLosses));
+System.out.println("INFO: retail intensity of "+retailIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(8);
         final PrintWriter w = new PrintWriter(baos);
         try
 	    	{
-            w.write(String.valueOf(Math.round(summary.currentIntensity * (1 + summary.totalGridLosses))));
+			w.write(String.valueOf(retailIntensity));
 	    	}
         finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
 
