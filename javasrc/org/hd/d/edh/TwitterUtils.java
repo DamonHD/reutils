@@ -295,7 +295,7 @@ public final class TwitterUtils
                     final TrafficLight lastStatus = (TrafficLight) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
                     if((null != lastStatus) && (status.equals(lastStatus)))
                         {
-                        System.err.println("WARNING: previous tweet same status ("+lastStatus+") so skipping sending this one: " + statusMessage);
+                        System.err.println("INFO: previous tweet same status ("+lastStatus+") so skipping sending this one: " + statusMessage);
                     	return;
                     	}
                     }
