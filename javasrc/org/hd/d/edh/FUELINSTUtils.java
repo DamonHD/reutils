@@ -816,7 +816,9 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             // If the data is current then use the latest data point,
             // else extract a suitable historical value to use in its place.
             final int hourOfDayHistorical = CurrentSummary.getGMTHourOfDay(startTime);
-            final TrafficLight statusHistorical = summary24h.selectColour(summary24h.histAveIntensityByHourOfDay.get(hourOfDayHistorical));
+            final Integer intensityHistoric = summary24h.histAveIntensityByHourOfDay.get(hourOfDayHistorical);
+			// If no historic intensity is available for this hour, use YELLOW.
+            final TrafficLight statusHistorical = (null == intensityHistoric) ? TrafficLight.YELLOW : summary24h.selectColour(intensityHistoric);
             final TrafficLight statusHistoricalCapped = (TrafficLight.GREEN != statusHistorical) ? statusHistorical : TrafficLight.YELLOW;
             final TrafficLight statusUncapped = (!isDataStale) ? summary24h.status : statusHistorical;
             final TrafficLight status = (!isDataStale) ? summary24h.status :
