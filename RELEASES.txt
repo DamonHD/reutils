@@ -20,7 +20,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20221109: added timings to help decide if parallelisation worthwhile.
-    DHD20221109: parallelising some I/O operations.
+    DHD20221109: parallelising some I/O operations anyway, for lolz.
     DHD20221110: work-around for missing historical intensity for current hour.
 
 
