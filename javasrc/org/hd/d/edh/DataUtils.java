@@ -359,6 +359,19 @@ public final class DataUtils
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
 			if(lastTimestampRaw.compareTo(timestampRaw) > 0) { return("timestamps misordered (decreasing)"); }
+			// DHD20221117: after a lot of catching up, multiple records may get the same timestamp
+			// because they seem to be stamped with when they are added,
+			// not the time of day of the samples that they refer to.
+//WARNING: [FUELINST, 20221117, 22, 20221117103500, 16266, 0, 0, 4228, 11863, 132, 496, 0, 205, 0, 0, 173, 0, 2005, 422, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 22, 20221117131300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 0, 0, 329, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 23, 20221117131300, 16297, 0, 0, 4231, 11865, 0, 496, 0, 209, 0, 0, 0, 0, 2011, 310, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 24, 20221117131300, 16471, 0, 0, 4251, 12685, 0, 435, 0, 205, 0, 0, 0, 0, 1957, 78, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 25, 20221117131300, 16670, 0, 0, 4234, 12699, 0, 428, 0, 205, 0, 0, 0, 0, 1974, 0, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 26, 20221117131300, 16642, 0, 0, 4238, 12599, 0, 430, 0, 144, 0, 0, 0, 0, 1972, 0, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 26, 20221117131400, 16511, 0, 0, 4239, 12640, 0, 429, 0, 135, 0, 0, 0, 0, 1974, 0, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 27, 20221117131400, 16331, 0, 0, 4234, 12636, 0, 430, 0, 155, 0, 0, 79, 0, 1973, 0, 0, 0, 1095]
+//WARNING: [FUELINST, 20221117, 27, 20221117131500, 16060, 0, 0, 4227, 12641, 130, 429, 1, 152, 0, 0, 103, 0, 1969, 0, 0, 0, 1095]
+
 			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return("timestamps not monotonically increasing"); }
 			lastTimestampRaw = timestampRaw;
 			}
