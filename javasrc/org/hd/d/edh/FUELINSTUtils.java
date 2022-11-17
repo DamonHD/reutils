@@ -674,6 +674,13 @@ System.err.println("ERROR: could not fetch data from " + url + " error: " + e.ge
         if(null != validationError)
             {
 System.err.println("ERROR: invalid CSV FUELINST data rejected: " + validationError);
+        	if(parsedBMRCSV != null)
+	        	{
+	        	for(List<String> row : parsedBMRCSV)
+		        	{
+		        	System.err.println("WARNING: " + row);	
+		        	}
+	        	}
         	parsedBMRCSV = null;
         	}
 
