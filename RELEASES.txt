@@ -19,16 +19,24 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20221109: added timings to help decide if parallelisation worthwhile.
-    DHD20221109: parallelising some I/O operations anyway, for lolz.
-    DHD20221110: work-around for missing historical intensity for current hour.
-    DHD20221117: ability to repair some errors in incoming FUELINST data.
 
 
 
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20221106:
+    freezepoint name: V1.1.18
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.17
+    DHD20221109: added timings to help decide if parallelisation worthwhile.
+    DHD20221109: parallelising some I/O operations anyway, for lolz.
+    DHD20221110: work-around for missing historical intensity for current hour.
+    DHD20221117: ability to repair some errors in incoming FUELINST data.
 
 
 20221106:
