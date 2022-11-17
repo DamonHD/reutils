@@ -372,11 +372,16 @@ public final class DataUtils
 	    {
 		if(null == parsedBMRCSV) { return(new ValidBMRDataResultError("null input")); }
 
-		// Optional if a repair is performed.
-		// A sample repaired error, or null if none.
+		// Null if no repair is performed.
 		String lastErrorRepaired = null;
 		// A mutable (must be wrapped for return) repaired result so far. 
-		List<List<String>> repairedBMRCSV = null;
+		// If repairs are not to be attempted this is null.
+		// If repairs are to be attempted this is initially a copy of the input rows,
+		// then bad rows are nulled out,
+		// then null entries are deleted,
+		// and an immutable copy is returned.
+		List<List<String>> repairedBMRCSV = !attemptRepair ? null :
+			new ArrayList<List<String>>(parsedBMRCSV);
 
 // Sample data...
 //FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
@@ -387,8 +392,11 @@ public final class DataUtils
 //FUELINST,20221104,21,20221104101500,14133,0,0,4639,9047,0,848,0,136,0,0,130,0,2224,0,0,0,1257
 
 		String lastTimestampRaw = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
-		for(List<String> row : parsedBMRCSV)
+//		for(List<String> row : parsedBMRCSV)
+		final int nRows = parsedBMRCSV.size();
+		for(int r = 0; r < nRows; ++r)		
 			{
+			final List<String> row = parsedBMRCSV.get(r);
 			if(null == row) { return(new ValidBMRDataResultError("null row")); }
 			if(row.size() < 5) { return(new ValidBMRDataResultError("short row")); }
 			if(!"FUELINST".equals(row.get(0))) { return(new ValidBMRDataResultError("row first field not FUELINST")); }
@@ -400,6 +408,7 @@ public final class DataUtils
 			// DHD20221117: after a lot of catching up, multiple records may get the same timestamp
 			// because they seem to be stamped with when they are added,
 			// not the time of day of the samples that they refer to.
+			// All the records with timestamps 20221117131300 and 20221117131400 should be dropped.
 //WARNING: [FUELINST, 20221117, 22, 20221117103500, 16266, 0, 0, 4228, 11863, 132, 496, 0, 205, 0, 0, 173, 0, 2005, 422, 0, 0, 1095]
 //WARNING: [FUELINST, 20221117, 22, 20221117131300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 0, 0, 329, 0, 0, 1095]
 //WARNING: [FUELINST, 20221117, 23, 20221117131300, 16297, 0, 0, 4231, 11865, 0, 496, 0, 209, 0, 0, 0, 0, 2011, 310, 0, 0, 1095]
@@ -410,8 +419,21 @@ public final class DataUtils
 //WARNING: [FUELINST, 20221117, 27, 20221117131400, 16331, 0, 0, 4234, 12636, 0, 430, 0, 155, 0, 0, 79, 0, 1973, 0, 0, 0, 1095]
 //WARNING: [FUELINST, 20221117, 27, 20221117131500, 16060, 0, 0, 4227, 12641, 130, 429, 1, 152, 0, 0, 103, 0, 1969, 0, 0, 0, 1095]
 
-			// THIS MAY BE REPAIRABLE!
-			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return(new ValidBMRDataResultError("timestamps not monotonically increasing")); }
+			// THIS IS POTENTIALLY REPAIRABLE!
+			if(lastTimestampRaw.compareTo(timestampRaw) >= 0)
+			    {
+				final String errorMessage = "timestamps not monotonically increasing";
+				if(attemptRepair)
+					{
+					// Note the error/repair.
+					lastErrorRepaired = errorMessage;
+					// Null out this record and the previous one that it shares a timestamp with,
+					repairedBMRCSV.set(r, null);
+					repairedBMRCSV.set(r-1, null);
+					}
+				else
+					{ return(new ValidBMRDataResultError(errorMessage)); }
+				}
 			lastTimestampRaw = timestampRaw;
 			}
 
@@ -426,6 +448,18 @@ public final class DataUtils
 
 		// FIXME Validate timestamp range.
 
+
+        // For a repaired result,
+        // remove any nulls,
+        // wrap to be immutable,
+        // and return a result object with sample error and repaired data.
+        if(null != lastErrorRepaired)
+	        {
+            while(repairedBMRCSV.remove(null)) { }
+        	return(new ValidBMRDataResultError(
+        			lastErrorRepaired,
+        			Collections.unmodifiableList(repairedBMRCSV)));
+	        }
 
 		// Did not find any problems.
 		return(null);
