@@ -321,10 +321,20 @@ public final class DataUtils
 		return(Collections.unmodifiableList(
 			parsedBMRCSV.subList(firstRecordOldEnough, nRows)));
 	    }
+    
+    /**Return from isValidBMRData.
+     * The error should never be null or empty for an instance of this.
+     */
+    static final class ValidBMRDataResultError
+	    {
+    	public ValidBMRDataResultError(String error) { errorMessage = error; }
+    	/**Human-readable error message; never null. */
+    	public final String errorMessage;
+	    }
 
-    /**Validate BMR FUELINST data on a number of key points.
+    /**Validate an and possibly fix up BMR FUELINST data on a number of key points.
      * 
-     * @param parsedBMRCSV  parsed FUELINST records (minus HDR and FTR);
+     * @param parsedBMRCSV  parsed FUELINST records (minus HDR and FTR), never modified;
      *             never null
      * @param newestPossibleValidRecord  no record may be newer than (timestamped after) this;
      *             positive and can be set to maximum long value to avoid the check
@@ -333,12 +343,12 @@ public final class DataUtils
      * 
      * @return non-null error if any problem found (usually first error).
      */
-	public static String isValidBMRData(
+	public static ValidBMRDataResultError isValidBMRData(
 			final List<List<String>> parsedBMRCSV,
 			final long newestPossibleValidRecord,
 			final int maxHoursSpan)
 	    {
-		if(null == parsedBMRCSV) { return("null input"); }
+		if(null == parsedBMRCSV) { return(new ValidBMRDataResultError("null input")); }
 
 // Sample data...
 //FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
@@ -351,14 +361,14 @@ public final class DataUtils
 		String lastTimestampRaw = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
 		for(List<String> row : parsedBMRCSV)
 			{
-			if(null == row) { return("null row"); }
-			if(row.size() < 5) { return("short row"); }
-			if(!"FUELINST".equals(row.get(0))) { return("row first field not FUELINST"); }
+			if(null == row) { return(new ValidBMRDataResultError("null row")); }
+			if(row.size() < 5) { return(new ValidBMRDataResultError("short row")); }
+			if(!"FUELINST".equals(row.get(0))) { return(new ValidBMRDataResultError("row first field not FUELINST")); }
 			final String timestampRaw = row.get(3);
-			if(14 != timestampRaw.length()) { return("timestamp wrong lenght"); }
+			if(14 != timestampRaw.length()) { return(new ValidBMRDataResultError("timestamp wrong lenght")); }
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
-			if(lastTimestampRaw.compareTo(timestampRaw) > 0) { return("timestamps misordered (decreasing)"); }
+			if(lastTimestampRaw.compareTo(timestampRaw) > 0) { return(new ValidBMRDataResultError("timestamps misordered (decreasing)")); }
 			// DHD20221117: after a lot of catching up, multiple records may get the same timestamp
 			// because they seem to be stamped with when they are added,
 			// not the time of day of the samples that they refer to.
@@ -372,7 +382,7 @@ public final class DataUtils
 //WARNING: [FUELINST, 20221117, 27, 20221117131400, 16331, 0, 0, 4234, 12636, 0, 430, 0, 155, 0, 0, 79, 0, 1973, 0, 0, 0, 1095]
 //WARNING: [FUELINST, 20221117, 27, 20221117131500, 16060, 0, 0, 4227, 12641, 130, 429, 1, 152, 0, 0, 103, 0, 1969, 0, 0, 0, 1095]
 
-			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return("timestamps not monotonically increasing"); }
+			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return(new ValidBMRDataResultError("timestamps not monotonically increasing")); }
 			lastTimestampRaw = timestampRaw;
 			}
 
@@ -380,9 +390,9 @@ public final class DataUtils
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
         Date d;
 		try { d = timestampParser.parse(lastTimestampRaw); }
-		catch (ParseException e) { return("cannot parse timestamp"); }
+		catch (ParseException e) { return(new ValidBMRDataResultError("cannot parse timestamp")); }
         final long finalTimestamp = d.getTime();
-        if(finalTimestamp > newestPossibleValidRecord) { return("last record timestamp too new"); }
+        if(finalTimestamp > newestPossibleValidRecord) { return(new ValidBMRDataResultError("last record timestamp too new")); }
 
 
 		// FIXME Validate timestamp range.

@@ -670,10 +670,10 @@ System.err.println("ERROR: could not fetch data from " + url + " error: " + e.ge
             }
         // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
         // Reject entirely if problem found.
-        final String validationError = DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1);
+        final DataUtils.ValidBMRDataResultError validationError = DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1);
         if(null != validationError)
             {
-System.err.println("ERROR: invalid CSV FUELINST data rejected: " + validationError);
+System.err.println("ERROR: invalid CSV FUELINST data rejected: " + validationError.errorMessage);
         	if(parsedBMRCSV != null)
 	        	{
 	        	for(List<String> row : parsedBMRCSV)
@@ -694,6 +694,11 @@ System.err.println("WARNING: could not load long store "+longStoreFile+" error: 
 	        }
         final long longStoreFetchEnd = System.currentTimeMillis();
 System.out.println("INFO: long store load and parse in "+(longStoreFetchEnd-longStoreFetchStart)+"ms.");
+//        if((null != longStore) && !longStore.isEmpty())
+//	        {
+//System.out.println("INFO: long store oldest "+longStore.get(0));
+//System.out.println("INFO: long store newest "+longStore.get(longStore.size()-1));
+//	        }
         // As of 2022-10 sometimes last few records are omitted apparently when server is busy.
         // Attempt to patch them up here...
         if((null != parsedBMRCSV) && (null != longStoreFile))
