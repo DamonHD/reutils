@@ -321,18 +321,36 @@ public final class DataUtils
 		return(Collections.unmodifiableList(
 			parsedBMRCSV.subList(firstRecordOldEnough, nRows)));
 	    }
-    
+
     /**Return from isValidBMRData.
      * The error should never be null or empty for an instance of this.
      */
     static final class ValidBMRDataResultError
 	    {
-    	public ValidBMRDataResultError(String error) { errorMessage = error; }
+    	public ValidBMRDataResultError(String errorMessage)
+    	    { this(errorMessage, null); }
+    	public ValidBMRDataResultError(final String errorMessage, List<List<String>> repairedBMRCSV)
+    	    {
+    		this.errorMessage = errorMessage;
+    		this.repairedBMRCSV = repairedBMRCSV;
+    		}
     	/**Human-readable error message; never null. */
     	public final String errorMessage;
+    	/**Immutable repaired data where a repair is requested and is possible, else null. */
+    	public List<List<String>> repairedBMRCSV;
 	    }
 
     /**Validate an and possibly fix up BMR FUELINST data on a number of key points.
+     *      * 
+     * @return non-null error if any problem found (usually first error).
+     */
+	public static ValidBMRDataResultError isValidBMRData(
+			final List<List<String>> parsedBMRCSV,
+			final long newestPossibleValidRecord,
+			final int maxHoursSpan)
+	    { return(isValidBMRData(parsedBMRCSV, newestPossibleValidRecord, maxHoursSpan, false)); }
+
+    /**Validate (and possibly fix up) BMR FUELINST data on a number of key points.
      * 
      * @param parsedBMRCSV  parsed FUELINST records (minus HDR and FTR), never modified;
      *             never null
@@ -340,15 +358,25 @@ public final class DataUtils
      *             positive and can be set to maximum long value to avoid the check
      * @param maxHoursSpan  maximum span of hours between newest and oldest record;
      *             strictly positive
+     * @param attemptRepair if true and any repairable error or errors are found,
+     *             attempt to create a repaired version in the result object
+     *             and if the repaired version is non-null it can be used
      * 
      * @return non-null error if any problem found (usually first error).
      */
 	public static ValidBMRDataResultError isValidBMRData(
 			final List<List<String>> parsedBMRCSV,
 			final long newestPossibleValidRecord,
-			final int maxHoursSpan)
+			final int maxHoursSpan,
+			final boolean attemptRepair)
 	    {
 		if(null == parsedBMRCSV) { return(new ValidBMRDataResultError("null input")); }
+
+		// Optional if a repair is performed.
+		// A sample repaired error, or null if none.
+		String lastErrorRepaired = null;
+		// A mutable (must be wrapped for return) repaired result so far. 
+		List<List<String>> repairedBMRCSV = null;
 
 // Sample data...
 //FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
@@ -382,6 +410,7 @@ public final class DataUtils
 //WARNING: [FUELINST, 20221117, 27, 20221117131400, 16331, 0, 0, 4234, 12636, 0, 430, 0, 155, 0, 0, 79, 0, 1973, 0, 0, 0, 1095]
 //WARNING: [FUELINST, 20221117, 27, 20221117131500, 16060, 0, 0, 4227, 12641, 130, 429, 1, 152, 0, 0, 103, 0, 1969, 0, 0, 0, 1095]
 
+			// THIS MAY BE REPAIRABLE!
 			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return(new ValidBMRDataResultError("timestamps not monotonically increasing")); }
 			lastTimestampRaw = timestampRaw;
 			}

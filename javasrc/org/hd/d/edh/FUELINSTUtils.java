@@ -669,8 +669,9 @@ System.out.println("INFO: record/row count of CSV FUELINST data: " + parsedBMRCS
 System.err.println("ERROR: could not fetch data from " + url + " error: " + e.getMessage());
             }
         // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
-        // Reject entirely if problem found.
-        final DataUtils.ValidBMRDataResultError validationError = DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1);
+        // Be preapred to reject entirely if problem found.
+        final DataUtils.ValidBMRDataResultError validationError =
+    		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1);
         if(null != validationError)
             {
 System.err.println("ERROR: invalid CSV FUELINST data rejected: " + validationError.errorMessage);
@@ -681,6 +682,9 @@ System.err.println("ERROR: invalid CSV FUELINST data rejected: " + validationErr
 		        	System.err.println("WARNING: " + row);	
 		        	}
 	        	}
+//            final DataUtils.ValidBMRDataResultError validationErrorRepaired =
+//            		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1, true);
+            
         	parsedBMRCSV = null;
         	}
 
