@@ -331,14 +331,14 @@ public final class DataUtils
      * @param maxHoursSpan  maximum span of hours between newest and oldest record;
      *             strictly positive
      * 
-     * @return false if any problem found.
+     * @return non-null error if any problem found (usually first error).
      */
-	public static boolean isValidBMRData(
+	public static String isValidBMRData(
 			final List<List<String>> parsedBMRCSV,
 			final long newestPossibleValidRecord,
 			final int maxHoursSpan)
 	    {
-		if(null == parsedBMRCSV) { return(false); }
+		if(null == parsedBMRCSV) { return("null input"); }
 
 // Sample data...
 //FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
@@ -351,14 +351,15 @@ public final class DataUtils
 		String lastTimestampRaw = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
 		for(List<String> row : parsedBMRCSV)
 			{
-			if(null == row) { return(false); }
-			if(row.size() < 5) { return(false); }
-			if(!"FUELINST".equals(row.get(0))) { return(false); }
+			if(null == row) { return("null row"); }
+			if(row.size() < 5) { return("short row"); }
+			if(!"FUELINST".equals(row.get(0))) { return("row first field not FUELINST"); }
 			final String timestampRaw = row.get(3);
-			if(14 != timestampRaw.length()) { return(false); }
+			if(14 != timestampRaw.length()) { return("timestamp wrong lenght"); }
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
-			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return(false); }
+			if(lastTimestampRaw.compareTo(timestampRaw) > 0) { return("timestamps misordered (decreasing)"); }
+			if(lastTimestampRaw.compareTo(timestampRaw) >= 0) { return("timestamps not monotonically increasing"); }
 			lastTimestampRaw = timestampRaw;
 			}
 
@@ -366,16 +367,16 @@ public final class DataUtils
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
         Date d;
 		try { d = timestampParser.parse(lastTimestampRaw); }
-		catch (ParseException e) { return(false); }
+		catch (ParseException e) { return("cannot parse timestamp"); }
         final long finalTimestamp = d.getTime();
-        if(finalTimestamp > newestPossibleValidRecord) { return(false); }
+        if(finalTimestamp > newestPossibleValidRecord) { return("last record timestamp too new"); }
 
 
 		// FIXME Validate timestamp range.
 
 
 		// Did not find any problems.
-		return(true);
+		return(null);
 	    }
 
     /**Parse bmreports-style CSV file/stream with HDR and FTR check rows (which are not returned); never null but may be empty.

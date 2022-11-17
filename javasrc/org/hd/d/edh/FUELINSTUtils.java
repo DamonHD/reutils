@@ -670,9 +670,10 @@ System.err.println("ERROR: could not fetch data from " + url + " error: " + e.ge
             }
         // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
         // Reject entirely if problem found.
-        if(!DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1))
+        final String validationError = DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1);
+        if(null != validationError)
             {
-System.err.println("ERROR: invalid CSV FUELINST data rejected.");
+System.err.println("ERROR: invalid CSV FUELINST data rejected: " + validationError);
         	parsedBMRCSV = null;
         	}
 
