@@ -380,7 +380,7 @@ public final class DataUtils
 		// then bad rows are nulled out,
 		// then null entries are deleted,
 		// and an immutable copy is returned.
-		List<List<String>> repairedBMRCSV = !attemptRepair ? null :
+		ArrayList<List<String>> repairedBMRCSV = !attemptRepair ? null :
 			new ArrayList<List<String>>(parsedBMRCSV);
 
 // Sample data...
@@ -455,7 +455,8 @@ public final class DataUtils
         // and return a result object with sample error and repaired data.
         if(null != lastErrorRepaired)
 	        {
-            while(repairedBMRCSV.remove(null)) { }
+            while(repairedBMRCSV.remove(null)) { } // FIXME: O(n^2) cost.
+            repairedBMRCSV.trimToSize();
         	return(new ValidBMRDataResultError(
         			lastErrorRepaired,
         			Collections.unmodifiableList(repairedBMRCSV)));
