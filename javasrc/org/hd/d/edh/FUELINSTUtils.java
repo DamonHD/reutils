@@ -669,23 +669,37 @@ System.out.println("INFO: record/row count of CSV FUELINST data: " + parsedBMRCS
 System.err.println("ERROR: could not fetch data from " + url + " error: " + e.getMessage());
             }
         // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
-        // Be preapred to reject entirely if problem found.
+        // If containable defects are found then repair on the fly.
+        // Be prepared to reject entirely if unrepairable problem found.
         final DataUtils.ValidBMRDataResultError validationError =
-    		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1);
+    		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1, true);
         if(null != validationError)
             {
-System.err.println("ERROR: invalid CSV FUELINST data rejected: " + validationError.errorMessage);
+System.err.println("WARNING: invalid CSV FUELINST data: " + validationError.errorMessage);
+        	// Dump troublesome data, as received...
         	if(parsedBMRCSV != null)
 	        	{
 	        	for(List<String> row : parsedBMRCSV)
-		        	{
-		        	System.err.println("WARNING: " + row);	
-		        	}
+		        	{ System.err.println("WARNING: " + row); }
 	        	}
-//            final DataUtils.ValidBMRDataResultError validationErrorRepaired =
-//            		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1, true);
-            
-        	parsedBMRCSV = null;
+            // Use repaired version if any.
+            if(null != validationError.repairedBMRCSV)
+                {
+            	parsedBMRCSV = validationError.repairedBMRCSV;
+System.err.println("WARNING: invalid CSV FUELINST data repaired.");
+				// Dump after repair...
+				if(parsedBMRCSV != null)
+					{
+					for(List<String> row : parsedBMRCSV)
+				    	{ System.err.println("WARNING: " + row); }
+					}
+                }
+            // Reject unrepairable data...
+            else
+	            {
+            	parsedBMRCSV = null;
+System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
+	            }            
         	}
 
         // Load long (7d) store if possible.
