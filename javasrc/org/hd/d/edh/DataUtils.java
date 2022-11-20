@@ -595,7 +595,7 @@ public final class DataUtils
 
             // Memory micro-optimisatons.
             // Intern "0" MW values by using implicitly intern()ed constant.
-            for(int i = 4; i < fields.length; ++i) { if("0".equals(fields[i])) { fields[i] = "0"; } }
+            for(int i = fields.length; --i >= 4; ) { if("0".equals(fields[i])) { fields[i] = "0"; } }
             // Share duplicate values from the previous row.
             if(!result.isEmpty())
 	            {
