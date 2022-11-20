@@ -599,12 +599,12 @@ public final class DataUtils
             // Share duplicate values from the previous row.
             if(!result.isEmpty())
 	            {
-	            final List<String> prev = result.get(result.size() - 1);	
-	            if(fields.length == prev.size())
+	            final List<String> prevRow = result.get(result.size() - 1);	
+	            if(fields.length == prevRow.size())
 		            {
 		            for(int i = fields.length; --i >= 0; )
 			            {
-			            final String pi = prev.get(i);
+			            final String pi = prevRow.get(i);
 						if(fields[i].equals(pi)) { fields[i] = pi; }
 			            }
 		            }
