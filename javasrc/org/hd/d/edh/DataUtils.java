@@ -551,7 +551,7 @@ public final class DataUtils
             { throw new IOException("wrong header (HDR) type/description found"); }
 
         // Initially-empty result...
-        // Size it to initially accommodate ~287-row live FUELINST datum.
+        // Size it to initially accommodate ~288-row live FUELINST datum.
         final ArrayList<List<String>> result = new ArrayList<List<String>>(300);
 
         String row;
@@ -593,11 +593,22 @@ public final class DataUtils
 //Data row: FUELINST,20221104,21,20221104102500,13998,0,0,4637,9195,0,848,1,136,0,0,130,0,2225,0,0,0,1257
 //Data row: FUELINST,20221104,21,20221104103000,13964,0,0,4635,9332,0,848,0,134,0,0,129,0,2219,0,0,0,1257
 
-            // Memory micro-optimisaton.
-            // Intern first few fields as likely largely repetitive.
-            for(int i = 0; (i < fields.length) && (i < 3); ++i) { fields[i] = fields[i].intern(); }
-            // Intern following "0"s by using implicitly intern()ed constant.
-            for(int i = 3; i < fields.length; ++i) { if("0".equals(fields[i])) { fields[i] = "0"; } }
+            // Memory micro-optimisatons.
+            // Intern "0" MW values by using implicitly intern()ed constant.
+            for(int i = 4; i < fields.length; ++i) { if("0".equals(fields[i])) { fields[i] = "0"; } }
+            // Share duplicate values from the previous row.
+            if(!result.isEmpty())
+	            {
+	            final List<String> prev = result.get(result.size() - 1);	
+	            if(fields.length == prev.size())
+		            {
+		            for(int i = fields.length; --i >= 0; )
+			            {
+			            final String pi = prev.get(i);
+						if(fields[i].equals(pi)) { fields[i] = pi; }
+			            }
+		            }
+	            }
 
             // Package up row data (and make it unmodifiable).
             result.add(Collections.unmodifiableList(Arrays.asList(fields)));
