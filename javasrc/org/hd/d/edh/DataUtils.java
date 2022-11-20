@@ -593,6 +593,12 @@ public final class DataUtils
 //Data row: FUELINST,20221104,21,20221104102500,13998,0,0,4637,9195,0,848,1,136,0,0,130,0,2225,0,0,0,1257
 //Data row: FUELINST,20221104,21,20221104103000,13964,0,0,4635,9332,0,848,0,134,0,0,129,0,2219,0,0,0,1257
 
+            // Memory micro-optimisaton.
+            // Intern first few fields as likely largely repetitive.
+            for(int i = 0; (i < fields.length) && (i < 3); ++i) { fields[i] = fields[i].intern(); }
+            // Intern following "0"s by using implicitly intern()ed constant.
+            for(int i = 3; i < fields.length; ++i) { if("0".equals(fields[i])) { fields[i] = "0"; } }
+
             // Package up row data (and make it unmodifiable).
             result.add(Collections.unmodifiableList(Arrays.asList(fields)));
             }
