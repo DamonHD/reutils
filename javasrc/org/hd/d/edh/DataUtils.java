@@ -551,7 +551,8 @@ public final class DataUtils
             { throw new IOException("wrong header (HDR) type/description found"); }
 
         // Initially-empty result...
-        final ArrayList<List<String>> result = new ArrayList<List<String>>();
+        // Size it to initially accommodate ~287-row live FUELINST datum.
+        final ArrayList<List<String>> result = new ArrayList<List<String>>(300);
 
         String row;
         while(null != (row = br.readLine()))
