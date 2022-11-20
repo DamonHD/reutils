@@ -502,11 +502,10 @@ public final class DataUtils
         conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
-        final InputStreamReader is = new InputStreamReader(conn.getInputStream());
-        try { return(DataUtils.parseBMRCSV(is, headerCheck)); }
-        finally { is.close(); }
+        try(final InputStreamReader is = new InputStreamReader(conn.getInputStream()))
+            { return(DataUtils.parseBMRCSV(is, headerCheck)); }
         }
-    
+
     /**Parse bmreports-style CSV file/stream with HDR and FTR check rows (which are not returned); never null but may be empty.
      *
      * @param r  stream to read from, not closed by this routine; never null
@@ -539,7 +538,8 @@ public final class DataUtils
         if(null == r) { throw new IllegalArgumentException(); }
 
         // Wrap a buffered reader around the input if not already so.
-        final BufferedReader br = (r instanceof BufferedReader) ? (BufferedReader)r : new BufferedReader(r, 8192);
+        final BufferedReader br = (r instanceof BufferedReader) ? (BufferedReader)r :
+        	new BufferedReader(r, 8192);
 
         // Read first (header) line/row.
         final String header = br.readLine();
