@@ -645,7 +645,18 @@ public final class FUELINSTUtils
         // Compute relative paths for caches/stores.
         final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + RESULT_CACHE_SUFFIX));
         final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));        
-        
+
+        // Load long (7d) store if possible.
+        List<List<String>> longStore = null;
+        final long longStoreFetchStart = System.currentTimeMillis();
+        try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
+        catch(final IOException e)
+	        {
+System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
+	        }
+        final long longStoreFetchEnd = System.currentTimeMillis();
+System.out.println("INFO: long store load and parse in "+(longStoreFetchEnd-longStoreFetchStart)+"ms.");
+
         // Fetch and parse the CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -702,23 +713,8 @@ System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: "
 	            }            
         	}
 
-        // Load long (7d) store if possible.
-        List<List<String>> longStore = null;
-        final long longStoreFetchStart = System.currentTimeMillis();
-        try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
-        catch(final IOException e)
-	        {
-System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
-	        }
-        final long longStoreFetchEnd = System.currentTimeMillis();
-System.out.println("INFO: long store load and parse in "+(longStoreFetchEnd-longStoreFetchStart)+"ms.");
-//        if((null != longStore) && !longStore.isEmpty())
-//	        {
-//System.out.println("INFO: long store oldest "+longStore.get(0));
-//System.out.println("INFO: long store newest "+longStore.get(longStore.size()-1));
-//	        }
-        // As of 2022-10 sometimes last few records are omitted apparently when server is busy.
-        // Attempt to patch them up here...
+        // As of 2022-10 sometimes last few live records are omitted apparently when server is busy.
+        // Attempt to patch them up from the long store if so...
         if((null != parsedBMRCSV) && (null != longStoreFile))
 	        {
         	final List<List<String>> appendedNewData = DataUtils.appendNewBMRDataRecords(
