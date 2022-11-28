@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -48,7 +47,6 @@ import java.io.Reader;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -671,11 +669,11 @@ public final class DataUtils
     	// Roughly size the working array for typical FUELINST data.
         final int rowCount = data.size();
         try (
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream(rowCount * (gzip ? 32 : 128));
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream(32 + (rowCount * (gzip ? 32 : 128)));
 			final OutputStream os = gzip ? new java.util.zip.GZIPOutputStream(baos) : baos
             )
 
-	        {
+	        {        	
 	        // Write header.
 	        os.write("HDR\n".getBytes(FUELINSTUtils.FUELINST_CHARSET));
 
