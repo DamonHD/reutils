@@ -678,8 +678,12 @@ public final class DataUtils
 	        os.write("HDR\n".getBytes(FUELINSTUtils.FUELINST_CHARSET));
 
 	        // Write body.
+	        final StringBuilder rowBuilder = new StringBuilder(128);
 	        for(final List<String> row : data)
 		        {
+	        	// Clear the new row under construction.
+	        	rowBuilder.setLength(0);
+	        	
 		        final int fields = row.size();
 
 		        // Do some simple validation.
@@ -693,9 +697,14 @@ public final class DataUtils
 		        // Write row.
 	        	for(int f = 0; f < fields; ++f)
 		        	{
-		        	os.write(row.get(f).getBytes(FUELINSTUtils.FUELINST_CHARSET));
-		        	os.write((f < fields-1) ? ',' : '\n');
+	        		rowBuilder.append(row.get(f));
+	        		rowBuilder.append((f < fields-1) ? ',' : '\n');
+//		        	os.write(row.get(f).getBytes(FUELINSTUtils.FUELINST_CHARSET));
+//		        	os.write((f < fields-1) ? ',' : '\n'); // Horribly inefficient!
 		        	}
+
+	        	// Write each row at once to help efficiency.
+	        	os.write(rowBuilder.toString().getBytes(FUELINSTUtils.FUELINST_CHARSET));
 		        }
 
 	        // Write footer.
