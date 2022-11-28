@@ -665,12 +665,15 @@ public final class DataUtils
     public static byte[] saveBMRCSV(final List<List<String>> data)
         throws IOException
 	    {
+    	if(null == data) { throw new IllegalArgumentException(); }
+
     	// Write to an ASCII CSV byte[].
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	// Roughly size array for typical FUELINST data.
+        final int rowCount = data.size();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(rowCount * 128);
 
         // Write header.
         baos.writeBytes("HDR\n".getBytes(FUELINSTUtils.FUELINST_CHARSET));
-        final int rowCount = data.size();
 
         // Write body.
         for(final List<String> row : data)
