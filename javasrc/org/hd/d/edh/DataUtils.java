@@ -633,7 +633,7 @@ public final class DataUtils
     		{ return(parseBMRCSV(r, null)); }
         }
 
-    /**Save/serialise, gzipped to file, parsed BMR FUELINST data in a form that parseBMRCSV() can read.
+    /**Save/serialise, gzipped to file, CSV BMR FUELINST data in a form that parseBMRCSV() can read.
      * Generate ASCII CSV, with newlines to terminate rows.
      * <p>
      * May be run as async task, so no logging output generated.
@@ -646,59 +646,66 @@ public final class DataUtils
         throws IOException
 	    {
 	    	if(null == longStoreFile) { throw new IllegalArgumentException(); }
-	    	final byte[] csv = saveBMRCSV(data);
-	    	// GZIP to a new byte[].
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            // We may gzip the stream to remove some of the redundancy and thus storage traffic.
-            final java.util.zip.GZIPOutputStream gos =
-                new java.util.zip.GZIPOutputStream(baos);
-            gos.write(csv);
-            gos.close();
-	    	replacePublishedFile(longStoreFile.getPath(), baos.toByteArray(), true);
+	    	final byte[] csvgz = saveBMRCSV(data, true);
+	    	replacePublishedFile(longStoreFile.getPath(), csvgz, true);
 	    }
 
-    /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read.
+    /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read, optionally gzipped.
      * Generate ASCII CSV, with newlines to terminate rows.
+     * 
+     * @param data  FUELINST CSV data rows (no header or footer); never null
+     * @param gzip  if true then gzip the result (on the fly to reduce memory usage)
      *
-     * @throws IOException  may be thrown if asked to serialise invalid (eg misordered or non-FUELINST) data
+     * @throws IllegalArgumentException  may be thrown if asked to serialise invalid
+     *     (eg misordered or non-FUELINST) data
+     * @throws IOException  in case of trouble serialising the data (should never happen)
      */
-    public static byte[] saveBMRCSV(final List<List<String>> data)
+    public static byte[] saveBMRCSV(final List<List<String>> data, boolean gzip)
         throws IOException
 	    {
     	if(null == data) { throw new IllegalArgumentException(); }
 
-    	// Write to an ASCII CSV byte[].
-    	// Roughly size array for typical FUELINST data.
+    	// Write to an ASCII CSV byte[], optionally gzipped.
+    	// Roughly size the working array for typical FUELINST data.
         final int rowCount = data.size();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(rowCount * 128);
+        try (
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream(rowCount * (gzip ? 32 : 128));
+			final OutputStream os = gzip ? new java.util.zip.GZIPOutputStream(baos) : baos
+            )
 
-        // Write header.
-        baos.writeBytes("HDR\n".getBytes(FUELINSTUtils.FUELINST_CHARSET));
-
-        // Write body.
-        for(final List<String> row : data)
 	        {
-	        final int fields = row.size();
+	        // Write header.
+	        os.write("HDR\n".getBytes(FUELINSTUtils.FUELINST_CHARSET));
 
-	        // Do some simple validation.
-	        // Abort if data not valid FUELINST format.
-	        // TODO: more validation, eg of row time ordering, field format, etc.
-	        if(fields < 4)
-                { throw new IOException("too few fields for FUELINST"); }
-	        if(!row.isEmpty() && !"FUELINST".equals(row.get(0)))
-                { throw new IOException("not FUELINST records"); }
+	        // Write body.
+	        for(final List<String> row : data)
+		        {
+		        final int fields = row.size();
 
-	        // Write row.
-        	for(int f = 0; f < fields; ++f)
-	        	{
-	        	baos.writeBytes(row.get(f).getBytes(FUELINSTUtils.FUELINST_CHARSET));
-	        	baos.write((f < fields-1) ? ',' : '\n');
-	        	}
+		        // Do some simple validation.
+		        // Abort if data not valid FUELINST format.
+		        // TODO: more validation, eg of row time ordering, field format, etc.
+		        if(fields < 4)
+	                { throw new IllegalArgumentException("too few fields for FUELINST"); }
+		        if(!row.isEmpty() && !"FUELINST".equals(row.get(0)))
+	                { throw new IllegalArgumentException("not FUELINST records"); }
+
+		        // Write row.
+	        	for(int f = 0; f < fields; ++f)
+		        	{
+		        	os.write(row.get(f).getBytes(FUELINSTUtils.FUELINST_CHARSET));
+		        	os.write((f < fields-1) ? ',' : '\n');
+		        	}
+		        }
+
+	        // Write footer.
+	        os.write(("FTR," + rowCount + "\n").getBytes(FUELINSTUtils.FUELINST_CHARSET));
+
+	        // Force compressed data to be written through.
+	        if(gzip) { os.close(); }
+
+	        return(baos.toByteArray());
 	        }
-
-        // Write footer.
-        baos.writeBytes(("FTR," + rowCount + "\n").getBytes(FUELINSTUtils.FUELINST_CHARSET));
-        return(baos.toByteArray());
 	    }
 
     /**Convert positional encoding of row values to Map form; never null but may be empty.

@@ -100,7 +100,7 @@ public final class TestMisc extends TestCase
 	    {
 	    // No-data case.
     	final String nodataOutExpected = "HDR\nFTR,0\n";
-    	final byte[] nodataOut = DataUtils.saveBMRCSV(new ArrayList<List<String>>());
+    	final byte[] nodataOut = DataUtils.saveBMRCSV(new ArrayList<List<String>>(), false);
         assertTrue("Should generate expected ASCII output", Arrays.equals(nodataOut, nodataOutExpected.getBytes(FUELINSTUtils.FUELINST_CHARSET)));
         assertTrue("Should parse as empty list", DataUtils.parseBMRCSV(new StringReader(nodataOutExpected), null).isEmpty());
         assertTrue("Should parse as empty list", DataUtils.parseBMRCSV(new InputStreamReader(new ByteArrayInputStream(nodataOut)), null).isEmpty());
