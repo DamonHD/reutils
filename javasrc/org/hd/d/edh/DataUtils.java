@@ -634,20 +634,22 @@ public final class DataUtils
         }
 
     /**Save/serialise, gzipped to file, CSV BMR FUELINST data in a form that parseBMRCSV() can read.
-     * Generate ASCII CSV, with newlines to terminate rows.
+     * Generate (gzipped) ASCII CSV, with newlines to terminate rows.
      * <p>
-     * May be run as async task, so no logging output generated.
+     * May be run as an async task/thread, as no logging output is generated.
      * <p>
      * Write atomically, world-readable.
      * 
-     * @throws IOException  may be thrown if asked to serialise invalid (eg misordered or non-FUELINST) data
+     * @throws IllegalArgumentException  may be thrown if asked to serialise invalid
+     *     (eg misordered or non-FUELINST) data
+     * @throws IOException  in case of trouble writing to the filesystem
      */
     public static void saveBMRCSV(final List<List<String>> data, final File longStoreFile)
         throws IOException
 	    {
-	    	if(null == longStoreFile) { throw new IllegalArgumentException(); }
-	    	final byte[] csvgz = saveBMRCSV(data, true);
-	    	replacePublishedFile(longStoreFile.getPath(), csvgz, true);
+    	if(null == longStoreFile) { throw new IllegalArgumentException(); }
+    	final byte[] csvgz = saveBMRCSV(data, true);
+    	replacePublishedFile(longStoreFile.getPath(), csvgz, true);
 	    }
 
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read, optionally gzipped.
