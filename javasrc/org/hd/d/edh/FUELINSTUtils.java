@@ -646,16 +646,12 @@ public final class FUELINSTUtils
         final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + RESULT_CACHE_SUFFIX));
         final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));        
 
-        // Load long (7d) store if possible.
-        List<List<String>> longStore = null;
-        final long longStoreFetchStart = System.currentTimeMillis();
-        try { longStore = DataUtils.loadBMRCSV(longStoreFile); }
-        catch(final IOException e)
-	        {
-System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
-	        }
-        final long longStoreFetchEnd = System.currentTimeMillis();
-System.out.println("INFO: long store load and parse in "+(longStoreFetchEnd-longStoreFetchStart)+"ms.");
+        // Load long store concurrently with fetching new data.
+        // As well as overlapping the I/O
+        // this is hoped to get instrumented JIT compilation 
+        // done fairly optimally in parallel.
+        final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
+	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
 
         // Fetch and parse the CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
@@ -712,6 +708,15 @@ System.err.println("WARNING: invalid CSV FUELINST data repaired.");
 System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
 	            }            
         	}
+    	
+        // Collect results of long store load.
+        List<List<String>> longStore = null;
+        try { longStore = longStoreLoad.get(); }
+        catch(final ExecutionException|InterruptedException e)
+	        {
+System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
+	        }
+if(null != longStore) { System.out.println("INFO: long store records loaded: "+longStore.size()); }
 
         // As of 2022-10 sometimes last few live records are omitted apparently when server is busy.
         // Attempt to patch them up from the long store if so...
