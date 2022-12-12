@@ -710,6 +710,7 @@ System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: "
         	}
     	
         // Collect results of long store load.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         List<List<String>> longStore = null;
         try { longStore = longStoreLoad.get(); }
         catch(final ExecutionException|InterruptedException e)
@@ -757,6 +758,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             }
 
         // Compute 24hr summary if we have fresh data, and cache.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         //
         // If parsedBMRCSV is null or empty
         // this will attempt to use previously cached result
@@ -798,6 +800,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             }
 
         // Compute 7-day summary if long store is available.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         CurrentSummary summary7d = null;
         if((null != longStore) && !longStore.isEmpty())
             { summary7d = FUELINSTUtils.computeCurrentSummary(longStore); }
@@ -822,6 +825,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // New as of 2019-10.
         // Append to the intensity log.
         // Only do this for current/live data, ie if not stale.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         if(isDataStale || (0 == summary24h.timestamp))
             { System.err.println("WARNING: will not update log, input data is stale."); }
         else
@@ -842,6 +846,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Update pages, XML and plain text.
         // Also post to social media if enabled.
         // FIMXE: consider dropping XML output if nothing is using it.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         if(outputHTMLFileName != null)
             {
             // Status to use to drive traffic-light measure.
@@ -887,6 +892,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             catch(final IOException e) { e.printStackTrace(); }
 
             // Update the (mobile-friendly) XHTML page.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
             try
                 {
                 final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
@@ -940,6 +946,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 
 
         // Update button(s)/icon(s).
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         try
             {
             final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
@@ -953,8 +960,8 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             }
         catch(final IOException e) { e.printStackTrace(); }
 
-
         // Wait for/reap any side tasks.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         if(null != resultCacheSave)
 	    	{
 	    	try {
