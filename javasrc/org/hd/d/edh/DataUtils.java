@@ -616,7 +616,7 @@ public final class DataUtils
         return(Collections.unmodifiableList(result)); // Make outer list unmodifiable...
         }
 
-    /**Load from file gzipped parsed FUELINST data in a form that parseBMRCSV() can read.
+    /**Load from file gzipped parsed FUELINST data in a form that parseBMRCSV() can read; never null but may be empty.
      * 
      * @throws IOException  if file not present or unreadable/unparseable.
      */
