@@ -1013,7 +1013,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
     /**Third (comment, intensities) line prefix of retail intensity log. */
     public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX = "# Intensities gCO2/kWh:";
 
-    /**Append to (or create if necessary) the (retail) intensity log.
+    /**Append to (or create if necessary) the (retail) intensity log, US_ASCII.
      * If run more often than new data is available
      * this may produce duplicate/repeated records.
      * <p>
@@ -1058,7 +1058,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         // This especially applies to the header(s).
         final boolean logFileExists = logFile.exists();
         try(PrintWriter pw = new PrintWriter(
-        	    new BufferedWriter(new FileWriter(logFile, true))))
+        	    new BufferedWriter(new FileWriter(logFile, StandardCharsets.US_ASCII, true))))
 	        {
         	// Write a header if the file was new.
 	        if(!logFileExists)
