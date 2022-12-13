@@ -142,6 +142,11 @@ public final class FUELINSTUtils
     /**Suffix to use for (gzipped, ASCII, CSV, pseudo-FUELINST format) longish-term (7d+) store. */
     public static final String LONG_STORE_SUFFIX = ".longstore.csv.gz";
 
+    /**If true, generate an XML data file alongside the HTML5 and XHTML pages.
+     * DHD20221213: last used some time ago by Ecotricity, so disabled.
+     */
+	private static final boolean GENERATE_XML_DATA_FILE = false;
+
 
     /**Compute current status of fuel intensity; never null, but may be empty/default if data not available.
      * If cacheing is enabled, then this may revert to cache in case of
@@ -878,17 +883,20 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             catch(final IOException e) { e.printStackTrace(); }
 
             // Update the XML data dump.
-            try
-                {
-                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
-                    (outputHTMLFileName + ".xml");
-                if(null != outputXMLFileName)
-                    {
-                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary24h, isDataStale,
-                        hourOfDayHistorical, status);
-                    }
-                }
-            catch(final IOException e) { e.printStackTrace(); }
+            if(GENERATE_XML_DATA_FILE)
+	            {
+	            try
+	                {
+	                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
+	                    (outputHTMLFileName + ".xml");
+	                if(null != outputXMLFileName)
+	                    {
+	                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary24h, isDataStale,
+	                        hourOfDayHistorical, status);
+	                    }
+	                }
+	            catch(final IOException e) { e.printStackTrace(); }
+	            }
 
             // Update the (mobile-friendly) XHTML page.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");

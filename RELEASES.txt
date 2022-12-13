@@ -20,7 +20,8 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20221213: doing awaitTermination() for the executor!
-    DHD20221212: simplified CSV field memory de-dup on parse.
+    DHD20221213: simplified CSV field memory de-dup on parse.
+    DHD20221213: stopped generating data XML file as no longer used.
 
 
 
