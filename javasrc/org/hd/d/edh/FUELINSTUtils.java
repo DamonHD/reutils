@@ -61,6 +61,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.hd.d.edh.FUELINST.CurrentSummary;
@@ -986,6 +987,12 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Kill off the thread pool, completing any running task(s).
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
+        try {
+			executor.awaitTermination(10, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         final long endTime = System.currentTimeMillis();
 System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
