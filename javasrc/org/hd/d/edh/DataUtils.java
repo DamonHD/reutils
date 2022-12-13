@@ -593,9 +593,8 @@ public final class DataUtils
 //Data row: FUELINST,20221104,21,20221104103000,13964,0,0,4635,9332,0,848,0,134,0,0,129,0,2219,0,0,0,1257
 
             // Memory micro-optimisatons.
-            // Deduplicate "0" MW values by using implicitly intern()ed constant.
-            for(int i = fields.length; --i >= 4; ) { if("0".equals(fields[i])) { fields[i] = "0"; } }
-            // Share duplicate values from the previous row.
+            // Where possible, share duplicate values from the previous row,
+            // else with a constant "0".
             if(!result.isEmpty())
 	            {
 	            final List<String> prevRow = result.get(result.size() - 1);	
@@ -605,6 +604,8 @@ public final class DataUtils
 			            {
 			            final String pi = prevRow.get(i);
 						if(fields[i].equals(pi)) { fields[i] = pi; }
+			            // Deduplicate "0" MW values by using implicitly intern()ed constant.
+						else if("0".equals(fields[i])) { fields[i] = "0"; }
 			            }
 		            }
 	            }
