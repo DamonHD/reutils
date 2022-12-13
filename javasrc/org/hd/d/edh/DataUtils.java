@@ -702,7 +702,7 @@ public final class DataUtils
 	        		rowBuilder.append(row.get(f));
 	        		rowBuilder.append((f < fields-1) ? ',' : '\n');
 //		        	os.write(row.get(f).getBytes(FUELINSTUtils.FUELINST_CHARSET));
-//		        	os.write((f < fields-1) ? ',' : '\n'); // Horribly inefficient!
+//		        	os.write((f < fields-1) ? ',' : '\n'); // Horribly inefficient to write 1 byte direct to GZIPOutputStream!
 		        	}
 
 	        	// Write each row at once to help efficiency.
