@@ -952,8 +952,9 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
             if(bd.isDirectory() && bd.canWrite())
                 {
+            	// DHD20221213: 48x48 generation dropped as not apparently used at all.
                 GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 48, summary24h.timestamp, summary24h.status, retailIntensity);
+//                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 48, summary24h.timestamp, summary24h.status, retailIntensity);
                 GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
                 }
             else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
