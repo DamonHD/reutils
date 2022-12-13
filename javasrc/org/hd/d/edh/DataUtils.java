@@ -671,7 +671,8 @@ public final class DataUtils
         final int rowCount = data.size();
         try (
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream(32 + (rowCount * (gzip ? 32 : 128)));
-			final OutputStream os = gzip ? new java.util.zip.GZIPOutputStream(baos) : baos
+			final OutputStream os = gzip ?
+				new BufferedOutputStream(new java.util.zip.GZIPOutputStream(baos)) : baos
             )
 
 	        {        	
