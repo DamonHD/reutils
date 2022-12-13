@@ -622,7 +622,6 @@ public final class FUELINSTUtils
         }
 
 
-
     /**Implement the 'traffic lights' command line option.
      * @param args  optional (though usual) trailing argument (output HTML file name); never null
      */
@@ -804,7 +803,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         CurrentSummary summary7d = null;
         if((null != longStore) && !longStore.isEmpty())
             { summary7d = FUELINSTUtils.computeCurrentSummary(longStore); }
-
 
         // Dump a summary of the current status.
         System.out.println("INFO: 24h summary: " + summary24h);
