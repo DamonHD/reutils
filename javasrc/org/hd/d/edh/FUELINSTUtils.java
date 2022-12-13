@@ -1731,7 +1731,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
         }
     
-    /**Update (atomically if possible) the plain-text bare gCO2e/kWh intensity value.
+    /**Update (atomically if possible) the plain-text US_ASCII bare gCO2e/kWh intensity value.
      * The file will be removed if the data is stale.
      * Predicted values are not published, only live fresh ones.
      */
@@ -1752,7 +1752,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 System.out.println("INFO: retail intensity of "+retailIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
 
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(8);
-        final PrintWriter w = new PrintWriter(baos);
+        final PrintWriter w = new PrintWriter(baos, false, StandardCharsets.US_ASCII);
         try
 	    	{
 			w.write(String.valueOf(retailIntensity));

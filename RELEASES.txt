@@ -23,6 +23,7 @@ PENDING:
     DHD20221213: simplified CSV field memory de-dup on parse.
     DHD20221213: stopped generating data XML file as no longer used.
     DHD20221213: forcing appendToRetailIntensityLog() to write US_ASCII.
+    DHD20221213: forcing updateTXTFile() to write US_ASCII.
 
 
 
