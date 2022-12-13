@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -972,7 +973,7 @@ public final class DataUtils
             final java.util.zip.GZIPOutputStream gos = gzipped ?
                 new java.util.zip.GZIPOutputStream(baos) : null;
             oos = new ObjectOutputStream(gzipped ?
-                (OutputStream)gos : (OutputStream)baos);
+        		new BufferedOutputStream(gos) : baos);
             oos.writeObject(o);
             oos.flush();
             if(gos != null) { gos.finish(); }

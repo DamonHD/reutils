@@ -19,6 +19,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
+    DHD20221213: wrapping GZIPOutputStream in BufferedOutputStream: performance optimisation.
     DHD20221212: performance micro-optimisations.
     DHD20221120: performance/memory micro-optimisations.
 
