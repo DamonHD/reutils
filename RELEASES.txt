@@ -19,16 +19,24 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20221213: stopping generating 48px button, as apparently not used.
-    DHD20221213: wrapping GZIPOutputStream in BufferedOutputStream: performance optimisation.
-    DHD20221212: performance micro-optimisations.
-    DHD20221120: performance/memory micro-optimisations.
 
 
 
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20221213:
+    freezepoint name: V1.1.19
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.18
+    DHD20221213: stopping generating 48px button, as apparently not used.
+    DHD20221213: wrapping GZIPOutputStream in BufferedOutputStream: performance optimisation.
+    DHD20221212: performance micro-optimisations.
+    DHD20221120: performance/memory micro-optimisations.
 
 
 20221106:
