@@ -755,7 +755,7 @@ public final class FUELINSTHistorical
                 }
             w.println(".</p>");
 
-            w.write("<p>Correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
+            w.write("<p>Correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable/non-constrained sources):");
             final SortedMap<String,Float> goodness = new TreeMap<String, Float>(correlations.second);
             for(final String fuel : goodness.keySet())
                 {
