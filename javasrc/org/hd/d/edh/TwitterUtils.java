@@ -347,7 +347,7 @@ public final class TwitterUtils
         final Callable<Long> task = () ->
         	{
 	        // Append time...
-	        final String fullMessage = statusMessage + ' ' + TWEET_TAIL_SEP + time + 'Z';
+	        final String fullMessage = statusMessage + TWEET_TAIL_SEP + time + 'Z';
 	        
 	        final long s = System.currentTimeMillis();
 	        td.handle.setStatus(fullMessage);
