@@ -30,16 +30,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
@@ -86,6 +89,9 @@ public final class TwitterUtils
 
     /**Property name for Mastodon host; not null. */
     public static final String PNAME_MASTODON_HOSTNAME = "Mastodon.hostname";
+
+    /**Property name for Mastodon auth token file; not null. */
+    public static final String PNAME_MASTODON_AUTH_TOKEN_FILE = "Mastodon.authtokenfile";
 
  
     /**Immutable class containing Twitter handle, user ID and read-only flag. */
@@ -432,6 +438,8 @@ public final class TwitterUtils
      * Note that this is not a live handle/connection.
      * Any authentication details to make a post (say)
      * will need to be looked up on the fly, separately.
+     * But this will return null and complain if such a token is not available
+     * even if username and hostname are present.
      */
     public static MastodonDetails getMastodonDetails()
 	    {
@@ -439,7 +447,13 @@ public final class TwitterUtils
 		if(null == username) { return(null); }
 		final String hostname = getMastodonHostname();
 		if(null == hostname) { return(null); }
-		
+
+		if(null == getMastodonAuthToken())
+			{
+			System.err.println("WARNING: getMastodonDetails(): Mastodon username and hostname available but not the auth token");
+			return(null);
+			}
+
 		return(new MastodonDetails(username, hostname));
 	    }
 
@@ -463,6 +477,23 @@ public final class TwitterUtils
         return(hostname);
         }
 
+    /**Get the specified non-empty Mastodon status POST auth token or null if none.
+     * Note: this return value is to be treated with care, eg not logged or printed.
+     */
+    public static String getMastodonAuthToken()
+        {
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String authtokenfilename = rawProperties.get(PNAME_MASTODON_AUTH_TOKEN_FILE);
+        // Transform empty user name to null.
+        if((null != authtokenfilename) && authtokenfilename.isEmpty()) { return(null); }
+
+
+        // TODO
+
+
+        return(null);
+        }
+
     /**Attempt to update Mastodon status.
      * Can be run on a background thread.
      *
@@ -470,12 +501,16 @@ public final class TwitterUtils
      * @param statusMessage  short (max 140 chars) Twitter status message; never null
      */
     public static void setMastodonStatus(final MastodonDetails md,
-                                              final String statusMessage)
+                                         final String statusMessage)
         throws IOException
         {
         if(null == md) { throw new IllegalArgumentException(); }
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > MAX_TOOT_CHARS) { throw new IllegalArgumentException("message too long"); }
+
+        // Fetch the auth tokens, or silently abort if not available...  
+        final String authtoken = getMastodonAuthToken();
+        if(null == authtoken) { return; }  
 
         // Send message...
 
@@ -483,9 +518,31 @@ public final class TwitterUtils
         // (MAT is a file containing the access token.)
         // curl https://mastodon.energy/api/v1/statuses -H "Authorization: Bearer `cat $MAT`" -F "status=$1"
 
+        // Use URL encoding to force into ASCII (7-bit) encoding.
+        final String formEncodedBody = "status=" +
+            URLEncoder.encode(statusMessage, StandardCharsets.US_ASCII);
+        
+        final int timeout_ms = 10000;
 
-// TODO
-
+        final URL u = new URL("https", md.hostname, "api/v1/statuses");
+        final HttpsURLConnection uc = (HttpsURLConnection) u.openConnection();
+        uc.setUseCaches(false);
+        uc.setAllowUserInteraction(false);
+        uc.setDoOutput(true);
+        uc.setDoInput(true);
+        uc.setConnectTimeout(timeout_ms);
+        uc.setReadTimeout(timeout_ms);
+        uc.setRequestMethod("POST");
+        uc.setRequestProperty("Authorization","Bearer " + authtoken);
+        uc.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+        uc.setRequestProperty("Content-length",String.valueOf(formEncodedBody.length()));
+        try ( final DataOutputStream output = new DataOutputStream(uc.getOutputStream()); )
+            {
+        	output.writeUTF(formEncodedBody);
+            // Absorb response from server here?
+            // Look for success/error?        	
+        	}
+        uc.disconnect();
         }
 
     /**Send a toot and time it.
