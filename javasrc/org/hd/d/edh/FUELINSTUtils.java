@@ -642,10 +642,10 @@ public final class FUELINSTUtils
 
         System.out.println("INFO: generating traffic-light summary "+Arrays.asList(args)+"...");
 
-        // Allow (at most) a couple of threads to process less critical tasks.
+        // A pool of threads to process less critical tasks concurrently.
         // Loading fresh data and composing the HTML page and updating flags are critical.
         // Anything else, especially including potentially-slow I/O, can be done in the pool.
-        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        final ExecutorService executor = Executors.newCachedThreadPool();
 
         final String outputHTMLFileName = (args.length < 1) ? null : args[0];
         final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
