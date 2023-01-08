@@ -972,17 +972,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 
         // Wait for/reap any side tasks.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        if(null != resultTweetSend)
-	    	{
-	    	try {
-	        	final Long rcT = resultTweetSend.get();
-	        	System.out.println("INFO: tweet send in "+rcT+"ms.");
-	        	}
-	        catch(final ExecutionException|InterruptedException e)
-		        {
-	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
-		        }
-	    	}
         if(null != resultCacheSave)
 	    	{
 	    	try {
@@ -1005,6 +994,17 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 		        }
         	}
+        if(null != resultTweetSend)
+	    	{
+	    	try {
+	        	final Long rcT = resultTweetSend.get();
+	        	System.out.println("INFO: tweet sent in "+rcT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
+		        }
+	    	}
         // Kill off the thread pool, completing any running task(s).
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
