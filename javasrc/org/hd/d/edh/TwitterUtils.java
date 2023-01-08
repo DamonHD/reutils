@@ -340,19 +340,21 @@ public final class TwitterUtils
         // UTC time to append to message to help make it unique.
         // Without this, in the olden days, Twitter sometimes blocked updates as duplicates.
         final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
+	    // Append timestamp to status message.
+        final String fullMessage = statusMessage + TWEET_TAIL_SEP + time + 'Z';
         
-        System.out.println("INFO: sending tweet for username "+td.username+": '"+statusMessage+"' with timestamp '"+time);
+System.out.println("INFO: sending tweet for username "+td.username+": '"+fullMessage);
 
-        // Do the work in a background thread, quietly.
-        final Callable<Long> task = () ->
+        // Do the tweet posting in a background thread, quietly.
+        final Callable<Long> tweetPostingTask = () ->
         	{
-	        // Append time...
-	        final String fullMessage = statusMessage + TWEET_TAIL_SEP + time + 'Z';
+    	    final long s = System.currentTimeMillis();
+
 	        
-	        final long s = System.currentTimeMillis();
+	        // Send message...
 	        td.handle.setStatus(fullMessage);
 	
-	        // Upon getting this far, assume that the Tweet was successfully sent...
+	        // Upon getting this far, assume that the tweet was successfully sent...
 	
 	        // Cache the status (uncompressed, since it will be small) if we can.
 	        // Only do this for non-null statuses.
@@ -366,7 +368,7 @@ public final class TwitterUtils
 	        return(e - s);
         	};
 
-		return(es.submit(task));
+		return(es.submit(tweetPostingTask));
         }
 
     /**Removes any trailing automatic/variable part from the tweet, leaving the core.
