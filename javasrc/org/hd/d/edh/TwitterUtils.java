@@ -37,6 +37,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -478,8 +481,12 @@ public final class TwitterUtils
         return(hostname);
         }
 
-    /**Get the specified non-empty Mastodon status POST auth token or null if none.
+    /**Get the specified non-empty Mastodon status post auth token or null if none.
      * Note: this return value is to be treated with care, eg not logged or printed.
+     * 
+     * Any auth token file must be short and be pure (7-bit) ASCII.
+     * 
+     * @return auth token, or null if not available
      */
     public static String getMastodonAuthToken()
         {
@@ -488,10 +495,15 @@ public final class TwitterUtils
         // Transform empty user name to null.
         if((null != authtokenfilename) && authtokenfilename.isEmpty()) { return(null); }
 
+        final Path path = Paths.get(authtokenfilename);
+        if(!Files.exists(path)) { return(null); }
 
-        // TODO
+        try
+            { return(new String(Files.readAllBytes(path), StandardCharsets.US_ASCII)); }
+        catch (IOException e)
+            { e.printStackTrace(); }
 
-
+        // Failed.
         return(null);
         }
 
