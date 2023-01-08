@@ -304,7 +304,13 @@ public final class TwitterUtils
         // Veto this update if the last update was too recent.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
         final String minIntervalS = rawProperties.get(PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS);
-        if(twitterCacheFileExists && (null != minIntervalS) && !minIntervalS.isEmpty())
+        final boolean minIntervalSpecified = (null != minIntervalS) && !minIntervalS.isEmpty();
+        if(!minIntervalSpecified)
+	        {
+        	// Complain if being accidentally antisocial: 0 can be specified if required.
+	        System.err.println("ERROR: minimum social media posting gap (minutes) not specified: " + PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS);
+	        }
+        if(twitterCacheFileExists && minIntervalSpecified)
             {
             try
                 {
