@@ -913,7 +913,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
                 		socialMediaPostStatusCacheFile,
                         status,
-                		false); // Say if/why a post should be deferred.
+                		false); // Log if/why a post should be deferred.
 
             	// Do tweet, if set up...
                 if(canPost && (td != null))
