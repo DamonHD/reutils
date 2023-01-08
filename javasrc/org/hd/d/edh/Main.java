@@ -30,6 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.hd.d.edh.FUELINST.TrafficLightsInterface;
 
@@ -125,21 +128,24 @@ public final class Main
                 return; // Completed.
                 }
             else if("extraTweet".equals(command))
-	        {
-            	final int minMsg = 9; // Minimum plausible Tweet length.
-            	if((args.length < 2) || (null == args[1]) || (args[1].length() < minMsg))
-	            {
-	            System.err.println("extraTweet tweet missing or too short");
-	            System.exit(1);
-	            }
-            	else
-            	    {
-            	    final String messageText = args[1];
-	            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
-	            TwitterUtils.setTwitterStatusIfChanged(td, null, null, messageText);
-            	    }
-                return; // Completed.
-	        }
+				{
+				final int minMsg = 9; // Minimum plausible Tweet length.
+				if((args.length < 2) || (null == args[1]) || (args[1].length() < minMsg))
+					{
+					System.err.println("extraTweet tweet missing or too short");
+					System.exit(1);
+					}
+				else
+					{
+					final String messageText = args[1];
+					final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+			        final ExecutorService executor = Executors.newSingleThreadExecutor();
+					TwitterUtils.setTwitterStatusIfChanged(td, null, null, messageText, executor);
+					executor.shutdown();
+			        executor.awaitTermination(10, TimeUnit.SECONDS);
+					}
+				return; // Completed.
+				}
             }
         catch(final Throwable e)
             {

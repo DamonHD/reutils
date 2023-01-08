@@ -37,9 +37,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import winterwell.jtwitter.OAuthSignpostClient;
-import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
 
 
@@ -260,23 +262,28 @@ public final class TwitterUtils
      */
     private static final char TWEET_TAIL_SEP = '|';
 
-    /**Attempt to update the displayed Twitter status if necessary.
+    /**Attempt to update the displayed social Twitter status if necessary.
      * Send a new tweet only if we think the message/status changed since we last sent one,
      * and if it no longer matches what is actually at Twitter,
-     * so as to eliminate spurious Tweets.
+     * so as to eliminate spurious tweets.
      * <p>
-     * We should take pains to avoid unnecessary annoying/expensive updates.
+     * Takes pains to avoid unnecessary annoying/expensive updates.
+     * <p>
+     * Avoids writing to stdout or stderr in the threaded execution.
      *
      * @param td  non-null, non-read-only Twitter handle
      * @param TwitterCacheFileName  if non-null is the location to cache twitter status messages;
      *     if the new status supplied is the same as the cached value then we won't send an update
      * @param status  overall R/A/G status, null if no attempt to regulate by this
      * @param statusMessage  short (max 140 chars) Twitter status message; never null
+     * @param es  executor to run the Twitter status update on; never null
+     * @return  Future for time (ms) to post the tweet, null if none attempted
      */
-    public static void setTwitterStatusIfChanged(final TwitterUtils.TwitterDetails td,
+    public static Future<Long> setTwitterStatusIfChanged(final TwitterUtils.TwitterDetails td,
                                                  final File TwitterCacheFileName,
                                                  final TrafficLight status,
-                                                 final String statusMessage)
+                                                 final String statusMessage,
+                                                 final ExecutorService es)
         throws IOException
         {
         if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
@@ -296,7 +303,7 @@ public final class TwitterUtils
                     if((null != lastStatus) && (status.equals(lastStatus)))
                         {
                         System.err.println("INFO: previous tweet same status ("+lastStatus+") so skipping sending this one: " + statusMessage);
-                    	return;
+                    	return(null);
                     	}
                     }
                 catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
@@ -322,7 +329,7 @@ public final class TwitterUtils
                     if((lastSent + minIntervalmS) > System.currentTimeMillis())
                         {
                         System.err.println("WARNING: sent previous tweet too recently (<"+minIntervalS+"m, last "+(new Date(lastSent))+") so skipping sending this one: " + statusMessage);
-                        return;
+                        return(null);
                         }
                     }
                 }
@@ -330,43 +337,36 @@ public final class TwitterUtils
             catch(final NumberFormatException e) { e.printStackTrace(); }
             }
 
-        final Status statusBefore = td.handle.getStatus(td.username);
-        // Don't send a repeat/redundant message to Twitter...
-        // Conserve follower bandwidth and patience...
-        // If this fails with an exception then we won't update our cached status message either...
+        // UTC time to append to message to help make it unique.
+        // Without this, in the olden days, Twitter sometimes blocked updates as duplicates.
         final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
-        final String statusBeforeText = (null == statusBefore) ? null : statusBefore.getText();
-        if((null == statusBeforeText) || !removeTrailingPart(statusMessage).equals(removeTrailingPart(statusBeforeText)))
-            {
-            // Append time...
-            final String fullMessage = statusMessage + ' ' + TWEET_TAIL_SEP + time;
-            td.handle.setStatus(fullMessage);
-            System.out.println("INFO: sent tweet for username "+td.username+": '"+statusMessage+"' with trailer '"+time+"', was "+statusBeforeText);
-            }
-        else
-            {
-            System.out.println("INFO: not resending unchanged status/tweet for username "+td.username+": '"+statusMessage+"'");
-            return; // Don't update cache.
-            }
+        
+        System.out.println("INFO: sending tweet for username "+td.username+": '"+statusMessage+"' with timestamp '"+time);
 
-        // DHD20211123: this check does not seem to be reliable currently, so causing excess tweeting.
-        //INFO: sent tweet for username EarthOrgUK: '272gCO2/kWh National Grid status GREEN: CO2 intensity is low so you can run your wash etc now! http://bit.ly/3usoe #green #energy #CO2' with trailer '0446', was 272gCO2/kWh National Grid status GREEN: CO2 intensity is low so you can run your wash etc now!… https://t.co/E850CKTrJw
-        //WARNING: status not updated at Twitter: '272gCO2/kWh National Grid status GREEN: CO2 intensity is low so you can run your wash etc now!… https://t.co/XraoRMFglI'
-//        final Status statusAfter = td.handle.getStatus(td.username);
-//        final String statusAfterText = (null == statusAfter) ? null : statusAfter.getText();
-//        if(!statusAfterText.endsWith(time))
-//            {
-//            System.err.println("WARNING: status not updated at Twitter: '"+statusAfterText+"'");
-//            return; // Don't update cache.
-//            }
+        // Do the work in a background thread, quietly.
+        final Callable<Long> task = () ->
+        	{
+	        // Append time...
+	        final String fullMessage = statusMessage + ' ' + TWEET_TAIL_SEP + time + 'Z';
+	        
+	        final long s = System.currentTimeMillis();
+	        td.handle.setStatus(fullMessage);
+	
+	        // Upon getting this far, assume that the Tweet was successfully sent...
+	
+	        // Cache the status (uncompressed, since it will be small) if we can.
+	        // Only do this for non-null statuses.
+	        if((null != TwitterCacheFileName) && (null != status))
+	            {
+	            try { DataUtils.serialiseToFile(status, TwitterCacheFileName, false, true); }
+	            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
+	            }
+	        
+	        final long e = System.currentTimeMillis();
+	        return(e - s);
+        	};
 
-        // Now try to cache the status (uncompressed, since it will be small) if we can.
-        // Only do this for non-null statuses.
-        if((null != TwitterCacheFileName) && (null != status))
-            {
-            try { DataUtils.serialiseToFile(status, TwitterCacheFileName, false, true); }
-            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
-            }
+		return(es.submit(task));
         }
 
     /**Removes any trailing automatic/variable part from the tweet, leaving the core.

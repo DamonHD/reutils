@@ -851,6 +851,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Also post to social media if enabled.
         // FIMXE: consider dropping XML output if nothing is using it.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        Future<Long> resultTweetSend = null;
         if(outputHTMLFileName != null)
             {
             // Status to use to drive traffic-light measure.
@@ -941,11 +942,12 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                     // We use different messages for live and historical (stale) data.
                     final String tweetMessage = FUELINSTUtils.generateTweetMessage(
                         isDataStale, statusUncapped, retailIntensity);
-                    TwitterUtils.setTwitterStatusIfChanged(
+                    resultTweetSend = TwitterUtils.setTwitterStatusIfChanged(
                     		td,
                     		new File(TwitterCacheFileName),
                     		status,
-                    		tweetMessage);
+                    		tweetMessage,
+                    		executor);
                     }
                 }
             catch(final IOException e) { e.printStackTrace(); }
@@ -970,6 +972,17 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 
         // Wait for/reap any side tasks.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        if(null != resultTweetSend)
+	    	{
+	    	try {
+	        	final Long rcT = resultTweetSend.get();
+	        	System.out.println("INFO: tweet send in "+rcT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
+		        }
+	    	}
         if(null != resultCacheSave)
 	    	{
 	    	try {
