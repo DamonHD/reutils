@@ -845,7 +845,9 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             try { FUELINSTUtils.doFlagFiles(baseFileName, isDataStale, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
             catch(final IOException e) { e.printStackTrace(); }
 
+            // Collect social media details.
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+            final TwitterUtils.MastodonDetails md = TwitterUtils.getMastodonDetails();
 
             // Update the HTML page.
             try

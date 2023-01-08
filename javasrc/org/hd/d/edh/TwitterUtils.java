@@ -400,4 +400,30 @@ public final class TwitterUtils
         // Trim residual whitespace.
         return(cut.trim());
         }
+
+    /**Immutable class containing Mastodon details.
+     * These details are enough (other than any security tokens) to make a post.
+     */
+    public static final class MastodonDetails
+        {
+//        /**User name on Mastodon; never null nor empty. */
+//        public final String username;
+
+        /**Create an instance. */
+        public MastodonDetails()
+            {
+//            if((null == username) || username.isEmpty()) { throw new IllegalArgumentException(); }
+//            if(null == handle) { throw new IllegalArgumentException(); }
+//            this.username = username;
+//            this.handle = handle;
+//            this.readOnly = readOnly;
+            }
+        }
+
+    /**Get Mastodon details for updates; null if nothing suitable set up.
+     */
+    public static MastodonDetails getMastodonDetails()
+	    {
+	    return(null);	
+	    }
     }
