@@ -85,11 +85,10 @@ public final class FUELINSTUtils
     /**If true then reject points with too few fuel types in mix since this is likely an error. */
     static final int MIN_FUEL_TYPES_IN_MIX = 2;
     
-    /**If true then enable cacheing of 24h result. */
-    public static final boolean ENABLE_24H_RESULT_CACHE = false;
-
-    /**If true, compress (GZIP) any persisted 24h state. */
-    static final boolean GZIP_24H_RESULT_CACHE = true;
+//    /**If true then enable cacheing of 24h result. */
+//    private static final boolean ENABLE_24H_RESULT_CACHE = false;
+//    /**If true, compress (GZIP) any persisted 24h state. */
+//    private static final boolean GZIP_24H_RESULT_CACHE = true;
 
     /**Immutable regex pattern for matching a valid fuel name (all upper-case ASCII first char, digits also allowed subsequently); non-null. */
     public static final Pattern FUEL_NAME_REGEX = Pattern.compile("[A-Z][A-Z0-9]+");
@@ -676,7 +675,7 @@ public final class FUELINSTUtils
             final long dataFetchStart = System.currentTimeMillis();
             parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
             final long dataFetchEnd = System.currentTimeMillis();
-System.out.println("INFO: record/row count of CSV FUELINST data: " + parsedBMRCSV.size() + " from source: " + url + " fetch and parse "+(dataFetchEnd-dataFetchStart)+"ms");
+System.out.println("INFO: record/row count of CSV FUELINST data: "+(dataFetchEnd-dataFetchStart)+"ms, " + parsedBMRCSV.size() + " records from source: " + url + " fetch and parse");
             }
         catch(final IOException e)
             {
