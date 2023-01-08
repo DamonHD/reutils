@@ -349,7 +349,6 @@ System.out.println("INFO: sending tweet for username "+td.username+": '"+fullMes
         final Callable<Long> tweetPostingTask = () ->
         	{
     	    final long s = System.currentTimeMillis();
-
 	        
 	        // Send message...
 	        td.handle.setStatus(fullMessage);
