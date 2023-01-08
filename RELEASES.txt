@@ -19,16 +19,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20221213: doing awaitTermination() for the executor!
-    DHD20221213: simplified CSV field memory de-dup on parse.
-    DHD20221213: stopped generating data XML file as no longer used.
-    DHD20221213: forcing appendToRetailIntensityLog() to write US_ASCII.
-    DHD20221213: forcing updateTXTFile() to write US_ASCII.
-    DHD20221230: minor wording improvement for HTML page.
-    DHD20220108: sends status tweet on a background thread.
-    DHD20220108: stopped writing overall result cache as no longer needed.
-    DHD20220108: extended the thread pool, eg to allow concurrent tweet and toot.
-    DHD20220108: Can post Mastodon status, ie "toot".
+
 
 
 
@@ -36,6 +27,24 @@ PENDING:
 SIGNIFICANT RELEASES (newest first)
 ===================================
 
+
+20230108:
+    freezepoint name: V1.1.20
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.19
+    DHD20221213: doing awaitTermination() for the executor!
+    DHD20221213: simplified CSV field memory de-dup on parse.
+    DHD20221213: stopped generating data XML file as no longer used.
+    DHD20221213: forcing appendToRetailIntensityLog() to write US_ASCII.
+    DHD20221213: forcing updateTXTFile() to write US_ASCII.
+    DHD20221230: minor wording improvement for HTML page.
+    DHD20230108: sends status tweet on a background thread.
+    DHD20230108: stopped writing overall result cache as no longer needed.
+    DHD20230108: extended the thread pool, eg to allow concurrent tweet and toot.
+    DHD20230108: Can post Mastodon status, ie "toot".
+    
 
 20221213:
     freezepoint name: V1.1.19
