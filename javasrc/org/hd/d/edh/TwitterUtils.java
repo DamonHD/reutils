@@ -463,7 +463,7 @@ public final class TwitterUtils
         return(hostname);
         }
 
-    /**Attempt to update Twitter status.
+    /**Attempt to update Mastodon status.
      * Can be run on a background thread.
      *
      * @param td  non-null, non-read-only Twitter handle
