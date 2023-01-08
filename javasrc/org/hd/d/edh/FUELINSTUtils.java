@@ -906,7 +906,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                 {
                 if(td != null)
                     {
-                    // Compute name of file in which to cache last status we sent to Twitter.
+                    // Compute name of file in which to cache last status posted to social media.
                     final String TwitterCacheFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
                         (outputHTMLFileName + ".twittercache");
                     // Attempt to update the displayed Twitter status as necessary

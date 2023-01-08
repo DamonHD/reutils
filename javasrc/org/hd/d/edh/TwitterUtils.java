@@ -76,7 +76,7 @@ public final class TwitterUtils
     public static final String PNAME_TWITTER_AUTHTOK_FILENAME2 = "Twitter.authtokenfile2";
 
     /**Property name for minimum gap between Tweets in minutes (non-negative); not null. */
-    public static final String PNAME_TWITTER_MIN_GAP_MINS = "Twitter.minGapMins";
+    public static final String PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS = "Twitter.minGapMins";
 
     /**Immutable class containing Twitter handle, user ID and read-only flag. */
     public static final class TwitterDetails
@@ -261,6 +261,75 @@ public final class TwitterUtils
      * Generally whitespace would also be inserted to avoid confusion.
      */
     private static final char TWEET_TAIL_SEP = '|';
+    
+    /**Returns true if a social media grid intensity update should be posted.
+     * This is based on whether the status has changed since the lost status post,
+     * and when that last status post was.
+     * 
+     * This may log reasons to stdout/stderr if returning false, unless quiet is true.
+     * 
+     * @param socialMediaPostStatusCacheFileName  if non-null is the location to cache twitter status messages;
+     *     if the new status supplied is the same as the cached value then we won't send an update
+     * @param status  overall R/A/G status; never null
+     * @param quiet  if true then suppress log messages on stdout/stderr
+     */
+    public static boolean canPostNewStatusMessage(
+    		final File socialMediaPostStatusCacheFileName,
+            final TrafficLight status,
+    		final boolean quiet)
+	    {
+    	if(null == socialMediaPostStatusCacheFileName) { throw new IllegalArgumentException(); }
+    	if(null == status) { throw new IllegalArgumentException(); }
+
+        // Don't try to post a new status unless different from previous.
+        final boolean twitterCacheFileExists = socialMediaPostStatusCacheFileName.canRead();
+
+        if(twitterCacheFileExists)
+            {
+            try
+                {
+                final TrafficLight lastStatus = (TrafficLight) DataUtils.deserialiseFromFile(socialMediaPostStatusCacheFileName, false);
+                if(status.equals(lastStatus))
+                    {
+                    if(!quiet)
+                    	{ System.err.println("INFO: previous tweet same status ("+lastStatus+")"); }
+                	return(false);
+                	}
+                }
+            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
+            }
+
+        // If there is a minimum interval between social media posts specified
+        // then check when the cache of the last one sent was updated.
+        // Veto this update if the last update was too recent.
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String minIntervalS = rawProperties.get(PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS);
+        if(twitterCacheFileExists && (null != minIntervalS) && !minIntervalS.isEmpty())
+            {
+            try
+                {
+                final int minInterval = Integer.parseInt(minIntervalS, 10);
+                if(minInterval < 0) { throw new NumberFormatException(PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS + " must be non-negative"); }
+                // Only restrict sending messages for a positive interval.
+                if(minInterval > 0)
+                    {
+                    final long minIntervalmS = minInterval * 60 * 1000L;
+                    final long lastSent = socialMediaPostStatusCacheFileName.lastModified();
+                    if((lastSent + minIntervalmS) > System.currentTimeMillis())
+                        {
+                    	if(!quiet)
+                            { System.out.println("INFO: sent previous social media post too recently (<"+minIntervalS+"m, last "+(new Date(lastSent))); }
+                        return(false);
+                        }
+                    }
+                }
+            // Complain about badly-formatted value, and continue as if not present.
+            catch(final NumberFormatException e) { e.printStackTrace(); }
+            }
+
+        // OK to post new status message.
+        return(true);
+	    }
 
     /**Attempt to update the displayed social Twitter status if necessary.
      * Send a new tweet only if we think the message/status changed since we last sent one,
@@ -314,13 +383,13 @@ public final class TwitterUtils
         // then check when our cache of the last one sent was updated
         // and quietly veto this message (though log it) if the last update was too recent.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String minIntervalS = rawProperties.get(PNAME_TWITTER_MIN_GAP_MINS);
+        final String minIntervalS = rawProperties.get(PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS);
         if(twitterCacheFileExists && (null != minIntervalS) && !minIntervalS.isEmpty())
             {
             try
                 {
                 final int minInterval = Integer.parseInt(minIntervalS, 10);
-                if(minInterval < 0) { throw new NumberFormatException(PNAME_TWITTER_MIN_GAP_MINS + " must be non-negative"); }
+                if(minInterval < 0) { throw new NumberFormatException(PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS + " must be non-negative"); }
                 // Only restrict sending messages for a positive interval.
                 if(minInterval > 0)
                     {
