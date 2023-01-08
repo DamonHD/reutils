@@ -28,6 +28,7 @@ PENDING:
     DHD20220108: sends status tweet on a background thread.
     DHD20220108: stopped writing overall result cache as no longer needed.
     DHD20220108: extended the thread pool, eg to allow concurrent tweet and toot.
+    DHD20220108: Can post Mastodon status, ie "toot".
 
 
 

@@ -30,10 +30,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -485,6 +485,7 @@ public final class TwitterUtils
      * Note: this return value is to be treated with care, eg not logged or printed.
      * 
      * Any auth token file must be short and be pure (7-bit) ASCII.
+     * Surrounding whitespace is trim()med.
      * 
      * @return auth token, or null if not available
      */
@@ -499,7 +500,7 @@ public final class TwitterUtils
         if(!Files.exists(path)) { return(null); }
 
         try
-            { return(new String(Files.readAllBytes(path), StandardCharsets.US_ASCII)); }
+            { return((new String(Files.readAllBytes(path), StandardCharsets.US_ASCII)).trim()); }
         catch (IOException e)
             { e.printStackTrace(); }
 
@@ -529,15 +530,17 @@ public final class TwitterUtils
 
         // Here is how to do it with curl...
         // (MAT is a file containing the access token.)
-        // curl https://mastodon.energy/api/v1/statuses -H "Authorization: Bearer `cat $MAT`" -F "status=$1"
-
+        // % curl https://mastodon.energy/api/v1/statuses -H "Authorization: Bearer `cat $MAT`" -F "status=$1"
+        // See https://dev.to/bitsrfr/getting-started-with-the-mastodon-api-41jj
+        
         // Use URL encoding to force into ASCII (7-bit) encoding.
         final String formEncodedBody = "status=" +
             URLEncoder.encode(statusMessage, StandardCharsets.US_ASCII);
         
         final int timeout_ms = 10000;
 
-        final URL u = new URL("https", md.hostname, "api/v1/statuses");
+        final URL u = new URL("https", md.hostname, "/api/v1/statuses");
+        
         final HttpsURLConnection uc = (HttpsURLConnection) u.openConnection();
         uc.setUseCaches(false);
         uc.setAllowUserInteraction(false);
@@ -546,16 +549,21 @@ public final class TwitterUtils
         uc.setConnectTimeout(timeout_ms);
         uc.setReadTimeout(timeout_ms);
         uc.setRequestMethod("POST");
-        uc.setRequestProperty("Authorization","Bearer " + authtoken);
-        uc.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-        uc.setRequestProperty("Content-length",String.valueOf(formEncodedBody.length()));
-        try ( final DataOutputStream output = new DataOutputStream(uc.getOutputStream()); )
-            {
-        	output.writeUTF(formEncodedBody);
-            // Absorb response from server here?
-            // Look for success/error?        	
-        	}
+        uc.setRequestProperty("Authorization", "Bearer " + authtoken);
+        uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        uc.setRequestProperty("Content-Length", String.valueOf(formEncodedBody.length()));
+        final OutputStream output = uc.getOutputStream();
+    	output.write(formEncodedBody.getBytes(StandardCharsets.US_ASCII));
+    	output.close();
+        final int responseCode = uc.getResponseCode();
+        final String responseMessage = uc.getResponseMessage();
+
         uc.disconnect();
+        if(200 != responseCode)
+            {
+        	throw new IOException("failed toot response code " +
+                responseCode + ": " + responseMessage);
+            }	
         }
 
     /**Send a toot and time it.
