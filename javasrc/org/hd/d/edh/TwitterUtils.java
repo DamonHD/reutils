@@ -406,24 +406,36 @@ public final class TwitterUtils
      */
     public static final class MastodonDetails
         {
-//        /**User name on Mastodon; never null nor empty. */
-//        public final String username;
+        /**User name on Mastodon; never null nor empty. */
+        public final String username;
+        /**Mastodon host; never null nor empty. */
+        public final String hostname;
 
         /**Create an instance. */
-        public MastodonDetails()
+        public MastodonDetails(final String username, final String hostname)
             {
-//            if((null == username) || username.isEmpty()) { throw new IllegalArgumentException(); }
-//            if(null == handle) { throw new IllegalArgumentException(); }
-//            this.username = username;
-//            this.handle = handle;
-//            this.readOnly = readOnly;
+            if((null == username) || username.isEmpty()) { throw new IllegalArgumentException(); }
+            if((null == hostname) || hostname.isEmpty()) { throw new IllegalArgumentException(); }
+            this.username = username;
+            this.hostname = hostname;
             }
         }
 
-    /**Get Mastodon details for updates; null if nothing suitable set up.
+    /**Get Mastodon details for updates; null if nothing is available.
+     * Note that this is not a live handle/connection.
+     * Any authentication details to make a post (say)
+     * will need to be looked up on the fly, separately.
      */
     public static MastodonDetails getMastodonDetails()
 	    {
+//		final String username = getMastodonUsername();
+//		if(null == username) { return(null); }
+
+// // Try first the primary password file, then the alternate if need be.
+// final Map<String, String> rawProperties = MainProperties.getRawProperties();
+// final String[] authtokens1 = getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME), allowReadOnly);
+// final String[] authtokens = (authtokens1 != null) ? authtokens1 : getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME2), allowReadOnly);
+
 	    return(null);	
 	    }
     }
