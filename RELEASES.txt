@@ -19,7 +19,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-*** Stop writing overall result cache as no longer really needed.
     DHD20221213: doing awaitTermination() for the executor!
     DHD20221213: simplified CSV field memory de-dup on parse.
     DHD20221213: stopped generating data XML file as no longer used.
@@ -27,6 +26,7 @@ PENDING:
     DHD20221213: forcing updateTXTFile() to write US_ASCII.
     DHD20221230: minor wording improvement for HTML page.
     DHD20220108: sends status tweet on a background thread.
+    DHD20220108: stopped writing overall result cache as no longer needed.
 
 
 

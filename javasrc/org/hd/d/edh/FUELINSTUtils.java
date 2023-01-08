@@ -83,10 +83,13 @@ public final class FUELINSTUtils
     static final String LESS_GREEN_STORAGE_DRAWDOWN = "olive";
 
     /**If true then reject points with too few fuel types in mix since this is likely an error. */
-    final static int MIN_FUEL_TYPES_IN_MIX = 2;
+    static final int MIN_FUEL_TYPES_IN_MIX = 2;
+    
+    /**If true then enable cacheing of 24h result. */
+    public static final boolean ENABLE_24H_RESULT_CACHE = false;
 
-    /**If true, compress (GZIP) any persisted state. */
-    static final boolean GZIP_CACHE = true;
+    /**If true, compress (GZIP) any persisted 24h state. */
+    static final boolean GZIP_24H_RESULT_CACHE = true;
 
     /**Immutable regex pattern for matching a valid fuel name (all upper-case ASCII first char, digits also allowed subsequently); non-null. */
     public static final Pattern FUEL_NAME_REGEX = Pattern.compile("[A-Z][A-Z0-9]+");
@@ -763,46 +766,19 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             }
 
         // Compute 24hr summary if we have fresh data, and cache.
+        // Will be empty rather than null if not able to be computed/loaded.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         //
         // If parsedBMRCSV is null or empty
-        // this will attempt to use previously cached result
-        // else fall back to empty/default result.
-        CurrentSummary summary24h = null;
+        // then this will leave a empty/default (non-null) result.
+        CurrentSummary summary24h = new FUELINST.CurrentSummary();
         Future<Long> resultCacheSave = null;
         if((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty())
         	{
         	final CurrentSummary result = FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
         	summary24h = result;
-            // If cacheing is enabled AND the new result is not stale
-        	// then persist this result, compressed.
-            if((null != resultCacheFile) && (summary24h.useByTime >= System.currentTimeMillis()))
-                {
-            	resultCacheSave = executor.submit(() ->
-	            	{
-	            	final long s = System.currentTimeMillis();
-                	DataUtils.serialiseToFile(result, resultCacheFile, FUELINSTUtils.GZIP_CACHE, true);
-	            	final long e = System.currentTimeMillis();
-			        return(e - s);
-	            	});
-            	}
         	}
-        else
-            {
-            // Try to retrieve from cache...
-            FUELINST.CurrentSummary cached = null;
-            try { cached = (FUELINST.CurrentSummary) DataUtils.deserialiseFromFile(resultCacheFile, FUELINSTUtils.GZIP_CACHE); }
-            catch(final IOException err) { /* Fall through... */ }
-            catch(final Exception err) { err.printStackTrace(); }
-            if(null != cached)
-                {
-                System.err.println("WARNING: using previous result from cache...");
-                summary24h = cached;
-                }
-            // Use place-holder value.
-            else
-            	{ summary24h = new FUELINST.CurrentSummary(); }
-            }
+
 
         // Compute 7-day summary if long store is available.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
@@ -851,7 +827,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Also post to social media if enabled.
         // FIMXE: consider dropping XML output if nothing is using it.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        Future<Long> resultTweetSend = null;
+        Future<Long> tweetSend = null;
         if(outputHTMLFileName != null)
             {
             // Status to use to drive traffic-light measure.
@@ -942,7 +918,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                     // We use different messages for live and historical (stale) data.
                     final String tweetMessage = FUELINSTUtils.generateTweetMessage(
                         isDataStale, statusUncapped, retailIntensity);
-                    resultTweetSend = TwitterUtils.setTwitterStatusIfChanged(
+                    tweetSend = TwitterUtils.setTwitterStatusIfChanged(
                     		td,
                     		new File(TwitterCacheFileName),
                     		status,
@@ -994,11 +970,11 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 		        }
         	}
-        if(null != resultTweetSend)
+        if(null != tweetSend)
 	    	{
 	    	try {
-	        	final Long rcT = resultTweetSend.get();
-	        	System.out.println("INFO: tweet sent in "+rcT+"ms.");
+	        	final Long tsT = tweetSend.get();
+	        	System.out.println("INFO: tweet sent in "+tsT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
 		        {
