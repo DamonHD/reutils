@@ -902,40 +902,52 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             // and there is a change from any previous status posted.
             // There are different messages when working from historical data
             // because real-time / live data is not available.
+            if((null != td) || (null != md))
+	            {
+	            // Compute name of file in which to cache last status posted to social media.
+	            final File socialMediaPostStatusCacheFile = new File(
+	            		(-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".postStatusCache") :
+	                (outputHTMLFileName + ".postStatusCache"));
+	
+	            // Should an update be posted (yet)?
+	        	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
+	            		socialMediaPostStatusCacheFile,
+	                    status,
+	            		false); // Log if/why a post should be deferred.
+	
+	        	if(canPost)
+		        	{
+	                final String statusMessage = FUELINSTUtils.generateSocialMediaStatus(
+		                    isDataStale, statusUncapped, retailIntensity);
+	
+	                // Send toot, if set up...
+	                if(md != null)
+		                {
+System.out.println("INFO: sending toot...");
 
-            // Compute name of file in which to cache last status posted to social media.
-            final File socialMediaPostStatusCacheFile = new File(
-            		(-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".postStatusCache") :
-                (outputHTMLFileName + ".postStatusCache"));
+		                // TODO
 
-            // Should an update be posted (yet)?
-        	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
-            		socialMediaPostStatusCacheFile,
-                    status,
-            		false); // Log if/why a post should be deferred.
-
-        	if(canPost)
-	        	{
-                final String statusMessage = FUELINSTUtils.generateSocialMediaStatus(
-	                    isDataStale, statusUncapped, retailIntensity);
-
-                // Do tweet, if set up...
-	            if(td != null)
-	                {
-	                tweetSend = executor.submit(() ->
-	                	{ return(TwitterUtils.timeSendTwitterStatus(td, statusMessage)); });
-	                }
-
-	            // Assume that status updates will almost always succeed.
-	            // And that it is not a disaster if an update (silently) fails...
-	            // Cache the new status (uncompressed, since it will be small).
-	            // Only do this for non-null statuses.
-	            if(null != status)
-	                {
-	                try { DataUtils.serialiseToFile(status, socialMediaPostStatusCacheFile, false, true); }
-	                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
-	                }
-	        	}
+		                }
+	                
+	                // Send tweet, if set up...
+		            if(td != null)
+		                {
+System.out.println("INFO: sending tweet...");
+		                tweetSend = executor.submit(() ->
+		                	{ return(TwitterUtils.timeSendTwitterStatus(td, statusMessage)); });
+		                }
+	
+		            // Assume that status updates will almost always succeed.
+		            // And that it is not a disaster if an update (silently) fails...
+		            // Cache the new status (uncompressed, since it will be small).
+		            // Only do this for non-null statuses.
+		            if(null != status)
+		                {
+		                try { DataUtils.serialiseToFile(status, socialMediaPostStatusCacheFile, false, true); }
+		                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
+		                }
+		        	}
+	            }
             }
 
 
