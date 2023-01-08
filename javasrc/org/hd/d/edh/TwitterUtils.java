@@ -360,7 +360,7 @@ public final class TwitterUtils
         {
         if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
         if(null == statusMessage) { throw new IllegalArgumentException(); }
-        if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
+        if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long"); }
 
         // UTC timestamp to append to message to help make it unique.
         // Without this, in the olden days, Twitter sometimes blocked updates as duplicates.
@@ -377,7 +377,7 @@ public final class TwitterUtils
      * @param statusMessage  short (max 140 chars) Twitter status message; never null
      * @param status  overall R/A/G status, null if no attempt to regulate by this
      */
-	public static Long timeSendTwitterStatus(final TwitterDetails td, final String statusMessage)
+	public static Long timeSetTwitterStatus(final TwitterDetails td, final String statusMessage)
 		throws IOException
 	    {
 		final long s = System.currentTimeMillis();
@@ -442,7 +442,6 @@ public final class TwitterUtils
 		
 		return(new MastodonDetails(username, hostname));
 	    }
-    
 
     /**Get the specified non-empty Mastodon user name or null if none. */
     public static String getMastodonUsername()
@@ -464,4 +463,36 @@ public final class TwitterUtils
         return(hostname);
         }
 
+    /**Attempt to update Twitter status.
+     * Can be run on a background thread.
+     *
+     * @param td  non-null, non-read-only Twitter handle
+     * @param statusMessage  short (max 140 chars) Twitter status message; never null
+     */
+    public static void setMastodonStatus(final MastodonDetails md,
+                                              final String statusMessage)
+        throws IOException
+        {
+        if(null == md) { throw new IllegalArgumentException(); }
+        if(null == statusMessage) { throw new IllegalArgumentException(); }
+        if(statusMessage.length() > MAX_TOOT_CHARS) { throw new IllegalArgumentException("message too long"); }
+
+        // Send message...
+
+// TODO
+        
+        }
+
+    /**Send a toot and time it.
+     * @param md  non-null, Mastodon details
+     * @param statusMessage  short (max 140 chars) Twitter status message; never null
+     */
+	public static long timeSetMastodonStatus(MastodonDetails md, String statusMessage)
+		throws IOException
+	    {
+		final long s = System.currentTimeMillis();
+		setMastodonStatus(md, statusMessage);
+		final long e = System.currentTimeMillis();
+		return(e - s);
+	    }
     }

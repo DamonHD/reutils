@@ -823,6 +823,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Also post to social media if enabled.
         // FIMXE: consider dropping XML output if nothing is using it.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        Future<Long> tootSend = null;
         Future<Long> tweetSend = null;
         if(outputHTMLFileName != null)
             {
@@ -879,11 +880,8 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                 {
                 final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
                     (outputHTMLFileName + ".xhtml");
-//                if(null != outputXHTMLFileName)
-//                    {
-                    FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary24h, isDataStale,
-                        hourOfDayHistorical, status);
-//                    }
+                FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary24h, isDataStale,
+                    hourOfDayHistorical, status);
                 }
             catch(final IOException e) { e.printStackTrace(); }
             
@@ -924,9 +922,8 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	                if(md != null)
 		                {
 System.out.println("INFO: sending toot...");
-
-		                // TODO
-
+						tootSend = executor.submit(() ->
+						    { return(TwitterUtils.timeSetMastodonStatus(md, statusMessage)); });
 		                }
 	                
 	                // Send tweet, if set up...
@@ -934,7 +931,7 @@ System.out.println("INFO: sending toot...");
 		                {
 System.out.println("INFO: sending tweet...");
 		                tweetSend = executor.submit(() ->
-		                	{ return(TwitterUtils.timeSendTwitterStatus(td, statusMessage)); });
+		                	{ return(TwitterUtils.timeSetTwitterStatus(td, statusMessage)); });
 		                }
 	
 		            // Assume that status updates will almost always succeed.
@@ -960,7 +957,6 @@ System.out.println("INFO: sending tweet...");
                 {
             	// DHD20221213: 48x48 generation dropped as not apparently used at all.
                 GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
-//                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 48, summary24h.timestamp, summary24h.status, retailIntensity);
                 GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
                 }
             else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
@@ -980,7 +976,18 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 		        }
         	}
-        if(null != tweetSend)
+        if(null != tootSend)
+	    	{
+	    	try {
+	        	final Long tsT = tootSend.get();
+	        	System.out.println("INFO: toot sent in "+tsT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not send toot: " + e.getMessage());
+		        }
+	    	}
+       if(null != tweetSend)
 	    	{
 	    	try {
 	        	final Long tsT = tweetSend.get();
@@ -991,7 +998,7 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
 		        }
 	    	}
-        // Kill off the thread pool, completing any running task(s).
+        // Shut down the thread pool, completing any running task(s).
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
         try { executor.awaitTermination(10, TimeUnit.SECONDS); }
