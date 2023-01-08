@@ -479,8 +479,13 @@ public final class TwitterUtils
 
         // Send message...
 
+        // Here is how to do it with curl...
+        // (MAT is a file containing the access token.)
+        // curl https://mastodon.energy/api/v1/statuses -H "Authorization: Bearer `cat $MAT`" -F "status=$1"
+
+
 // TODO
-        
+
         }
 
     /**Send a toot and time it.
