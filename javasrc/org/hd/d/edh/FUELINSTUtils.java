@@ -657,12 +657,11 @@ public final class FUELINSTUtils
 
         // Load long store concurrently with fetching new data.
         // As well as overlapping the I/O
-        // this is hoped to get instrumented JIT compilation 
-        // done fairly optimally in parallel.
+        // this may get JIT compilation done fairly optimally in parallel.
         final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
 	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
 
-        // Fetch and parse the CSV file from the data source.
+        // Fetch and parse the FUELINST CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
         final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
@@ -740,7 +739,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 				parsedBMRCSV = appendedNewData;
 	        	}
 	        }
-        // Attempt to update the long store with new records.
+        // Attempt to update the long store with new data received.
         // Keep the store length trimmed.
         Future<Long> longStoreSave = null;
         // Update the long store only if there is something valid to update it with.
@@ -755,7 +754,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        		longStore, HOURS_PER_WEEK);
 	        if(null != trimmedLongStore) { longStore = trimmedLongStore; }
 	        // Save long store (asynchronously, atomically, world-readable).
-	        // Long store must not be mutated.
+	        // The long store must not be mutated.
 	        final List<List<String>> lsf = longStore;
 	        longStoreSave = executor.submit(() ->
 	            {
@@ -804,7 +803,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Only do this for current/live data, ie if not stale.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         if(isDataStale || (0 == summary24h.timestamp))
-            { System.err.println("WARNING: will not update log, input data is stale."); }
+            { System.err.println("WARNING: will not update intensity log, input data is stale."); }
         else
         	{ 		
             try
@@ -981,12 +980,8 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // Kill off the thread pool, completing any running task(s).
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
-        try {
-			executor.awaitTermination(10, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try { executor.awaitTermination(10, TimeUnit.SECONDS); }
+        catch (InterruptedException e) { e.printStackTrace(); }
 
         final long endTime = System.currentTimeMillis();
 System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
