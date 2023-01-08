@@ -898,17 +898,26 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             catch(final IOException e) { e.printStackTrace(); }
 
 
-            // Update Twitter if it is set up
-            // and if this represents a change from the previous status.
-            // We may have different messages when we're working from historical data
+            // Update social media if set up
+            // and there is a change from any previous status posted.
+            // There are different messages when working from historical data
             // because real-time / live data is not available.
             try
                 {
-                if(td != null)
+                // Compute name of file in which to cache last status posted to social media.
+                final File socialMediaPostStatusCacheFile = new File(
+                		(-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
+                    (outputHTMLFileName + ".twittercache"));
+
+                // Should an update be posted (yet)?
+            	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
+                		socialMediaPostStatusCacheFile,
+                        status,
+                		false);
+
+            	// Do tweet, if set up...
+                if(canPost && (td != null))
                     {
-                    // Compute name of file in which to cache last status posted to social media.
-                    final String TwitterCacheFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
-                        (outputHTMLFileName + ".twittercache");
                     // Attempt to update the displayed Twitter status as necessary
                     // only if we think the status changed since we last sent it
                     // and it has actually changed compared to what is at Twitter...
@@ -918,7 +927,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                         isDataStale, statusUncapped, retailIntensity);
                     tweetSend = TwitterUtils.setTwitterStatusIfChanged(
                     		td,
-                    		new File(TwitterCacheFileName),
+                    		socialMediaPostStatusCacheFile,
                     		status,
                     		tweetMessage,
                     		executor);
