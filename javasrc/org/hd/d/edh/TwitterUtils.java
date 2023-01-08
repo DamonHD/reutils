@@ -438,8 +438,9 @@ public final class TwitterUtils
      * Note that this is not a live handle/connection.
      * Any authentication details to make a post (say)
      * will need to be looked up on the fly, separately.
-     * But this will return null and complain if such a token is not available
-     * even if username and hostname are present.
+     * 
+     * This will return null and complain if such an auth token is not available
+     * if username and hostname are present.
      */
     public static MastodonDetails getMastodonDetails()
 	    {
