@@ -650,7 +650,6 @@ public final class FUELINSTUtils
         final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
 
         // Compute relative paths for caches/stores.
-        final File resultCacheFile = (null == baseFileName) ? null : (new File(baseFileName + RESULT_CACHE_SUFFIX));
         final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));        
 
         // Load long store concurrently with fetching new data.
@@ -1662,7 +1661,6 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             final LocalDate todayUTC = LocalDate.now(ZoneOffset.UTC);
             final int intensityYear = todayUTC.getYear();
             w.write("<p>Overall generation intensity (kgCO2/kWh) computed using the following fuel year-"+intensityYear+" intensities (other fuels/sources are ignored):");
-            final Map<String, Float> configuredIntensities = FUELINSTUtils.getConfiguredIntensities(intensityYear);
             final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities(intensityYear));
             for(final String fuel : intensities.keySet())
                 {
