@@ -311,7 +311,7 @@ public final class TwitterUtils
                 if(status.equals(lastStatus))
                     {
                     if(!quiet)
-                    	{ System.err.println("INFO: previous tweet same status ("+lastStatus+")"); }
+                    	{ System.out.println("INFO: social media post status unchanged ("+lastStatus+")"); }
                 	return(false);
                 	}
                 }
@@ -343,7 +343,7 @@ public final class TwitterUtils
                     if((lastSent + minIntervalmS) > System.currentTimeMillis())
                         {
                     	if(!quiet)
-                            { System.out.println("INFO: sent previous social media post too recently (<"+minIntervalS+"m, last "+(new Date(lastSent))); }
+                            { System.out.println("INFO: sent previous social media post recently (<"+minIntervalS+"m, last "+(new Date(lastSent))); }
                         return(false);
                         }
                     }
