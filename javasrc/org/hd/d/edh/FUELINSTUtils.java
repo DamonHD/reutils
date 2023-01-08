@@ -641,8 +641,11 @@ public final class FUELINSTUtils
         final long startTime = System.currentTimeMillis();
 
         System.out.println("INFO: generating traffic-light summary "+Arrays.asList(args)+"...");
-        
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        // Allow (at most) a couple of threads to process less critical tasks.
+        // Loading fresh data and composing the HTML page and updating flags are critical.
+        // Anything else, especially including potentially-slow I/O, can be done in the pool.
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
 
         final String outputHTMLFileName = (args.length < 1) ? null : args[0];
         final int lastDot = (outputHTMLFileName == null) ? -1 : outputHTMLFileName.lastIndexOf(".");
