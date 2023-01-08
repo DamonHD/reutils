@@ -81,6 +81,13 @@ public final class TwitterUtils
     /**Property name for minimum gap between Tweets in minutes (non-negative); not null. */
     public static final String PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS = "Twitter.minGapMins";
 
+    /**Property name for Mastodon user; not null. */
+    public static final String PNAME_MASTODON_USERNAME = "Mastodon.username";
+
+    /**Property name for Mastodon host; not null. */
+    public static final String PNAME_MASTODON_HOSTNAME = "Mastodon.hostname";
+
+ 
     /**Immutable class containing Twitter handle, user ID and read-only flag. */
     public static final class TwitterDetails
         {
@@ -428,14 +435,33 @@ public final class TwitterUtils
      */
     public static MastodonDetails getMastodonDetails()
 	    {
-//		final String username = getMastodonUsername();
-//		if(null == username) { return(null); }
-
-// // Try first the primary password file, then the alternate if need be.
-// final Map<String, String> rawProperties = MainProperties.getRawProperties();
-// final String[] authtokens1 = getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME), allowReadOnly);
-// final String[] authtokens = (authtokens1 != null) ? authtokens1 : getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME2), allowReadOnly);
-
-	    return(null);	
+		final String username = getMastodonUsername();
+		if(null == username) { return(null); }
+		final String hostname = getMastodonHostname();
+		if(null == hostname) { return(null); }
+		
+		return(new MastodonDetails(username, hostname));
 	    }
+    
+
+    /**Get the specified non-empty Mastodon user name or null if none. */
+    public static String getMastodonUsername()
+        {
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String username = rawProperties.get(PNAME_MASTODON_USERNAME);
+        // Transform empty user name to null.
+        if((null != username) && username.isEmpty()) { return(null); }
+        return(username);
+        }
+
+    /**Get the specified non-empty Mastodon host name or null if none. */
+    public static String getMastodonHostname()
+        {
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+        final String hostname = rawProperties.get(PNAME_MASTODON_HOSTNAME);
+        // Transform empty user name to null.
+        if((null != hostname) && hostname.isEmpty()) { return(null); }
+        return(hostname);
+        }
+
     }
