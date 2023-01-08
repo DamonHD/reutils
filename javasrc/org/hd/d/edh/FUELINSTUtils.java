@@ -770,7 +770,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // If parsedBMRCSV is null or empty
         // then this will leave a empty/default (non-null) result.
         CurrentSummary summary24h = new FUELINST.CurrentSummary();
-        Future<Long> resultCacheSave = null;
         if((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty())
         	{
         	final CurrentSummary result = FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
@@ -795,9 +794,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         final int retailIntensity = Math.round((isDataStale ?
         		summary24h.histAveIntensity :
         	    summary24h.currentIntensity) * (1 + summary24h.totalGridLosses));
-
-//if(null != resultCacheSave) { System.out.println("resultCacheSave.isDone(): " + resultCacheSave.isDone()); }
-//if(null != longStoreSave) { System.out.println("longStoreSave.isDone(): " + longStoreSave.isDone()); }
 
 
         // New as of 2019-10.
@@ -902,38 +898,40 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             // and there is a change from any previous status posted.
             // There are different messages when working from historical data
             // because real-time / live data is not available.
-            try
-                {
-                // Compute name of file in which to cache last status posted to social media.
-                final File socialMediaPostStatusCacheFile = new File(
-                		(-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".twittercache") :
-                    (outputHTMLFileName + ".twittercache"));
 
-                // Should an update be posted (yet)?
-            	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
-                		socialMediaPostStatusCacheFile,
-                        status,
-                		false); // Log if/why a post should be deferred.
+            // Compute name of file in which to cache last status posted to social media.
+            final File socialMediaPostStatusCacheFile = new File(
+            		(-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".postStatusCache") :
+                (outputHTMLFileName + ".postStatusCache"));
 
-            	// Do tweet, if set up...
-                if(canPost && (td != null))
-                    {
-                    // Attempt to update the displayed Twitter status as necessary
-                    // only if we think the status changed since we last sent it
-                    // and it has actually changed compared to what is at Twitter...
-                    // If we can't get a hand-crafted message then we create a simple one on the fly...
-                    // We use different messages for live and historical (stale) data.
-                    final String tweetMessage = FUELINSTUtils.generateTweetMessage(
-                        isDataStale, statusUncapped, retailIntensity);
-                    tweetSend = TwitterUtils.setTwitterStatusIfChanged(
-                    		td,
-                    		socialMediaPostStatusCacheFile,
-                    		status,
-                    		tweetMessage,
-                    		executor);
-                    }
-                }
-            catch(final IOException e) { e.printStackTrace(); }
+            // Should an update be posted (yet)?
+        	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
+            		socialMediaPostStatusCacheFile,
+                    status,
+            		false); // Log if/why a post should be deferred.
+
+        	if(canPost)
+	        	{
+                final String statusMessage = FUELINSTUtils.generateSocialMediaStatus(
+	                    isDataStale, statusUncapped, retailIntensity);
+
+                // Do tweet, if set up...
+	            if(td != null)
+	                {
+	                tweetSend = executor.submit(() ->
+	                	{ return(TwitterUtils.timeSendTwitterStatus(td, statusMessage)); });
+	                }
+
+	            // Assume that status updates will almost always succeed.
+	            // And that it is not a disaster if an update (silently) fails...
+	            // Cache the new status (uncompressed, since it will be small).
+	            // Only do this for non-null statuses.
+	            if(null != status)
+	                {
+	                try { DataUtils.serialiseToFile(status, socialMediaPostStatusCacheFile, false, true); }
+	                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
+	                }
+	        	}
             }
 
 
@@ -955,17 +953,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 
         // Wait for/reap any side tasks.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        if(null != resultCacheSave)
-	    	{
-	    	try {
-	        	final Long rcT = resultCacheSave.get();
-	        	System.out.println("INFO: result cache save in "+rcT+"ms.");
-	        	}
-	        catch(final ExecutionException|InterruptedException e)
-		        {
-	        	System.err.println("ERROR: could not update/save result cache: " + e.getMessage());
-		        }
-	    	}
         if(null != longStoreSave)
         	{
         	try {
@@ -1001,6 +988,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         final long endTime = System.currentTimeMillis();
 System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         }
+
 
 	/**First (comment) line of retail intensity log. */
     public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_1 = "# Retail GB electricity carbon intensity as computed by earth.org.uk.";
@@ -1113,18 +1101,18 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      */
     private static final String DEFAULT_INTENSITY_LOG_BASE_DIR = "../data/FUELINST/log/live/";
 
-    /**Generate the text of the status Tweet.
+    /**Generate the text of the social media status/post, eg for Twitter.
      * Public to allow testing that returned Tweets are always valid.
      *
-     * @param isDataStale  true if we are working on historical/predicted (non-live) data
+     * @param isDataStale  true if working on historical/predicted (non-live) data
      * @param statusUncapped  the uncapped current or predicted status; never null
      * @param retailIntensity  intensity in gCO2/kWh as seen by retail customer, non-negative
-     * @return human-readable valid Tweet message
+     * @return human-readable valid Tweet message; non-null
      */
-    public static String generateTweetMessage(
+    public static String generateSocialMediaStatus(
     		final boolean isDataStale,
             final TrafficLight statusUncapped,
-            final int retailIntensity) // TODO
+            final int retailIntensity)
         {
         if(null == statusUncapped) { throw new IllegalArgumentException(); }
         final String statusTemplate = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);

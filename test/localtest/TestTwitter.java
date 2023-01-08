@@ -52,7 +52,7 @@ public final class TestTwitter extends TestCase
                 {
 				for(final int retailIntensity : new int[]{9, 99, 999})
 					{
-					final String message = FUELINSTUtils.generateTweetMessage(
+					final String message = FUELINSTUtils.generateSocialMediaStatus(
 							isDataStale, status, retailIntensity);
 	                assertNotNull("Generated Tweet must not be null", message);
 //System.err.println("LENGTH="+message.length()+": "+message);

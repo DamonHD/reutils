@@ -139,10 +139,7 @@ public final class Main
 					{
 					final String messageText = args[1];
 					final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
-			        final ExecutorService executor = Executors.newSingleThreadExecutor();
-					TwitterUtils.setTwitterStatusIfChanged(td, null, null, messageText, executor);
-					executor.shutdown();
-			        executor.awaitTermination(10, TimeUnit.SECONDS);
+					TwitterUtils.setTwitterStatus(td, messageText);
 					}
 				return; // Completed.
 				}

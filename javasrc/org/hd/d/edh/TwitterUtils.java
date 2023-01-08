@@ -46,7 +46,7 @@ import winterwell.jtwitter.Twitter;
 
 
 /**Twitter Utilities.
- * Handles some common interactions with Twitter.
+ * Handles some common interactions with Twitter and other social media.
  */
 public final class TwitterUtils
     {
@@ -55,10 +55,13 @@ public final class TwitterUtils
 
     /**Maximum Twitter message length (tweet) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
-     * <p>
-     * DHD20210404: could be lifted from 134 to 274 (max Tweet length now 280 chars), but may need JTwitter upgrade.
      */
     public static final int MAX_TWEET_CHARS = 274; // 134 before upgrade to JTwitter 3.8.5.
+
+    /**Maximum Mastodon message length (post) in (ASCII) characters.
+     * This allows some elbow room for trailing automatic/variable content.
+     */
+    public static final int MAX_TOOT_CHARS = 464;
 
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages; not null. */
     public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES = "Twitter.trafficlight.status.";
@@ -337,113 +340,44 @@ public final class TwitterUtils
         return(true);
 	    }
 
-    /**Attempt to update the displayed social Twitter status if necessary.
-     * Send a new tweet only if we think the message/status changed since we last sent one,
-     * and if it no longer matches what is actually at Twitter,
-     * so as to eliminate spurious tweets.
-     * <p>
-     * Takes pains to avoid unnecessary annoying/expensive updates.
-     * <p>
-     * Avoids writing to stdout or stderr in the threaded execution.
+    /**Attempt to update Twitter status.
+     * Can be run on a background thread.
      *
      * @param td  non-null, non-read-only Twitter handle
-     * @param TwitterCacheFileName  if non-null is the location to cache twitter status messages;
-     *     if the new status supplied is the same as the cached value then we won't send an update
-     * @param status  overall R/A/G status, null if no attempt to regulate by this
      * @param statusMessage  short (max 140 chars) Twitter status message; never null
-     * @param es  executor to run the Twitter status update on; never null
-     * @return  Future for time (ms) to post the tweet, null if none attempted
+     * @param status  overall R/A/G status, null if no attempt to regulate by this
      */
-    public static Future<Long> setTwitterStatusIfChanged(final TwitterUtils.TwitterDetails td,
-                                                 final File TwitterCacheFileName,
-                                                 final TrafficLight status,
-                                                 final String statusMessage,
-                                                 final ExecutorService es)
+    public static void setTwitterStatus(final TwitterUtils.TwitterDetails td,
+                                                 final String statusMessage)
         throws IOException
         {
         if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long, 140 ASCII chars max"); }
 
-        // Don't try to resend unless different status from previous generated tweet.
-        // Ignore for null status messages.
-        final boolean twitterCacheFileExists = (null != TwitterCacheFileName) && TwitterCacheFileName.canRead();
-        if(SEND_TWEET_ONLY_IF_TWITTER_STATUS_DIFFERENT)
-            {
-            if(twitterCacheFileExists && (null != status))
-                {
-                try
-                    {
-                    final TrafficLight lastStatus = (TrafficLight) DataUtils.deserialiseFromFile(TwitterCacheFileName, false);
-                    if((null != lastStatus) && (status.equals(lastStatus)))
-                        {
-                        System.err.println("INFO: previous tweet same status ("+lastStatus+") so skipping sending this one: " + statusMessage);
-                    	return(null);
-                    	}
-                    }
-                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness, but whinge. */ }
-                }
-            }
-
-        // If there is a minimum interval between tweets specified
-        // then check when our cache of the last one sent was updated
-        // and quietly veto this message (though log it) if the last update was too recent.
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String minIntervalS = rawProperties.get(PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS);
-        if(twitterCacheFileExists && (null != minIntervalS) && !minIntervalS.isEmpty())
-            {
-            try
-                {
-                final int minInterval = Integer.parseInt(minIntervalS, 10);
-                if(minInterval < 0) { throw new NumberFormatException(PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS + " must be non-negative"); }
-                // Only restrict sending messages for a positive interval.
-                if(minInterval > 0)
-                    {
-                    final long minIntervalmS = minInterval * 60 * 1000L;
-                    final long lastSent = TwitterCacheFileName.lastModified();
-                    if((lastSent + minIntervalmS) > System.currentTimeMillis())
-                        {
-                        System.err.println("WARNING: sent previous tweet too recently (<"+minIntervalS+"m, last "+(new Date(lastSent))+") so skipping sending this one: " + statusMessage);
-                        return(null);
-                        }
-                    }
-                }
-            // Complain about badly-formatted value, and continue as if not present.
-            catch(final NumberFormatException e) { e.printStackTrace(); }
-            }
-
-        // UTC time to append to message to help make it unique.
+        // UTC timestamp to append to message to help make it unique.
         // Without this, in the olden days, Twitter sometimes blocked updates as duplicates.
         final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
 	    // Append timestamp to status message.
         final String fullMessage = statusMessage + TWEET_TAIL_SEP + time + 'Z';
-        
-System.out.println("INFO: sending tweet for username "+td.username+": '"+fullMessage);
 
-        // Do the tweet posting in a background thread, quietly.
-        final Callable<Long> tweetPostingTask = () ->
-        	{
-    	    final long s = System.currentTimeMillis();
-	        
-	        // Send message...
-	        td.handle.setStatus(fullMessage);
-	
-	        // Upon getting this far, assume that the tweet was successfully sent...
-	
-	        // Cache the status (uncompressed, since it will be small) if we can.
-	        // Only do this for non-null statuses.
-	        if((null != TwitterCacheFileName) && (null != status))
-	            {
-	            try { DataUtils.serialiseToFile(status, TwitterCacheFileName, false, true); }
-	            catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
-	            }
-	        
-	        final long e = System.currentTimeMillis();
-	        return(e - s);
-        	};
-
-		return(es.submit(tweetPostingTask));
+        // Send message...
+        td.handle.setStatus(fullMessage);
         }
+
+    /**Send a tweet and time it.
+     * @param td  non-null, non-read-only Twitter handle
+     * @param statusMessage  short (max 140 chars) Twitter status message; never null
+     * @param status  overall R/A/G status, null if no attempt to regulate by this
+     */
+	public static Long timeSendTwitterStatus(final TwitterDetails td, final String statusMessage)
+		throws IOException
+	    {
+		final long s = System.currentTimeMillis();
+		setTwitterStatus(td, statusMessage);
+		final long e = System.currentTimeMillis();
+		return(e - s);
+	    }
 
     /**Removes any trailing automatic/variable part from the tweet, leaving the core.
      * The 'trailing part' starts at the last occurrence of the TWEET_TAIL_SEP,
