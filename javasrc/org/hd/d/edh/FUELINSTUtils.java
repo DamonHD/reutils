@@ -1067,12 +1067,14 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      * <p>
      * Public for testability.
      * 
-     * @param id   non-null writable directory for the log file
-     * @param timestamp  +ve timestamp of latest input available data point
+     * @param id  non-null writable directory for the log file
+     * @param timestamp  positive timestamp of latest available source data point
      * @param retailIntensity  non-negative retail/domestic intensity gCO2e/kWh
      * @return handle of log file, or null if none written
      */
-    public static File appendToRetailIntensityLog(File id, long timestamp, int retailIntensity)
+    public static File appendToRetailIntensityLog(final File id,
+    		final long timestamp,
+    		final int retailIntensity)
         throws IOException
         {
         if(null == id) { throw new IllegalArgumentException(); }
@@ -1086,12 +1088,12 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 //System.out.println("UTC date for log: " + dateUTC);
         final File logFile = new File(id, dateUTC + ".log");
 //System.out.println("Intensity log filename: " + logFile);
-        
+
         // Compute the timestamp string for the log record.
         final SimpleDateFormat tsDF = new SimpleDateFormat(UTCMINTIMESTAMP_FORMAT);
         tsDF.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
         final String timestampUTC = tsDF.format(new Date(timestamp));
-        
+
         // Refuse to write to a log other than today's for safety.
         // This may possibly wrongly drop records at either end of the day.
         final String todayDateUTC = fsDF.format(new Date());
@@ -1128,7 +1130,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 	        }
         // Attempt to ensure that the log file is readable by all.
         logFile.setReadable(true, false);
-        
+
         return(logFile);
 	    }
 
