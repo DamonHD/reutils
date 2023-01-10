@@ -19,7 +19,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-
+    DHD20230110: writing 7d retail mean intensity file.
 
 
 

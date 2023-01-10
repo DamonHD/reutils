@@ -778,7 +778,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         	summary24h = result;
         	}
 
-
         // Compute 7-day summary if long store is available.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         CurrentSummary summary7d = null;
@@ -789,6 +788,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         System.out.println("INFO: 24h summary: " + summary24h);
         System.out.println("INFO: 7d summary: " + summary7d);
 
+
         // Is the data stale?
         final boolean isDataStale = summary24h.useByTime < startTime;
 
@@ -796,6 +796,10 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         final int retailIntensity = Math.round((isDataStale ?
         		summary24h.histAveIntensity :
         	    summary24h.currentIntensity) * (1 + summary24h.totalGridLosses));
+        // Compute retail mean intensity from over 7d if available.
+        final int retailMeanIntensity = Math.round(
+		    ((null != summary7d) ? summary7d.histAveIntensity : summary24h.histAveIntensity) *
+		        (1 + summary24h.totalGridLosses));
 
 
         // New as of 2019-10.
@@ -891,10 +895,20 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	            final String outputTXTFileName = (-1 != lastDot) ?
 	                (outputHTMLFileName.substring(0, lastDot) + ".txt") :
 	                (outputHTMLFileName + ".txt");
-	        	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, summary24h, isDataStale);
+            	System.out.println("INFO: retail intensity of "+retailIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
+	        	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailIntensity), isDataStale);
 	            }
             catch(final IOException e) { e.printStackTrace(); }
-
+            // Update the plain-text mean intensity file.
+            try
+	            {
+	            final String outputTXTFileName = (-1 != lastDot) ?
+	                (outputHTMLFileName.substring(0, lastDot) + ".mean.txt") :
+	                (outputHTMLFileName + ".mean.txt");
+            	System.out.println("INFO: retail mean intensity of "+retailMeanIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
+	        	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailMeanIntensity), isDataStale);
+	            }
+            catch(final IOException e) { e.printStackTrace(); }
 
             // Update social media if set up
             // and there is a change from any previous status posted.
@@ -1009,7 +1023,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         }
 
 
-	/**First (comment) line of retail intensity log. */
+    /**First (comment) line of retail intensity log. */
     public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_1 = "# Retail GB electricity carbon intensity as computed by earth.org.uk.";
     /**Second (comment) line of retail intensity log. */
     public static final String RETAIL_INTENSITY_LOG_HEADER_LINE_2 = "# Time gCO2e/kWh";
@@ -1739,27 +1753,20 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      */
     static void updateTXTFile(final long startTime,
     									final String outputTXTFileName,
-    									final CurrentSummary summary,
+    									final String content,
     									final boolean isDataStale)
         throws IOException
     	{
     	// In case of stale/missing data remove any result file.
-    	if(isDataStale || (null == summary))
+    	if(isDataStale || (null == content) || content.isBlank())
     	    {
     		(new File(outputTXTFileName)).delete();
     		return;
     	    }
 
-        final int retailIntensity = Math.round(summary.currentIntensity * (1 + summary.totalGridLosses));
-System.out.println("INFO: retail intensity of "+retailIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
-
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(8);
-        final PrintWriter w = new PrintWriter(baos, false, StandardCharsets.US_ASCII);
-        try
-	    	{
-			w.write(String.valueOf(retailIntensity));
-	    	}
-        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
+    	final ByteArrayOutputStream baos = new ByteArrayOutputStream(8);
+        try ( final PrintWriter w = new PrintWriter(baos, false, StandardCharsets.US_ASCII); )
+            { w.write(content); }
 
         // Attempt atomic replacement of HTML page...
         DataUtils.replacePublishedFile(outputTXTFileName, baos.toByteArray());

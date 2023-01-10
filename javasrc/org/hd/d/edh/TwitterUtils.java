@@ -563,7 +563,7 @@ public final class TwitterUtils
             {
         	throw new IOException("failed toot response code " +
                 responseCode + ": " + responseMessage);
-            }	
+            }
         }
 
     /**Send a toot and time it.
