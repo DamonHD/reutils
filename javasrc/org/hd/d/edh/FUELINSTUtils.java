@@ -847,6 +847,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         Future<Long> taskTootSend = null;
         Future<Long> taskTweetSend = null;
+        Future<Long> taskXHTMLsave = null;
         if(outputHTMLFileName != null)
             {
             // Status to use to drive traffic-light measure.
@@ -880,32 +881,35 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                 }
             catch(final IOException e) { e.printStackTrace(); }
 
-            // Update the XML data dump.
-            if(GENERATE_XML_DATA_FILE)
-	            {
-	            try
-	                {
-	                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
-	                    (outputHTMLFileName + ".xml");
-	                if(null != outputXMLFileName)
-	                    {
-	                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary24h, isDataStale,
-	                        hourOfDayHistorical, status);
-	                    }
-	                }
-	            catch(final IOException e) { e.printStackTrace(); }
-	            }
+//            // Update the XML data dump.
+//            if(GENERATE_XML_DATA_FILE)
+//	            {
+//	            try
+//	                {
+//	                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
+//	                    (outputHTMLFileName + ".xml");
+//	                if(null != outputXMLFileName)
+//	                    {
+//	                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary24h, isDataStale,
+//	                        hourOfDayHistorical, status);
+//	                    }
+//	                }
+//	            catch(final IOException e) { e.printStackTrace(); }
+//	            }
+
 
             // Update the (mobile-friendly) XHTML page.
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-            try
+            final CurrentSummary s4h = summary24h;
+            taskXHTMLsave = executor.submit(() ->
                 {
+                final long s = System.currentTimeMillis();
                 final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
                     (outputHTMLFileName + ".xhtml");
-                FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary24h, isDataStale,
+                FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, s4h, isDataStale,
                     hourOfDayHistorical, status);
-                }
-            catch(final IOException e) { e.printStackTrace(); }
+                final long e = System.currentTimeMillis();
+                return(e - s);
+                });
             
 
             // Update social media if set up
@@ -978,16 +982,16 @@ System.out.println("INFO: sending tweet...");
         // Wait for/reap any side tasks.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         if(null != taskLongStoreSave)
-    	{
-    	try {
-        	final Long lsT = taskLongStoreSave.get();
-        	System.out.println("INFO: long store save in "+lsT+"ms.");
-        	}
-        catch(final ExecutionException|InterruptedException e)
-	        {
-        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
-	        }
-    	}
+	    	{
+	    	try {
+	        	final Long lsT = taskLongStoreSave.get();
+	        	System.out.println("INFO: long store save in "+lsT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
+		        }
+	    	}
         if(null != taskIntensityFiles)
 	    	{
 	    	try {
@@ -997,6 +1001,17 @@ System.out.println("INFO: sending tweet...");
 	        catch(final ExecutionException|InterruptedException e)
 		        {
 	        	System.err.println("ERROR: could not update/save intensity files error: " + e.getMessage());
+		        }
+	    	}
+        if(null != taskXHTMLsave)
+	    	{
+	    	try {
+	        	final Long xhT = taskXHTMLsave.get();
+	        	System.out.println("INFO: XHTML generate and save in "+xhT+"ms.");
+	    	    }
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not generate/save XHTML error: " + e.getMessage());
 		        }
 	    	}
         if(null != taskTootSend)
