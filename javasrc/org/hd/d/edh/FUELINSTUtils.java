@@ -838,6 +838,24 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             });
 
 
+        // Update button(s)/icon(s).
+        Future<Long> taskButtons = null;
+        final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
+        if(bd.isDirectory() && bd.canWrite())
+            {
+        	taskButtons = executor.submit(() ->
+        		{
+        		final long s = System.currentTimeMillis();
+        		// DHD20221213: 48x48 generation dropped as not apparently used at all.
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
+        		final long e = System.currentTimeMillis();
+        		return(e - s);
+        		});
+        	}
+        else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
+
+
         // Update pages, XML and plain text.
         // Also post to social media if enabled.
         // FIMXE: consider dropping XML output if nothing is using it.
@@ -959,21 +977,6 @@ System.out.println("INFO: sending tweet...");
             }
 
 
-        // Update button(s)/icon(s).
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        try
-            {
-            final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
-            if(bd.isDirectory() && bd.canWrite())
-                {
-            	// DHD20221213: 48x48 generation dropped as not apparently used at all.
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
-                }
-            else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
-            }
-        catch(final IOException e) { e.printStackTrace(); }
-
         // Wait for/reap any side tasks.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         if(null != taskLongStoreSave)
@@ -985,6 +988,17 @@ System.out.println("INFO: sending tweet...");
 	        catch(final ExecutionException|InterruptedException e)
 		        {
 	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
+		        }
+	    	}
+        if(null != taskButtons)
+	    	{
+	    	try {
+	        	final Long bT = taskButtons.get();
+	        	System.out.println("INFO: buttons draw and save in "+bT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not create/save buttons, error: " + e.getMessage());
 		        }
 	    	}
         if(null != taskIntensityLogUpdate)
