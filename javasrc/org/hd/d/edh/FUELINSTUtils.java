@@ -1809,8 +1809,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         throws IOException
         {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
-        final PrintWriter w = new PrintWriter(baos);
-        try
+        try ( PrintWriter w = new PrintWriter(baos); )
             {
             final Map<String, String> rawProperties = MainProperties.getRawProperties();
 
@@ -1835,12 +1834,9 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.println("<p>This page updated at "+(new Date())+".</p>");
 
             w.println(rawProperties.get("trafficLightPage.XHTML.postamble"));
-
-            w.flush();
             }
-        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
 
-        // Attempt atomic replacement of XHTML page...
+        // Attempt atomic replacement of XHTML page (quietly)...
         DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray(), true);
         }
 
