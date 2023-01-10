@@ -1841,7 +1841,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
 
         // Attempt atomic replacement of XHTML page...
-        DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray());
+        DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray(), true);
         }
 
     /**Update (atomically if possible) the XML traffic-light data dump.
