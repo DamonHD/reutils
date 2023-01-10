@@ -870,6 +870,18 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
             final TwitterUtils.MastodonDetails md = TwitterUtils.getMastodonDetails();
 
+            // Update the (mobile-friendly) XHTML page (in the background).
+            taskXHTMLsave = executor.submit(() ->
+                {
+                final long s = System.currentTimeMillis();
+                final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
+                    (outputHTMLFileName + ".xhtml");
+                FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary24h, isDataStale,
+                    hourOfDayHistorical, status);
+                final long e = System.currentTimeMillis();
+                return(e - s);
+                });
+
             // Update the HTML page.
             try
                 {
@@ -893,19 +905,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 //	                }
 //	            catch(final IOException e) { e.printStackTrace(); }
 //	            }
-
-
-            // Update the (mobile-friendly) XHTML page.
-            taskXHTMLsave = executor.submit(() ->
-                {
-                final long s = System.currentTimeMillis();
-                final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
-                    (outputHTMLFileName + ".xhtml");
-                FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary24h, isDataStale,
-                    hourOfDayHistorical, status);
-                final long e = System.currentTimeMillis();
-                return(e - s);
-                });
             
 
             // Update social media if set up
