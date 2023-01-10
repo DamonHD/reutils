@@ -741,7 +741,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        }
         // Attempt to update the long store with new data received.
         // Keep the store length trimmed.
-        Future<Long> longStoreSave = null;
+        Future<Long> taskLongStoreSave = null;
         // Update the long store only if there is something valid to update it with.
         if(null != parsedBMRCSV)
             {
@@ -756,7 +756,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        // Save long store (asynchronously, atomically, world-readable).
 	        // The long store must not be mutated.
 	        final List<List<String>> lsf = longStore;
-	        longStoreSave = executor.submit(() ->
+	        taskLongStoreSave = executor.submit(() ->
 	            {
 				final long longStoreSaveStart = System.currentTimeMillis();
 	        	DataUtils.saveBMRCSV(lsf, longStoreFile);
@@ -814,21 +814,39 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	            {
 	            final File id = new File(DEFAULT_INTENSITY_LOG_BASE_DIR);
 	            if(id.isDirectory() && id.canWrite())
-	                {
-	            	appendToRetailIntensityLog(id, summary24h.timestamp, retailIntensity);
-	                }
-	            else { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
+	                { appendToRetailIntensityLog(id, summary24h.timestamp, retailIntensity); }
+	            else
+	                { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
 	            }
             catch(final IOException e) { e.printStackTrace(); }
         	}
+        
+        
+        // Update intensity files.
+        Future<Long> taskIntensityFiles = null;
+        final String outputTXTFileName = (-1 != lastDot) ?
+                (outputHTMLFileName.substring(0, lastDot) + ".txt") :
+                (outputHTMLFileName + ".txt");
+    	System.out.println("INFO: retail intensity of "+retailIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
+        final String outputMeanTXTFileName = (-1 != lastDot) ?
+                (outputHTMLFileName.substring(0, lastDot) + ".mean.txt") :
+                (outputHTMLFileName + ".mean.txt");
+        	System.out.println("INFO: retail mean intensity of "+retailMeanIntensity+"gCO2e/kWh being saved to "+outputMeanTXTFileName+"...");
+        taskIntensityFiles = executor.submit(() -> {
+        	final long s = System.currentTimeMillis();
+        	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailIntensity), isDataStale);
+        	FUELINSTUtils.updateTXTFile(startTime, outputMeanTXTFileName, Integer.toString(retailMeanIntensity), isDataStale);  
+        	final long e = System.currentTimeMillis();
+        	return(e - s);
+            });
 
 
         // Update pages, XML and plain text.
         // Also post to social media if enabled.
         // FIMXE: consider dropping XML output if nothing is using it.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        Future<Long> tootSend = null;
-        Future<Long> tweetSend = null;
+        Future<Long> taskTootSend = null;
+        Future<Long> taskTweetSend = null;
         if(outputHTMLFileName != null)
             {
             // Status to use to drive traffic-light measure.
@@ -889,26 +907,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                 }
             catch(final IOException e) { e.printStackTrace(); }
             
-            // Update the plain-text intensity file.
-            try
-	            {
-	            final String outputTXTFileName = (-1 != lastDot) ?
-	                (outputHTMLFileName.substring(0, lastDot) + ".txt") :
-	                (outputHTMLFileName + ".txt");
-            	System.out.println("INFO: retail intensity of "+retailIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
-	        	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailIntensity), isDataStale);
-	            }
-            catch(final IOException e) { e.printStackTrace(); }
-            // Update the plain-text mean intensity file.
-            try
-	            {
-	            final String outputTXTFileName = (-1 != lastDot) ?
-	                (outputHTMLFileName.substring(0, lastDot) + ".mean.txt") :
-	                (outputHTMLFileName + ".mean.txt");
-            	System.out.println("INFO: retail mean intensity of "+retailMeanIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
-	        	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailMeanIntensity), isDataStale);
-	            }
-            catch(final IOException e) { e.printStackTrace(); }
 
             // Update social media if set up
             // and there is a change from any previous status posted.
@@ -936,7 +934,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	                if(md != null)
 		                {
 System.out.println("INFO: sending toot...");
-						tootSend = executor.submit(() ->
+						taskTootSend = executor.submit(() ->
 						    { return(TwitterUtils.timeSetMastodonStatus(md, statusMessage)); });
 		                }
 	                
@@ -944,7 +942,7 @@ System.out.println("INFO: sending toot...");
 		            if(td != null)
 		                {
 System.out.println("INFO: sending tweet...");
-		                tweetSend = executor.submit(() ->
+		                taskTweetSend = executor.submit(() ->
 		                	{ return(TwitterUtils.timeSetTwitterStatus(td, statusMessage)); });
 		                }
 	
@@ -979,21 +977,32 @@ System.out.println("INFO: sending tweet...");
 
         // Wait for/reap any side tasks.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        if(null != longStoreSave)
-        	{
-        	try {
-            	final Long lsT = longStoreSave.get();
-            	System.out.println("INFO: long store save in "+lsT+"ms.");
+        if(null != taskLongStoreSave)
+    	{
+    	try {
+        	final Long lsT = taskLongStoreSave.get();
+        	System.out.println("INFO: long store save in "+lsT+"ms.");
+        	}
+        catch(final ExecutionException|InterruptedException e)
+	        {
+        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
+	        }
+    	}
+        if(null != taskIntensityFiles)
+	    	{
+	    	try {
+	        	final Long ifT = taskIntensityFiles.get();
+	        	System.out.println("INFO: intensty files save in "+ifT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
 		        {
-	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
+	        	System.err.println("ERROR: could not update/save intensity files error: " + e.getMessage());
 		        }
-        	}
-        if(null != tootSend)
+	    	}
+        if(null != taskTootSend)
 	    	{
 	    	try {
-	        	final Long tsT = tootSend.get();
+	        	final Long tsT = taskTootSend.get();
 	        	System.out.println("INFO: toot sent in "+tsT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
@@ -1001,10 +1010,10 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not send toot: " + e.getMessage());
 		        }
 	    	}
-       if(null != tweetSend)
+       if(null != taskTweetSend)
 	    	{
 	    	try {
-	        	final Long tsT = tweetSend.get();
+	        	final Long tsT = taskTweetSend.get();
 	        	System.out.println("INFO: tweet sent in "+tsT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
@@ -1769,7 +1778,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             { w.write(content); }
 
         // Attempt atomic replacement of HTML page...
-        DataUtils.replacePublishedFile(outputTXTFileName, baos.toByteArray());
+        DataUtils.replacePublishedFile(outputTXTFileName, baos.toByteArray(), true);
     	}
 
     /**Update (atomically if possible) the mobile-friendly XHTML traffic-light page.
