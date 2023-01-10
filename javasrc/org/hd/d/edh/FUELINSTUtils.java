@@ -770,13 +770,10 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         //
         // If parsedBMRCSV is null or empty
-        // then this will leave a empty/default (non-null) result.
-        CurrentSummary summary24h = new FUELINST.CurrentSummary();
-        if((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty())
-        	{
-        	final CurrentSummary result = FUELINSTUtils.computeCurrentSummary(parsedBMRCSV);
-        	summary24h = result;
-        	}
+        // then this will be a empty/default (non-null) result.
+        final CurrentSummary summary24h = ((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty()) ?
+        		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
+        		new FUELINST.CurrentSummary();
 
         // Compute 7-day summary if long store is available.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
@@ -802,23 +799,23 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 		        (1 + summary24h.totalGridLosses));
 
 
-        // New as of 2019-10.
         // Append to the intensity log.
         // Only do this for current/live data, ie if not stale.
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        Future<Long> taskIntensityLogUpdate = null;
+        final File intensityLogFile = new File(DEFAULT_INTENSITY_LOG_BASE_DIR);
         if(isDataStale || (0 == summary24h.timestamp))
             { System.err.println("WARNING: will not update intensity log, input data is stale."); }
+        else if(!intensityLogFile.isDirectory() || !intensityLogFile.canWrite())
+            { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
         else
-        	{ 		
-            try
-	            {
-	            final File id = new File(DEFAULT_INTENSITY_LOG_BASE_DIR);
-	            if(id.isDirectory() && id.canWrite())
-	                { appendToRetailIntensityLog(id, summary24h.timestamp, retailIntensity); }
-	            else
-	                { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
-	            }
-            catch(final IOException e) { e.printStackTrace(); }
+        	{ 	
+        	taskIntensityLogUpdate = executor.submit(() ->
+        	    {
+        		final long s = System.currentTimeMillis();
+	            appendToRetailIntensityLog(intensityLogFile, summary24h.timestamp, retailIntensity);
+        		final long e = System.currentTimeMillis();
+                return(e - s);
+	            });
         	}
         
         
@@ -899,13 +896,12 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 
 
             // Update the (mobile-friendly) XHTML page.
-            final CurrentSummary s4h = summary24h;
             taskXHTMLsave = executor.submit(() ->
                 {
                 final long s = System.currentTimeMillis();
                 final String outputXHTMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xhtml") :
                     (outputHTMLFileName + ".xhtml");
-                FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, s4h, isDataStale,
+                FUELINSTUtils.updateXHTMLFile(startTime, outputXHTMLFileName, summary24h, isDataStale,
                     hourOfDayHistorical, status);
                 final long e = System.currentTimeMillis();
                 return(e - s);
@@ -992,6 +988,17 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 		        }
 	    	}
+        if(null != taskIntensityLogUpdate)
+	    	{
+	    	try {
+	        	final Long ilT = taskIntensityLogUpdate.get();
+	        	System.out.println("INFO: intensty log update in "+ilT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not update intensty log, error: " + e.getMessage());
+		        }
+	    	}
         if(null != taskIntensityFiles)
 	    	{
 	    	try {
@@ -1000,7 +1007,7 @@ System.out.println("INFO: sending tweet...");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
 		        {
-	        	System.err.println("ERROR: could not update/save intensity files error: " + e.getMessage());
+	        	System.err.println("ERROR: could not update/save intensity files, error: " + e.getMessage());
 		        }
 	    	}
         if(null != taskXHTMLsave)
@@ -1011,7 +1018,7 @@ System.out.println("INFO: sending tweet...");
 	    	    }
 	        catch(final ExecutionException|InterruptedException e)
 		        {
-	        	System.err.println("ERROR: could not generate/save XHTML error: " + e.getMessage());
+	        	System.err.println("ERROR: could not generate/save XHTML, error: " + e.getMessage());
 		        }
 	    	}
         if(null != taskTootSend)

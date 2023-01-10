@@ -21,6 +21,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 PENDING:
     DHD20230110: now writing 7d retail mean intensity file.
     DHD20230110: XHTML file now generated and saved in background.
+    DHD20230110: intensity log now updated in background.
 
 
 
