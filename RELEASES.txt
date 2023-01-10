@@ -19,16 +19,24 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20230110: now writing 7d retail mean intensity file.
-    DHD20230110: XHTML file now generated and saved in background.
-    DHD20230110: intensity log now updated in background.
-    DHD20230110: buttons now drawn/saved in background.
 
 
 
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20230110:
+    freezepoint name: V1.1.21
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.20
+    DHD20230110: now writing 7d retail mean intensity file.
+    DHD20230110: XHTML file now generated and saved in background.
+    DHD20230110: intensity log now updated in background.
+    DHD20230110: buttons now drawn/saved in background.
 
 
 20230108:
