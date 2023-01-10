@@ -120,14 +120,20 @@ public final class GraphicsUtils
             // The text looks very rough without anti-aliasing.
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+            // Only add time and units lines when larger than the minimum dimensions.
+            // At minimum size these extra lines are essentially unreadable.
+            // The central text can be expanded instead at minimum icon size to help its readability.
+            final boolean showTimeAndUnits = (sizePX > MIN_ICON_SIZE_PX);
+
             // Size the main intensity number text to fit the icon (width).
             final FontRenderContext fc = g.getFontRenderContext();
             final Rectangle2D boundsTmp = fontTmp.getStringBounds(basicIconText, fc);
             final double wTmp = boundsTmp.getWidth();
             final double hTmp = boundsTmp.getHeight();
             final float sTmp = fontTmp.getSize2D();
-            final int fitToWidth = sizePX - (2*ICON_BORDER_PX);
-            final int fitToHeight = ((2*sizePX)/3) - (2*ICON_BORDER_PX); // Allow text to take 2/3rds of height.
+            final int fitToWidth = sizePX - (showTimeAndUnits ? (2*ICON_BORDER_PX) : 0);
+            // Allow text to take 2/3rds of height normally.
+            final int fitToHeight = (showTimeAndUnits ? ((2*sizePX)/3) : sizePX) - (showTimeAndUnits ? (2*ICON_BORDER_PX) : 0);
             assert(fitToWidth > 0);
             assert(fitToHeight > 0);
 //            System.out.println("initial width and height with font size "+sTmp+": " + wTmp + ", " + hTmp);
@@ -143,8 +149,7 @@ public final class GraphicsUtils
             g.drawString(basicIconText, (int) (-boundsMain.getCenterX() + (sizePX/2.0)), (int) ((-boundsMain.getY() + (sizePX/2.0)) - (hMain/2.0))); // Centre vertically.
 
             // Only add time and units lines when larger than the minimum dimensions.
-            // At minimum size these extra lines are essentially unreadable.
-            if(sizePX > MIN_ICON_SIZE_PX)
+            if(showTimeAndUnits)
 	            {
 	            // Show units at the bottom of the icon, ie under the number.
 	            final String units = "gCO2/kWh";
