@@ -655,11 +655,13 @@ public final class FUELINSTUtils
         // Compute relative paths for caches/stores.
         final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));        
 
+
         // Load long store concurrently with fetching new data.
         // As well as overlapping the I/O
         // this may get JIT compilation done fairly optimally in parallel.
         final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
 	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
+
 
         // Fetch and parse the FUELINST CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
@@ -727,7 +729,7 @@ System.err.println("WARNING: could not load long store "+longStoreFile+" error: 
 	        }
 if(null != longStore) { System.out.println("INFO: long store records loaded: "+longStore.size()); }
 
-        // As of 2022-10 sometimes last few live records are omitted apparently when server is busy.
+        // Sometimes last few live records are omitted apparently when server is busy.
         // Attempt to patch them up from the long store if so...
         if((null != parsedBMRCSV) && (null != longStoreFile))
 	        {
@@ -739,7 +741,49 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 				parsedBMRCSV = appendedNewData;
 	        	}
 	        }
-        // Attempt to update the long store with new data received.
+
+
+        // Compute 24hr summary if we have fresh data, and cache.
+        // Will be empty rather than null if not able to be computed/loaded.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        //
+        // If parsedBMRCSV is null or empty
+        // then this will be a empty/default (non-null) result.
+        final CurrentSummary summary24h = ((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty()) ?
+        		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
+        		new FUELINST.CurrentSummary();
+
+
+        // Is the data stale?
+        final boolean isDataStale = summary24h.useByTime < startTime;
+
+        // Compute intensity as seen by typical GB domestic consumer, gCO2/kWh.
+        final int retailIntensity = Math.round((isDataStale ?
+        		summary24h.histAveIntensity :
+        	    summary24h.currentIntensity) * (1 + summary24h.totalGridLosses));
+
+
+        // Update button(s)/icon(s).
+        // Start early, because slow.
+        // NOTE: currently based on 24h summary only.
+        Future<Long> taskButtons = null;
+        final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
+        if(bd.isDirectory() && bd.canWrite())
+            {
+        	taskButtons = executor.submit(() ->
+        		{
+        		final long s = System.currentTimeMillis();
+        		// DHD20221213: 48x48 generation dropped as not apparently used at all.
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
+        		final long e = System.currentTimeMillis();
+        		return(e - s);
+        		});
+        	}
+        else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
+
+        
+        // Attempt to update the long store with the new data received, then save it.
         // Keep the store length trimmed.
         Future<Long> taskLongStoreSave = null;
         // Update the long store only if there is something valid to update it with.
@@ -764,59 +808,24 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 		        return(longStoreSaveEnd - longStoreSaveStart);
 	            });
             }
-
-        // Compute 24hr summary if we have fresh data, and cache.
-        // Will be empty rather than null if not able to be computed/loaded.
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        //
-        // If parsedBMRCSV is null or empty
-        // then this will be a empty/default (non-null) result.
-        final CurrentSummary summary24h = ((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty()) ?
-        		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
-        		new FUELINST.CurrentSummary();
-
+        
+        
         // Compute 7-day summary if long store is available.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         CurrentSummary summary7d = null;
         if((null != longStore) && !longStore.isEmpty())
             { summary7d = FUELINSTUtils.computeCurrentSummary(longStore); }
 
+
         // Dump a summary of the current status.
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         System.out.println("INFO: 24h summary: " + summary24h);
         System.out.println("INFO: 7d summary: " + summary7d);
 
 
-        // Is the data stale?
-        final boolean isDataStale = summary24h.useByTime < startTime;
-
-        // Compute intensity as seen by typical GB domestic consumer, gCO2/kWh.
-        final int retailIntensity = Math.round((isDataStale ?
-        		summary24h.histAveIntensity :
-        	    summary24h.currentIntensity) * (1 + summary24h.totalGridLosses));
         // Compute retail mean intensity from over 7d if available.
         final int retailMeanIntensity = Math.round(
 		    ((null != summary7d) ? summary7d.histAveIntensity : summary24h.histAveIntensity) *
 		        (1 + summary24h.totalGridLosses));
-
-
-        // Update button(s)/icon(s).
-        // Start early, because slow.
-        Future<Long> taskButtons = null;
-        final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
-        if(bd.isDirectory() && bd.canWrite())
-            {
-        	taskButtons = executor.submit(() ->
-        		{
-        		final long s = System.currentTimeMillis();
-        		// DHD20221213: 48x48 generation dropped as not apparently used at all.
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
-        		final long e = System.currentTimeMillis();
-        		return(e - s);
-        		});
-        	}
-        else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
 
 
         // Append to the intensity log.

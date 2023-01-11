@@ -20,6 +20,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20231010: rendering text better/bigger for smallest button.
+    DHD20231011: some more rearrangments for performance.
 
 
 
