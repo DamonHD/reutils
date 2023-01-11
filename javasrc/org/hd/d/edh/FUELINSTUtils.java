@@ -782,6 +782,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             { summary7d = FUELINSTUtils.computeCurrentSummary(longStore); }
 
         // Dump a summary of the current status.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         System.out.println("INFO: 24h summary: " + summary24h);
         System.out.println("INFO: 7d summary: " + summary7d);
 
@@ -797,6 +798,25 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         final int retailMeanIntensity = Math.round(
 		    ((null != summary7d) ? summary7d.histAveIntensity : summary24h.histAveIntensity) *
 		        (1 + summary24h.totalGridLosses));
+
+
+        // Update button(s)/icon(s).
+        // Start early, because slow.
+        Future<Long> taskButtons = null;
+        final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
+        if(bd.isDirectory() && bd.canWrite())
+            {
+        	taskButtons = executor.submit(() ->
+        		{
+        		final long s = System.currentTimeMillis();
+        		// DHD20221213: 48x48 generation dropped as not apparently used at all.
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
+                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
+        		final long e = System.currentTimeMillis();
+        		return(e - s);
+        		});
+        	}
+        else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
 
 
         // Append to the intensity log.
@@ -836,24 +856,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         	final long e = System.currentTimeMillis();
         	return(e - s);
             });
-
-
-        // Update button(s)/icon(s).
-        Future<Long> taskButtons = null;
-        final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
-        if(bd.isDirectory() && bd.canWrite())
-            {
-        	taskButtons = executor.submit(() ->
-        		{
-        		final long s = System.currentTimeMillis();
-        		// DHD20221213: 48x48 generation dropped as not apparently used at all.
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 32, summary24h.timestamp, summary24h.status, retailIntensity);
-                GraphicsUtils.writeSimpleIntensityIconPNG(DEFAULT_BUTTON_BASE_DIR, 64, summary24h.timestamp, summary24h.status, retailIntensity);
-        		final long e = System.currentTimeMillis();
-        		return(e - s);
-        		});
-        	}
-        else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
 
 
         // Update pages, XML and plain text.
