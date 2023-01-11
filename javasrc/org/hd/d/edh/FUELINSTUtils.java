@@ -927,10 +927,11 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 //	            }
             
 
-            // Update social media if set up
+            // Update social media if set up ONCE THE HTML PAGE IS UPDATED
             // and there is a change from any previous status posted.
             // There are different messages when working from historical data
             // because real-time / live data is not available.
+            // *** Only tweet/toot once the HTML is updated since the messages link to it.
             if((null != td) || (null != md))
 	            {
 	            // Compute name of file in which to cache last status posted to social media.
