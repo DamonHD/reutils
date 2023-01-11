@@ -187,7 +187,8 @@ public final class GraphicsUtils
             }
         finally { g.dispose(); }
 
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        // Size the buffer a little larger than the expected PNG file size.
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
         ImageIO.write(buffer, "png", baos);
 
         final String suffix = "intico1-" + sizePX + ".png";
