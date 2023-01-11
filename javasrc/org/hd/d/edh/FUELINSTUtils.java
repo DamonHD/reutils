@@ -963,6 +963,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 		                    isDataStale, statusUncapped, retailIntensity);
 	
 	                // Send toot, if set up...
+	                // DHD20230111: time to toot ~1100ms, tweet ~800ms.
 	                if(md != null)
 		                {
 System.out.println("INFO: sending toot...");
