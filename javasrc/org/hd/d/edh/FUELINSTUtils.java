@@ -890,9 +890,11 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             final TrafficLight status7d = (!isDataStale) ? summary7d.status :
                 (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
 
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
             // Handle the flag files that can be tested by remote servers.
             try { FUELINSTUtils.doFlagFiles(baseFileName, isDataStale, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
             catch(final IOException e) { e.printStackTrace(); }
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
             // Collect social media details.
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
@@ -911,12 +913,15 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                 });
 
             // Update the HTML page.
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
             try
                 {
                 FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary24h, summary7d,
                     isDataStale, hourOfDayHistorical, status, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+
 
 //            // Update the XML data dump.
 //            if(GENERATE_XML_DATA_FILE)
@@ -1519,9 +1524,8 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                                            final TwitterUtils.TwitterDetails td)
         throws IOException
         {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
-        final PrintWriter w = new PrintWriter(baos);
-        try
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(32768); 
+        try ( final PrintWriter w = new PrintWriter(baos); )
             {
             final Map<String, String> rawProperties = MainProperties.getRawProperties();
 
@@ -1794,10 +1798,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.println("<p>This page updated at "+(new Date())+"; generation time "+(System.currentTimeMillis()-startTime)+"ms.</p>");
 
             w.println(rawProperties.get("trafficLightPage.HTML.postamble"));
-
-            w.flush();
             }
-        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
 
         // Attempt atomic replacement of HTML page...
         DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
