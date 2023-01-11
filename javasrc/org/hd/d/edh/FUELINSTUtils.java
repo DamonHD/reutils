@@ -1020,18 +1020,18 @@ System.out.println("INFO: sending tweet...");
 	    	{
 	    	try {
 	        	final Long ilT = taskIntensityLogUpdate.get();
-	        	System.out.println("INFO: intensty log update in "+ilT+"ms.");
+	        	System.out.println("INFO: intensity log update in "+ilT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
 		        {
-	        	System.err.println("ERROR: could not update intensty log, error: " + e.getMessage());
+	        	System.err.println("ERROR: could not update intensity log, error: " + e.getMessage());
 		        }
 	    	}
         if(null != taskIntensityFiles)
 	    	{
 	    	try {
 	        	final Long ifT = taskIntensityFiles.get();
-	        	System.out.println("INFO: intensty files save in "+ifT+"ms.");
+	        	System.out.println("INFO: intensity files save in "+ifT+"ms.");
 	        	}
 	        catch(final ExecutionException|InterruptedException e)
 		        {
