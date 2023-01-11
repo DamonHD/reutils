@@ -858,9 +858,8 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             });
 
 
-        // Update pages, XML and plain text.
+        // Update HTML and XHTML (mobile page).
         // Also post to social media if enabled.
-        // FIMXE: consider dropping XML output if nothing is using it.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         Future<Long> taskTootSend = null;
         Future<Long> taskTweetSend = null;
@@ -926,7 +925,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 //	            catch(final IOException e) { e.printStackTrace(); }
 //	            }
             
-
             // Update social media if set up ONCE THE HTML PAGE IS UPDATED
             // and there is a change from any previous status posted.
             // There are different messages when working from historical data
