@@ -867,7 +867,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             });
 
 
-        // Update HTML and XHTML (mobile page).
+        // Update HTML page, and XHTML mobile page.
         // Also post to social media if enabled.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         Future<Long> taskTootSend = null;
