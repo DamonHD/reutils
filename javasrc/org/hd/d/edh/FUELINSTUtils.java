@@ -718,29 +718,66 @@ System.err.println("WARNING: invalid CSV FUELINST data repaired.");
 System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
 	            }            
         	}
-    	
+
+
         // Collect results of long store load.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        List<List<String>> longStore = null;
-        try { longStore = longStoreLoad.get(); }
+        List<List<String>> _ls = null;
+        try { _ls = longStoreLoad.get(); }
         catch(final ExecutionException|InterruptedException e)
 	        {
 System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
 	        }
-if(null != longStore) { System.out.println("INFO: long store records loaded: "+longStore.size()); }
+if(null != _ls) { System.out.println("INFO: long store records loaded: "+_ls.size()); }
 
         // Sometimes last few live records are omitted apparently when server is busy.
         // Attempt to patch them up from the long store if so...
         if((null != parsedBMRCSV) && (null != longStoreFile))
 	        {
         	final List<List<String>> appendedNewData = DataUtils.appendNewBMRDataRecords(
-        			parsedBMRCSV, longStore);
+        			parsedBMRCSV, _ls);
         	if(null != appendedNewData)
 	        	{
 System.err.println("WARNING: some recent records omitted from this data fetch: patched back in.");
 				parsedBMRCSV = appendedNewData;
 	        	}
 	        }
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        // Attempt to update the long store with the new data received, then save it.
+        // Keep the store length trimmed.
+        Future<Long> taskLongStoreSave = null;
+        // Update the long store only if there is something valid to update it with.
+        if(null != parsedBMRCSV)
+            {
+	        // Append any new records to long store.
+	        final List<List<String>> appendedlongStore = DataUtils.appendNewBMRDataRecords(
+	        		_ls, parsedBMRCSV);
+	        if(null != appendedlongStore) { _ls = appendedlongStore; }
+	        // Trim history in long store to maximum of 7 days.
+	        final List<List<String>> trimmedLongStore = DataUtils.trimBMRData(
+	        		_ls, HOURS_PER_WEEK);
+	        if(null != trimmedLongStore) { _ls = trimmedLongStore; }
+	        // Save long store (asynchronously, atomically, world-readable).
+	        // The long store must not be mutated.
+	        final List<List<String>> lsf = _ls;
+	        taskLongStoreSave = executor.submit(() ->
+	            {
+				final long longStoreSaveStart = System.currentTimeMillis();
+	        	DataUtils.saveBMRCSV(lsf, longStoreFile);
+		        final long longStoreSaveEnd = System.currentTimeMillis();
+		        return(longStoreSaveEnd - longStoreSaveStart);
+	            });
+            }
+        // Immutable view.
+        final List<List<String>> longStore = _ls;
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+
+
+        // Start compute of 7-day summary if long store is available.
+        // Try to do it largely concurrently with the main 24h view.
+        final Future<CurrentSummary> taskSummary7d =
+            ((null == longStore) || longStore.isEmpty()) ? null :
+            executor.submit(() -> {return(FUELINSTUtils.computeCurrentSummary(longStore));});
 
 
         // Compute 24hr summary if we have fresh data, and cache.
@@ -752,6 +789,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         final CurrentSummary summary24h = ((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty()) ?
         		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
         		new FUELINST.CurrentSummary();
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
         // Is the data stale?
@@ -781,40 +819,17 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         		});
         	}
         else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
+        
 
-        
-        // Attempt to update the long store with the new data received, then save it.
-        // Keep the store length trimmed.
-        Future<Long> taskLongStoreSave = null;
-        // Update the long store only if there is something valid to update it with.
-        if(null != parsedBMRCSV)
-            {
-	        // Append any new records to long store.
-	        final List<List<String>> appendedlongStore = DataUtils.appendNewBMRDataRecords(
-	        		longStore, parsedBMRCSV);
-	        if(null != appendedlongStore) { longStore = appendedlongStore; }
-	        // Trim history in long store to maximum of 7 days.
-	        final List<List<String>> trimmedLongStore = DataUtils.trimBMRData(
-	        		longStore, HOURS_PER_WEEK);
-	        if(null != trimmedLongStore) { longStore = trimmedLongStore; }
-	        // Save long store (asynchronously, atomically, world-readable).
-	        // The long store must not be mutated.
-	        final List<List<String>> lsf = longStore;
-	        taskLongStoreSave = executor.submit(() ->
-	            {
-				final long longStoreSaveStart = System.currentTimeMillis();
-	        	DataUtils.saveBMRCSV(lsf, longStoreFile);
-		        final long longStoreSaveEnd = System.currentTimeMillis();
-		        return(longStoreSaveEnd - longStoreSaveStart);
-	            });
-            }
-        
-        
-        // Compute 7-day summary if long store is available.
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         CurrentSummary summary7d = null;
-        if((null != longStore) && !longStore.isEmpty())
-            { summary7d = FUELINSTUtils.computeCurrentSummary(longStore); }
+        if(null != taskSummary7d)
+ 	    	{
+ 	    	try { summary7d = taskSummary7d.get(); }
+ 	        catch(final ExecutionException|InterruptedException e)
+ 		        {
+ 	        	System.err.println("ERROR: could not computer 7d summary: " + e.getMessage());
+ 		        }
+ 	    	}
 
 
         // Dump a summary of the current status.
