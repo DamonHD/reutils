@@ -19,16 +19,24 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20230110: rendering text better/bigger for smallest button.
-    DHD20230111: more code reordering for potential increased performance.
-    DHD20230115: tidyup of created JARS.
-    DHD20230115: Slimmed-down out_O/edhMain.reutils-X.Y.Z.jar created, ~10% of previous size!
 
 
 
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20230115:
+    freezepoint name: V1.1.22
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.21
+    DHD20230110: rendering text better/bigger for smallest button.
+    DHD20230111: more code reordering for potential increased performance.
+    DHD20230115: tidyup of generated JARs.
+    DHD20230115: slimmed-down out_O/edhMain.reutils-X.Y.Z.jar created, ~10% of previous size if obfuscated!
 
 
 20230110:

@@ -219,15 +219,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <target name="core.jar.edhMainsuperopt"
         depends="core.jar.opt"
         description="builds the shrunk optimised/release org.hd.d.edh.Main JAR">
-    	<proguard>
-    	    <!-- -verbose -->
+    	<proguard
+    		verbose="true">
 		    <!-- -printconfiguration -->
 		    -injars      ${build.dir.opt}/${dist.jar}
 		    -outjars     ${build.dir.opt}/edhMain.${dist.jar}
 		    -libraryjars ${java.home}/jmods/java.base.jmod(!**.jar;!module-info.class)
 		    -libraryjars ${java.home}/jmods/java.desktop.jmod(!**.jar;!module-info.class)
     		-libraryjars ${cp.opt.basic}
-			-libraryjars ${cp.common.rt} 
+			-libraryjars ${cp.common.rt}
+    		-dontobfuscate <!-- leave class names etc for easier debugging -->
   		    -keep public class org.hd.d.edh.Main {
   		        public *;
       	    }	  
