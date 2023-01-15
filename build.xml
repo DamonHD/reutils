@@ -103,6 +103,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <!--Place where javadoc is built. -->
     <property name="javadoc.dir" value="${build.dir.cmn}/javadoc"/>
+	
+	<!-- ProGuard static optimiser/shrunker.  -->
+	<property name="pg.dir" value="../proguard/" />
+	<taskdef resource="proguard/ant/task.properties"
+	         classpath="${pg.dir}/lib/proguard-ant.jar" />
+	
 
     <!-- General initialisation target. -->
     <target name="init">
@@ -206,6 +212,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      <echo message="Release JAR now at ${build.dir.opt}/${dist.jar} ..." />   
     </target>
 
+    <!-- Super-optimised and shrunk org.hd.d.edh.Main JAR -->
+    <target name="core.jar.edhMainsuperopt"
+        depends="core.jar.opt"
+        description="builds the shrunk optimised/release org.hd.d.edh.Main JAR">
+        
+     <echo message="Release JAR now at ${build.dir.opt}/${dist.jar} ..." />   
+    </target>
 
 
 
