@@ -47,7 +47,8 @@ public final class Main
         System.err.println("Commands/options");
         System.err.println("  -help");
         System.err.println("    This summary/help.");
-        System.err.println("  trafficLights [-class full.generator.classname] {args}");
+        // System.err.println("  trafficLights [-class full.generator.classname] {args}");
+        System.err.println("  trafficLights {args}");
         System.err.println("  FUELINST outfile.html TIBCOfile.gz {TIBCOfile.gz*}");
         System.err.println("  FUELINST outfile.html <directory> [regex-filematch-pattern]");
         }
@@ -56,7 +57,7 @@ public final class Main
      *
      * Accepts the following commands:
      * <ul>
-     * <li>trafficLights [-class full.generator.classname] {args}<br />
+     * <li>trafficLights {args}<br />
      *         Using the default implementation,
      *         args consists of one optional filename.html
      *         from which other output file names (for flags, xhtml, caches, etc)
@@ -69,6 +70,7 @@ public final class Main
      *         Will also delete outfile.html.flag file if status is GREEN, else will create it,
      *         which is useful for automated remote 200/404 status check.
      *         <p>
+     *         Old - [-class full.generator.classname]
      *         If a full class name is supplied
      *         then it is passed the remaining arguments
      *         and may interpret them as it wishes.
@@ -107,24 +109,26 @@ public final class Main
                 {
                 final TrafficLightsInterface impl;
 
-                // Check if "-class" "name" optional args are present.
-                final boolean classSpecified = (args.length >= 2) && "-class".equals(args[1]);
-
-                // If first optional argument is "-class"
-                // then attempt to create an instance of the specified class.
-                if(classSpecified)
-                    {
-                    final String classname = args[2];
-                    System.out.println("Class specified: " + classname);
-                    impl = (TrafficLightsInterface) Class.forName(classname).newInstance();
-                    }
-                // Else use the default implementation.
-                else
+//                // Check if "-class" "name" optional args are present.
+//                final boolean classSpecified = (args.length >= 2) && "-class".equals(args[1]);
+//
+//                // If first optional argument is "-class"
+//                // then attempt to create an instance of the specified class.
+//                if(classSpecified)
+//                    {
+//                    final String classname = args[2];
+//                    System.out.println("Class specified: " + classname);
+//                    impl = (TrafficLightsInterface) Class.forName(classname).newInstance();
+//                    }
+//                // Else use the default implementation.
+//                else
                     { impl = (new FUELINST.TrafficLightsDEFAULT()); }
 
                 // Pass in trailing args (if any) to impl;
+//                // leading 'trafficLights' (and possible -class name) is omitted.
+//                impl.doTrafficLights(Arrays.copyOfRange(args, classSpecified ? 3 : 1, args.length));
                 // leading 'trafficLights' (and possible -class name) is omitted.
-                impl.doTrafficLights(Arrays.copyOfRange(args, classSpecified ? 3 : 1, args.length));
+                impl.doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
                 return; // Completed.
                 }
             else if("extraTweet".equals(command))

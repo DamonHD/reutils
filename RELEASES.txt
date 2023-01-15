@@ -19,8 +19,10 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20231010: rendering text better/bigger for smallest button.
-    DHD20231011: more code reordering for potential increased performance.
+    DHD20230110: rendering text better/bigger for smallest button.
+    DHD20230111: more code reordering for potential increased performance.
+    DHD20230115: tidyup of created JARS.
+    DHD20230115: Slimmed-down out_O/edhMain.reutils-X.Y.Z.jar created, ~10% of previous size!
 
 
 

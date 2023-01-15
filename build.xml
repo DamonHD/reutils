@@ -95,6 +95,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="cp.dbg.basic" value="${cp.common.basic}"/>
     <property name="cp.opt.basic" value="${cp.common.basic}"/>
 
+    <!-- Class path for libs that may run against; includes any external libs. -->
+    <property name="cp.common.rt" value="libs/commons-codec.jar:libs/signpost-core.jar:libs/signpost-commonshttp4.jar"/>
+
 
     <!--Place where source snapshot is built. -->
     <property name="src.snapshot.dir" value="${build.dir.cmn}/snapshot"/>
@@ -191,7 +194,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <include name="**/*.class"/>
             <manifest>
                 <attribute name="Main-Class" value="org.hd.d.edh.Main"/>
-                <attribute name="Class-Path" value="${cp.common.basic}"/>
+                <!-- <attribute name="Class-Path" value="${cp.common.basic}"/> -->
             </manifest>   
         </jar>
     </target>
@@ -202,11 +205,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         description="builds the optimised/release core classes JAR shared by all other app components">
         <jar jarfile="${build.dir.opt}/${dist.jar}"
             basedir="${build.dir.opt}/${tmp.workdir}/${core}">
-            <zipgroupfileset dir="libs" includes="*.jar" excludes=""/>
+            <!-- <zipgroupfileset dir="libs" includes="*.jar" excludes=""/> -->
             <include name="**/*.class"/>   
             <manifest>
                 <attribute name="Main-Class" value="org.hd.d.edh.Main"/>
-                <attribute name="Class-Path" value="${cp.common.basic}"/>
+                <!-- <attribute name="Class-Path" value="${cp.common.basic}"/> -->
             </manifest>   
         </jar>
      <echo message="Release JAR now at ${build.dir.opt}/${dist.jar} ..." />   
@@ -216,8 +219,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <target name="core.jar.edhMainsuperopt"
         depends="core.jar.opt"
         description="builds the shrunk optimised/release org.hd.d.edh.Main JAR">
-        
-     <echo message="Release org.hd.d.edh.Main JAR not yet at ${build.dir.opt}/BLAH.${dist.jar} ..." />   
+    	<proguard>
+    	    <!-- -verbose -->
+		    <!-- -printconfiguration -->
+		    -injars      ${build.dir.opt}/${dist.jar}
+		    -outjars     ${build.dir.opt}/edhMain.${dist.jar}
+		    -libraryjars ${java.home}/jmods/java.base.jmod(!**.jar;!module-info.class)
+		    -libraryjars ${java.home}/jmods/java.desktop.jmod(!**.jar;!module-info.class)
+    		-libraryjars ${cp.opt.basic}
+			-libraryjars ${cp.common.rt} 
+  		    -keep public class org.hd.d.edh.Main {
+  		        public *;
+      	    }	  
+    	</proguard>
+     <echo message="Release org.hd.d.edh.Main JAR now at ${build.dir.opt}/edhMain.${dist.jar} ..." />   
     </target>
 
 
@@ -301,21 +316,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-
-
-
-
-
-
-
     <!-- =================================================================== -->
     <!-- Builds debug and optimised code from scratch, and tests it.         -->
     <!-- =================================================================== -->
     <target name="all"
-        depends="clean,core.jar.opt,core.jar.edhMainsuperopt,src.snapshot"
+    	depends="clean,core.jar.opt,core.jar.edhMainsuperopt,src.snapshot"
         description="cleans, then does optimised/release build and test">
         <echo message="Builds and tests complete."/>
     </target>
+    <!-- depends="clean,core.jar.opt,src.snapshot" -->
+    <!-- depends="clean,core.jar.opt,core.jar.edhMainsuperopt,src.snapshot" -->
 
     <!-- =================================================================== -->
     <!-- Cleans up generated intermediate stuff                              -->
