@@ -655,7 +655,7 @@ public final class FUELINSTUtils
         // Compute relative paths for caches/stores.
         final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));        
 
-
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         // Load long store concurrently with fetching new data.
         // As well as overlapping the I/O
         // this may get JIT compilation done fairly optimally in parallel.
@@ -743,7 +743,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        	}
 	        }
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        // Attempt to update the long store with the new data received, then save it.
+        // Attempt to update the long 	 with the new data received, then save it.
         // Keep the store length trimmed.
         Future<Long> taskLongStoreSave = null;
         // Update the long store only if there is something valid to update it with.

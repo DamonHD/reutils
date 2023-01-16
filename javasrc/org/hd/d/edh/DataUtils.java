@@ -505,6 +505,9 @@ public final class DataUtils
             { return(DataUtils.parseBMRCSV(is, headerCheck)); }
         }
 
+    /**If true, attempt to minimise memory consumption when parsing and loading FUELINST data. */
+    private static final boolean OPTIMISE_MEMORY_IN_FUELINST_PARSE = true;
+
     /**Parse bmreports-style CSV file/stream with HDR and FTR check rows (which are not returned); never null but may be empty.
      *
      * @param r  stream to read from, not closed by this routine; never null
@@ -595,7 +598,9 @@ public final class DataUtils
             // Memory micro-optimisatons.
             // Where possible, share duplicate values from the previous row,
             // else with a constant "0".
-            if(!result.isEmpty())
+            // Costs maybe ~10% of execution time doing this extra work.
+            // May save more than that in avoided GC.
+            if(OPTIMISE_MEMORY_IN_FUELINST_PARSE && !result.isEmpty())
 	            {
 	            final List<String> prevRow = result.get(result.size() - 1);	
 	            if(fields.length == prevRow.size())
