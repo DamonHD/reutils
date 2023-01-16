@@ -307,7 +307,9 @@ public final class TwitterUtils
             {
             try
                 {
-                final TrafficLight lastStatus = (TrafficLight) DataUtils.deserialiseFromFile(socialMediaPostStatusCacheFileName, false);
+            	// Assume the that the cache contains one of "RED", "YELLOW" or "GREEN".
+            	final TrafficLight lastStatus = TrafficLight.valueOf(Files.readString(
+            			socialMediaPostStatusCacheFileName.toPath(), StandardCharsets.US_ASCII).trim());
                 if(status.equals(lastStatus))
                     {
                     if(!quiet)

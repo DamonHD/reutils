@@ -22,8 +22,19 @@ PENDING:
 
 
 
+
+
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20230116:
+    freezepoint name: V1.1.24
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.23
+    DHD20230116: fix for postStatusCache to be plain ASCII "RED" / "YELLOW" / "GREEN".
 
 
 20230116:

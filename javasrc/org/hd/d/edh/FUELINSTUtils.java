@@ -39,6 +39,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -996,11 +997,11 @@ System.out.println("INFO: sending tweet...");
 	
 		            // Assume that status updates will almost always succeed.
 		            // And that it is not a disaster if an update (silently) fails...
-		            // Cache the new status (uncompressed, since it will be small).
+		            // Cache the new status as plain ASCII "RED" or "YELLOW" or "GREEN".
 		            // Only do this for non-null statuses.
 		            if(null != status)
 		                {
-		                try { DataUtils.serialiseToFile(status, socialMediaPostStatusCacheFile, false, true); }
+		            	try { DataUtils.replacePublishedFile(socialMediaPostStatusCacheFile.getName(), status.toString().getBytes(StandardCharsets.US_ASCII), true); }
 		                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
 		                }
 		        	}

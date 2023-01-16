@@ -231,6 +231,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   		    -keep public class org.hd.d.edh.Main {
   		        public *;
       	    }
+    		<!-- Makes the enum handling a little simpler! -->
+  		    -keep public class org.hd.d.edh.TrafficLight {
+  		        public *;
+      	    }
     		<!-- Build a few times, run many: thus worth extra optimisation effort here... -->
     		-optimizationpasses 5
     		-allowaccessmodification
