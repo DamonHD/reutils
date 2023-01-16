@@ -20,7 +20,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20230116: micro-optimisations to try to speed up critical (CSV parse) path.
-
+    DHD20230116: allowing more obfuscation to shrink JAR, leaving source file and line info.
 
 
 

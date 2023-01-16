@@ -228,12 +228,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		    -libraryjars ${java.home}/jmods/java.desktop.jmod(!**.jar;!module-info.class)
     		-libraryjars ${cp.opt.basic}
 			-libraryjars ${cp.common.rt}
-    		-dontobfuscate <!-- leave class names etc for easier debugging -->
   		    -keep public class org.hd.d.edh.Main {
   		        public *;
       	    }
     		<!-- Build a few times, run many many, so worth extra optimisation effort here... -->
     		-optimizationpasses 5
+    		-allowaccessmodification
+
+    		<!-- -dontobfuscate - leave class/method names etc for easier debugging -->
+            -keepattributes SourceFile,LineNumberTable <!-- Keep minimum for execption debugging. -->
     	</proguard>
      <echo message="Release org.hd.d.edh.Main JAR now at ${build.dir.opt}/edhMain.${dist.jar} ..." />   
     </target>
