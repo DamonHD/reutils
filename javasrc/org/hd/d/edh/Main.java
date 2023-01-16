@@ -42,7 +42,7 @@ import org.hd.d.edh.FUELINST.TrafficLightsInterface;
 public final class Main
     {
     /**Print a summary of command options to stderr. */
-    public static void printOptions()
+    private static void printOptions()
         {
         System.err.println("Commands/options");
         System.err.println("  -help");
