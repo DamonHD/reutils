@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-Copyright (c) 2008-2021, Damon Hart-Davis
+Copyright (c) 2008-2023, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -232,7 +232,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   		    -keep public class org.hd.d.edh.Main {
   		        public *;
       	    }
-    		<!-- Build once, run many many times, so worth extra optimisation effort here... -->
+    		<!-- Build a few times, run many many, so worth extra optimisation effort here... -->
     		-optimizationpasses 5
     	</proguard>
      <echo message="Release org.hd.d.edh.Main JAR now at ${build.dir.opt}/edhMain.${dist.jar} ..." />   
@@ -309,7 +309,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <a href="http://d.hd.org/" target="_top">EDH</a> V${app.version}<br />
                             ]]></header>
             <footer>EDH V${app.version}</footer>
-            <bottom>Copyright (c) 2009-2013, Damon Hart-Davis. All rights reserved.</bottom>
+            <bottom>Copyright (c) 2009-2023, Damon Hart-Davis. All rights reserved.</bottom>
         </javadoc>
     </target>
 
