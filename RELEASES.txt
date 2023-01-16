@@ -19,13 +19,21 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20230116: micro-optimisations to try to speed up critical (CSV parse) path.
-    DHD20230116: allowing more obfuscation to shrink JAR, leaving source file and line info.
 
 
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20230116:
+    freezepoint name: V1.1.23
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.22
+    DHD20230116: micro-optimisations to try to speed up critical (CSV parse) path.
+    DHD20230116: allowing most obfuscation to shrink JAR further, leaving source file and line info.
 
 
 20230115:
