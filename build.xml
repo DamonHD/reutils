@@ -231,7 +231,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     		-dontobfuscate <!-- leave class names etc for easier debugging -->
   		    -keep public class org.hd.d.edh.Main {
   		        public *;
-      	    }	  
+      	    }
+    		<!-- Build once, run many many times, so worth extra optimisation effort here... -->
+    		-optimizationpasses 5
     	</proguard>
      <echo message="Release org.hd.d.edh.Main JAR now at ${build.dir.opt}/edhMain.${dist.jar} ..." />   
     </target>
