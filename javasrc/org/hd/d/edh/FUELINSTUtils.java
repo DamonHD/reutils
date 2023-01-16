@@ -1001,7 +1001,7 @@ System.out.println("INFO: sending tweet...");
 		            // Only do this for non-null statuses.
 		            if(null != status)
 		                {
-		            	try { DataUtils.replacePublishedFile(socialMediaPostStatusCacheFile.getName(), status.toString().getBytes(StandardCharsets.US_ASCII), true); }
+		            	try { DataUtils.replacePublishedFile(socialMediaPostStatusCacheFile.getName(), status.toString().getBytes(StandardCharsets.US_ASCII), false); }
 		                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
 		                }
 		        	}
