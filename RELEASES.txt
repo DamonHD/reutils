@@ -19,6 +19,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
+    DHD20230116: micro-optimisations to try to speed up critical (CSV parse) path.
 
 
 
