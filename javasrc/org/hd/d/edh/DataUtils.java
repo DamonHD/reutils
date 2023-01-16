@@ -595,11 +595,11 @@ public final class DataUtils
 //Data row: FUELINST,20221104,21,20221104102500,13998,0,0,4637,9195,0,848,1,136,0,0,130,0,2225,0,0,0,1257
 //Data row: FUELINST,20221104,21,20221104103000,13964,0,0,4635,9332,0,848,0,134,0,0,129,0,2219,0,0,0,1257
 
-            // Memory micro-optimisatons.
+            // Memory micro-optimisation.
             // Where possible, share duplicate values from the previous row,
-            // else with a constant "0".
-            // Costs maybe ~10% of execution time doing this extra work.
-            // May save more than that in avoided GC.
+            // or with a constant "0".
+            // Costs maybe ~10% of parse execution time doing this extra work,
+            // but may save more than that in avoided GC on small JVM instance.
             if(OPTIMISE_MEMORY_IN_FUELINST_PARSE && !result.isEmpty())
 	            {
 	            final List<String> prevRow = result.get(result.size() - 1);	
@@ -607,10 +607,12 @@ public final class DataUtils
 		            {
 		            for(int i = fields.length; --i >= 0; )
 			            {
+		            	final String fi = fields[i];
+			            // Deduplicate "0" (MW) values by using an implicitly intern()ed constant.
+						if("0".equals(fi)) { fields[i] = "0"; continue; }
+                        // Else if this matches the item from the previous row, reuse it.
 			            final String pi = prevRow.get(i);
-						if(fields[i].equals(pi)) { fields[i] = pi; }
-			            // Deduplicate "0" MW values by using implicitly intern()ed constant.
-						else if("0".equals(fields[i])) { fields[i] = "0"; }
+						if(fi.equals(pi)) { fields[i] = pi; }
 			            }
 		            }
 	            }
