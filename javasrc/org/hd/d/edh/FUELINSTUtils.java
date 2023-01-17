@@ -917,10 +917,6 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: 
 System.out.println("INFO: doTrafficLights(): CHECKPOINT: flags written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
-            // Collect social media details.
-            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
-            final TwitterUtils.MastodonDetails md = TwitterUtils.getMastodonDetails();
-
             // Update the (mobile-friendly) XHTML page (in the background).
             taskXHTMLsave = executor.submit(() ->
                 {
@@ -932,6 +928,10 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: flags written: timestam
                 final long e = System.currentTimeMillis();
                 return(e - s);
                 });
+
+            // Collect social media details.
+            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+            final TwitterUtils.MastodonDetails md = TwitterUtils.getMastodonDetails();
 
             // Update the HTML page.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
@@ -945,21 +945,21 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: HTML page written: time
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
-//            // Update the XML data dump.
-//            if(GENERATE_XML_DATA_FILE)
-//	            {
-//	            try
-//	                {
-//	                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
-//	                    (outputHTMLFileName + ".xml");
-//	                if(null != outputXMLFileName)
-//	                    {
-//	                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary24h, isDataStale,
-//	                        hourOfDayHistorical, status);
-//	                    }
-//	                }
-//	            catch(final IOException e) { e.printStackTrace(); }
-//	            }
+            // Update the XML data dump.
+            if(GENERATE_XML_DATA_FILE)
+	            {
+	            try
+	                {
+	                final String outputXMLFileName = (-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".xml") :
+	                    (outputHTMLFileName + ".xml");
+	                if(null != outputXMLFileName)
+	                    {
+	                    FUELINSTUtils.updateXMLFile(startTime, outputXMLFileName, summary24h, isDataStale,
+	                        hourOfDayHistorical, status);
+	                    }
+	                }
+	            catch(final IOException e) { e.printStackTrace(); }
+	            }
             
             // Update social media if set up ONCE THE HTML PAGE IS UPDATED
             // and there is a change from any previous status posted.
@@ -1028,17 +1028,6 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not update/save long store "+longStoreFile+" error: " + e.getMessage());
 		        }
 	    	}
-        if(null != taskButtons)
-	    	{
-	    	try {
-	        	final Long bT = taskButtons.get();
-	        	System.out.println("INFO: buttons draw and save in "+bT+"ms.");
-	        	}
-	        catch(final ExecutionException|InterruptedException e)
-		        {
-	        	System.err.println("ERROR: could not create/save buttons, error: " + e.getMessage());
-		        }
-	    	}
         if(null != taskIntensityLogUpdate)
 	    	{
 	    	try {
@@ -1083,7 +1072,7 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not send toot: " + e.getMessage());
 		        }
 	    	}
-       if(null != taskTweetSend)
+        if(null != taskTweetSend)
 	    	{
 	    	try {
 	        	final Long tsT = taskTweetSend.get();
@@ -1094,6 +1083,21 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
 		        }
 	    	}
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        if(null != taskButtons)
+            {
+        	if(!taskButtons.isDone()) { System.out.println("INFO: buttons draw and save still running..."); }
+	    	try {
+	        	final Long bT = taskButtons.get();
+	        	System.out.println("INFO: buttons draw and save in "+bT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not create/save buttons, error: " + e.getMessage());
+		        }
+	    	}
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+
         // Shut down the thread pool, completing any running task(s).
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
