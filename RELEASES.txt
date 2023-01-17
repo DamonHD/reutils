@@ -20,6 +20,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20230117: added computeTime_ms to CurrentSummary toString() result.
+    DHD20230117: more code reordering for potential increased performance.
 
 
 

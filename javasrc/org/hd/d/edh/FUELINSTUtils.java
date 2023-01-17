@@ -823,28 +823,6 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         		});
         	}
         else { System.err.println("ERROR: missing directory for icons: " + DEFAULT_BUTTON_BASE_DIR); }
-        
-
-        CurrentSummary summary7d = null;
-        if(null != taskSummary7d)
- 	    	{
- 	    	try { summary7d = taskSummary7d.get(); }
- 	        catch(final ExecutionException|InterruptedException e)
- 		        {
- 	        	System.err.println("ERROR: could not computer 7d summary: " + e.getMessage());
- 		        }
- 	    	}
-
-
-        // Dump a summary of the current status.
-        System.out.println("INFO: 24h summary: " + summary24h);
-        System.out.println("INFO: 7d summary: " + summary7d);
-
-
-        // Compute retail mean intensity from over 7d if available.
-        final int retailMeanIntensity = Math.round(
-		    ((null != summary7d) ? summary7d.histAveIntensity : summary24h.histAveIntensity) *
-		        (1 + summary24h.totalGridLosses));
 
 
         // Append to the intensity log.
@@ -865,8 +843,29 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                 return(e - s);
 	            });
         	}
-        
-        
+
+
+        // Gather 7d result.
+        CurrentSummary summary7d = null;
+        if(null != taskSummary7d)
+ 	    	{
+ 	    	try { summary7d = taskSummary7d.get(); }
+ 	        catch(final ExecutionException|InterruptedException e)
+ 		        { System.err.println("ERROR: could not compute 7d summary: " + e.getMessage()); }
+ 	    	}
+
+
+        // Dump a summary of the current status.
+        System.out.println("INFO: 24h summary: " + summary24h);
+        System.out.println("INFO: 7d summary: " + summary7d);
+
+
+        // Compute retail mean intensity from over 7d if available.
+        final int retailMeanIntensity = Math.round(
+		    ((null != summary7d) ? summary7d.histAveIntensity : summary24h.histAveIntensity) *
+		        (1 + summary24h.totalGridLosses));
+
+
         // Update intensity files.
         Future<Long> taskIntensityFiles = null;
         final String outputTXTFileName = (-1 != lastDot) ?
