@@ -722,6 +722,7 @@ System.err.println("WARNING: invalid CSV FUELINST data repaired.");
 System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
 	            }            
         	}
+System.out.println("INFO: doTrafficLights(): CHECKPOINT: fresh data fetched, parsed, validated/fixed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
         // Collect results of long store load.
@@ -794,6 +795,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
         		new FUELINST.CurrentSummary();
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
         // Is the data stale?
@@ -912,6 +914,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             // Handle the flag files that can be tested by remote servers.
             try { FUELINSTUtils.doFlagFiles(baseFileName, isDataStale, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
             catch(final IOException e) { e.printStackTrace(); }
+System.out.println("INFO: doTrafficLights(): CHECKPOINT: flags written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
             // Collect social media details.
@@ -938,6 +941,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
                     isDataStale, hourOfDayHistorical, status, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
+System.out.println("INFO: doTrafficLights(): CHECKPOINT: HTML page written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
