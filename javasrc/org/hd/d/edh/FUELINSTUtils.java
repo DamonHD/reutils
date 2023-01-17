@@ -808,7 +808,7 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: 
 
 
         // Update button(s)/icon(s).
-        // Start early, because slow.
+        // Start ASAP, because likely the last task to finish.
         // NOTE: currently based on 24h summary only.
         Future<Long> taskButtons = null;
         final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
@@ -847,18 +847,17 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: 
         	}
 
 
+        // Dump summaries...
+        System.out.println("INFO: 24h summary: " + summary24h);
         // Gather 7d result.
         CurrentSummary summary7d = null;
         if(null != taskSummary7d)
  	    	{
+        	if(!taskSummary7d.isDone()) { System.out.println("INFO: summary7d still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
  	    	try { summary7d = taskSummary7d.get(); }
  	        catch(final ExecutionException|InterruptedException e)
  		        { System.err.println("ERROR: could not compute 7d summary: " + e.getMessage()); }
  	    	}
-
-
-        // Dump a summary of the current status.
-        System.out.println("INFO: 24h summary: " + summary24h);
         System.out.println("INFO: 7d summary: " + summary7d);
 
 
@@ -1019,6 +1018,7 @@ System.out.println("INFO: sending tweet...");
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         if(null != taskLongStoreSave)
 	    	{
+        	if(!taskLongStoreSave.isDone()) { System.out.println("INFO: long store still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
 	    	try {
 	        	final Long lsT = taskLongStoreSave.get();
 	        	System.out.println("INFO: long store save in "+lsT+"ms.");
@@ -1061,19 +1061,9 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not generate/save XHTML, error: " + e.getMessage());
 		        }
 	    	}
-        if(null != taskTootSend)
-	    	{
-	    	try {
-	        	final Long tsT = taskTootSend.get();
-	        	System.out.println("INFO: toot sent in "+tsT+"ms.");
-	        	}
-	        catch(final ExecutionException|InterruptedException e)
-		        {
-	        	System.err.println("ERROR: could not send toot: " + e.getMessage());
-		        }
-	    	}
         if(null != taskTweetSend)
 	    	{
+        	if(!taskTweetSend.isDone()) { System.out.println("INFO: tweet still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
 	    	try {
 	        	final Long tsT = taskTweetSend.get();
 	        	System.out.println("INFO: tweet sent in "+tsT+"ms.");
@@ -1083,10 +1073,21 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
 		        }
 	    	}
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+        if(null != taskTootSend)
+	    	{
+        	if(!taskTootSend.isDone()) { System.out.println("INFO: toot still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
+	    	try {
+	        	final Long tsT = taskTootSend.get();
+	        	System.out.println("INFO: toot sent in "+tsT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not send toot: " + e.getMessage());
+		        }
+	    	}
         if(null != taskButtons)
             {
-        	if(!taskButtons.isDone()) { System.out.println("INFO: buttons draw and save still running..."); }
+        	if(!taskButtons.isDone()) { System.out.println("INFO: buttons draw and save still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
 	    	try {
 	        	final Long bT = taskButtons.get();
 	        	System.out.println("INFO: buttons draw and save in "+bT+"ms.");
