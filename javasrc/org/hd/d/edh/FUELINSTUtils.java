@@ -727,7 +727,8 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: fresh data fetched, par
 
         // Collect results of long store load.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        List<List<String>> _ls = null;
+		if(!longStoreLoad.isDone()) { System.out.println("INFO: long store load still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
+		List<List<String>> _ls = null;
         try { _ls = longStoreLoad.get(); }
         catch(final ExecutionException|InterruptedException e)
 	        {
