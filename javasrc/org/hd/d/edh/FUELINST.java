@@ -214,6 +214,9 @@ public final class FUELINST
          * Likely actual precision only warrants float.
          */
         public final Map<String,Float> correlationIntensityToFuel;
+        
+        /**Compute time (ms); 0 if unknown. */
+        public final long computeTime_ms;
 
 
         /**Construct a default (empty) instance.
@@ -224,7 +227,8 @@ public final class FUELINST
             this(null, null, 0L, 0L, 0L, 0, Collections.<String,Integer>emptyMap(), 0L, 0, 0L, 0, 0, 0L, 0L, 0, 0, 0,
                     null, null, null, null,
                     0f,
-                    Collections.<String,Float>emptyMap());
+                    Collections.<String,Float>emptyMap(),
+                    0);
             }
 
         /**Construct an instance.
@@ -249,7 +253,8 @@ public final class FUELINST
                 final List<Integer> histAveZCGenerationByHourOfDay,
                 final List<Integer> histAveStorageDrawdownByHourOfDay,
                 final float totalGridLosses,
-                final Map<String,Float> correlationIntensityToFuel)
+                final Map<String,Float> correlationIntensityToFuel,
+                final long computeTime_ms)
             {
             this.status = status;
             this.recentChange = recentChange;
@@ -277,6 +282,7 @@ public final class FUELINST
             this.totalGridLosses = totalGridLosses;
             if(correlationIntensityToFuel == null) { throw new IllegalArgumentException(); }
             this.correlationIntensityToFuel = Collections.unmodifiableMap(new HashMap<String, Float>(correlationIntensityToFuel)); // Defensive copy.
+            this.computeTime_ms = computeTime_ms;
             }
 
         /**Select the traffic-light colour for a given intensity (gCO2/kWh); never null.
@@ -305,7 +311,7 @@ public final class FUELINST
         /**Generate human-readable summary of most of the data; never null. */
         @Override public String toString()
             {
-            final StringBuilder sb = new StringBuilder(256);
+            final StringBuilder sb = new StringBuilder(600);
             sb.append("FUELINST.CurrentSummary");
 
             sb.append(":status=").append(status);
@@ -327,6 +333,7 @@ public final class FUELINST
             sb.append(":histAveIntensityByHourOfDay=");
                for(final Integer i : histAveIntensityByHourOfDay) { sb.append(i).append(","); }
                sb.deleteCharAt(sb.length() - 1);
+            sb.append(":computeTime_ms=").append(computeTime_ms);
 
             return(sb.toString());
             }

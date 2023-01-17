@@ -157,7 +157,7 @@ public final class FUELINSTUtils
      * <p>
      * Uses fuel intensities as of this year, ie when this call is made.
      * <p>
-     * Purely functional other than some writes to stdout/stdere:
+     * Purely functional other than some writes to stdout/stderr:
      * has no side-effects and does not alter the input.
      *
      * @param parsedBMRCSV  parsed (as strings) BMR CSV file data, or null if unavailable
@@ -172,6 +172,8 @@ public final class FUELINSTUtils
         // then return an empty/default result.
         if((null == parsedBMRCSV) || parsedBMRCSV.isEmpty())
             { return(new FUELINST.CurrentSummary()); }
+
+        final long start = System.currentTimeMillis();
 
         // Get as much set up as we can before pestering the data source...
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -451,7 +453,8 @@ public final class FUELINSTUtils
                                   aveZCGenerationByHourOfDay,
                                   aveStorageDrawdownByHourOfDay,
                                   tranLoss + distLoss,
-                                  correlationIntensityToFuel);
+                                  correlationIntensityToFuel,
+                                  System.currentTimeMillis() - start);
 
         return(result);
         }
