@@ -19,15 +19,23 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20230117: added computeTime_ms to CurrentSummary toString() result.
-    DHD20230117: more code reordering for potential increased performance.
-    DHD20230117: reporting where long tasks are delaying progress.
 
 
 
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20230118:
+    freezepoint name: V1.1.26
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.25
+    DHD20230117: added computeTime_ms to CurrentSummary toString() result.
+    DHD20230117: more code reordering for potential increased performance.
+    DHD20230117: reporting where long tasks are delaying progress.
 
 
 20230116:
