@@ -749,7 +749,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	        	}
 	        }
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        // Attempt to update the long 	 with the new data received, then save it.
+        // Attempt to update the long store with the new data received, then save it.
         // Keep the store length trimmed.
         Future<Long> taskLongStoreSave = null;
         // Update the long store only if there is something valid to update it with.
