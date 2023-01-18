@@ -73,23 +73,6 @@ public final class GraphicsUtils
      */
     public static final boolean MINIMISE_PNG_ICON_SIZE = false;
 
-    /**Warm up / preload graphics subsystem for writeSimpleIntensityIconPNG(); returns ms taken.
-     * The buffer.createGraphics() takes hundreds of milliseconds,
-     * so can be done ahead of when actually needed.
-     */
-    public static long preloadGraphicsSupport()
-	    {
-    	final long s = System.currentTimeMillis();
-    	Font.decode(null); // Load system default font...
-    	final int sizePX = MIN_ICON_SIZE_PX;
-        final BufferedImage buffer = new BufferedImage(sizePX, sizePX,
-        		MINIMISE_PNG_ICON_SIZE ? BufferedImage.TYPE_BYTE_INDEXED : BufferedImage.TYPE_INT_RGB);
-        final Graphics2D g = buffer.createGraphics();
-        final FontRenderContext fc = g.getFontRenderContext();
-        g.dispose();
-    	final long e = System.currentTimeMillis();
-        return(e - s);
-	    }
 
     /**Write a simple PNG icon containing the current intensity and with the current traffic-light colour; never null.
      * This attempts to update the output atomically and leaving it globally readable at all times.
