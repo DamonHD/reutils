@@ -666,6 +666,9 @@ public final class FUELINSTUtils
         final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
 	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
 
+        // Try to ensure that button drawing does not drive entire execution time!
+        final Future<Long> taskPreloadGraphics = executor.submit(() ->
+        	{ return(GraphicsUtils.preloadGraphicsSupport()); });
 
         // Fetch and parse the FUELINST CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
@@ -811,6 +814,7 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: 
         // Update button(s)/icon(s).
         // Start ASAP, because likely the last task to finish.
         // NOTE: currently based on 24h summary only.
+    	if(!taskPreloadGraphics.isDone()) { System.out.println("INFO: graphics preload still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
         Future<Long> taskButtons = null;
         final File bd = new File(DEFAULT_BUTTON_BASE_DIR);
         if(bd.isDirectory() && bd.canWrite())
@@ -1084,6 +1088,18 @@ System.out.println("INFO: sending tweet...");
 	        catch(final ExecutionException|InterruptedException e)
 		        {
 	        	System.err.println("ERROR: could not send toot: " + e.getMessage());
+		        }
+	    	}
+        if(null != taskPreloadGraphics)
+	        {
+	    	if(!taskPreloadGraphics.isDone()) { System.out.println("INFO: graphics preload still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
+	    	try {
+	        	final Long bT = taskPreloadGraphics.get();
+	        	System.out.println("INFO: graphics preload in "+bT+"ms.");
+	        	}
+	        catch(final ExecutionException|InterruptedException e)
+		        {
+	        	System.err.println("ERROR: could not preload graphics, error: " + e.getMessage());
 		        }
 	    	}
         if(null != taskButtons)
