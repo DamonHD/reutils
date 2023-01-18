@@ -73,8 +73,8 @@ public final class GraphicsUtils
      */
     public static final boolean MINIMISE_PNG_ICON_SIZE = false;
 
-    /**Warm up / preload graphics subsystem; returns ms taken.
-     * This seems to take a long time to load,
+    /**Warm up / preload graphics subsystem for writeSimpleIntensityIconPNG(); returns ms taken.
+     * The buffer.createGraphics() takes hundreds of milliseconds,
      * so can be done ahead of when actually needed.
      */
     public static long preloadGraphicsSupport()
