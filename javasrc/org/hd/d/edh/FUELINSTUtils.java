@@ -696,7 +696,7 @@ System.err.println("ERROR: could not fetch data from " + url + " error: " + e.ge
     		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1, true);
         if(null != validationError)
             {
-System.err.println("WARNING: invalid CSV FUELINST data: " + validationError.errorMessage);
+System.err.println("WARNING: *** invalid CSV FUELINST data as received: " + validationError.errorMessage);
         	// Dump troublesome data, as received...
         	if(parsedBMRCSV != null)
 	        	{
@@ -707,7 +707,7 @@ System.err.println("WARNING: invalid CSV FUELINST data: " + validationError.erro
             if(null != validationError.repairedBMRCSV)
                 {
             	parsedBMRCSV = validationError.repairedBMRCSV;
-System.err.println("WARNING: invalid CSV FUELINST data repaired.");
+System.err.println("WARNING: *** invalid CSV FUELINST data as repaired.");
 				// Dump after repair...
 				if(parsedBMRCSV != null)
 					{

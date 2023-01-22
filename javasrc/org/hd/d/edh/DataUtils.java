@@ -400,10 +400,35 @@ public final class DataUtils
 			if(row.size() < 5) { return(new ValidBMRDataResultError("short row")); }
 			if(!"FUELINST".equals(row.get(0))) { return(new ValidBMRDataResultError("row first field not FUELINST")); }
 			final String timestampRaw = row.get(3);
-			if(14 != timestampRaw.length()) { return(new ValidBMRDataResultError("timestamp wrong lenght")); }
+			if(14 != timestampRaw.length()) { return(new ValidBMRDataResultError("timestamp wrong length")); }
+
+			// THIS IS POTENTIALLY REPAIRABLE!
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
-			if(lastTimestampRaw.compareTo(timestampRaw) > 0) { return(new ValidBMRDataResultError("timestamps misordered (decreasing) at " + timestampRaw)); }
+//WARNING: [FUELINST, 20230122, 12, 20230122055500, 5380, 0, 501, 5171, 6616, 0, 374, 0, 190, 651, 400, 1002, 153, 2017, 989, 259, 384, 1257]
+//WARNING: [FUELINST, 20230122, 12, 20230122060000, 5779, 0, 500, 5172, 6614, 0, 374, 0, 165, 547, 400, 1003, 127, 2005, 985, 251, 344, 1257]
+//WARNING: [FUELINST, 20230122, 13, 20230122061500, 6749, 0, 498, 5175, 6601, 0, 377, 0, 166, 125, 400, 1003, 51, 2010, 862, 227, 219, 1257]
+//WARNING: [FUELINST, 20230122, 13, 20230122062000, 6951, 0, 500, 5175, 6539, 0, 376, 0, 167, 125, 400, 1003, 45, 2014, 862, 227, 219, 1257]
+//WARNING: [FUELINST, 20230122, 13, 20230122060500, 6320, 0, 499, 5177, 6617, 0, 375, 0, 164, 249, 400, 1003, 102, 2001, 867, 236, 260, 1257]
+//WARNING: [FUELINST, 20230122, 13, 20230122061000, 6575, 0, 499, 5175, 6656, 0, 377, 0, 165, 125, 400, 1004, 77, 2010, 862, 227, 219, 1257]
+//WARNING: [FUELINST, 20230122, 13, 20230122062500, 7171, 0, 499, 5176, 6489, 0, 375, 0, 168, 125, 397, 1004, 68, 2013, 862, 227, 219, 1257]
+//WARNING: [FUELINST, 20230122, 13, 20230122063000, 7055, 0, 500, 5179, 6458, 0, 374, 0, 187, 125, 376, 1004, 93, 2016, 862, 227, 219, 1257]
+			if(lastTimestampRaw.compareTo(timestampRaw) > 0)
+			    {
+				final String errorMessage = "timestamps misordered (decreasing) at " + timestampRaw;
+				if(attemptRepair)
+					{
+					// Note the error/repair.
+					lastErrorRepaired = errorMessage;
+					// Null out the later record.
+					repairedBMRCSV.set(r, null);
+					// Keep lastTimestampRaw as-is.
+					continue;
+					}
+				else
+				    { return(new ValidBMRDataResultError(errorMessage)); }
+				}
+
 			// DHD20221117: after a lot of catching up, multiple records may get the same timestamp
 			// because they seem to be stamped with when they are added,
 			// not the time of day of the samples that they refer to.
@@ -419,20 +444,21 @@ public final class DataUtils
 //WARNING: [FUELINST, 20221117, 27, 20221117131500, 16060, 0, 0, 4227, 12641, 130, 429, 1, 152, 0, 0, 103, 0, 1969, 0, 0, 0, 1095]
 
 			// THIS IS POTENTIALLY REPAIRABLE!
-			if(lastTimestampRaw.compareTo(timestampRaw) >= 0)
+			if(lastTimestampRaw.compareTo(timestampRaw) == 0)
 			    {
 				final String errorMessage = "timestamps not monotonically increasing";
 				if(attemptRepair)
 					{
 					// Note the error/repair.
 					lastErrorRepaired = errorMessage;
-					// Null out this record and the previous one that it shares a timestamp with,
+					// Null out this record and the previous one that it shares a timestamp with.
 					repairedBMRCSV.set(r, null);
 					repairedBMRCSV.set(r-1, null);
 					}
 				else
 					{ return(new ValidBMRDataResultError(errorMessage)); }
 				}
+
 			lastTimestampRaw = timestampRaw;
 			}
 
@@ -457,7 +483,7 @@ public final class DataUtils
             while(repairedBMRCSV.remove(null)) { } // FIXME: O(n^2) cost.
             repairedBMRCSV.trimToSize();
         	return(new ValidBMRDataResultError(
-        			lastErrorRepaired,
+        			"REPAIRED: " + lastErrorRepaired,
         			Collections.unmodifiableList(repairedBMRCSV)));
 	        }
 
