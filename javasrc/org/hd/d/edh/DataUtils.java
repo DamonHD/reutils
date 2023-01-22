@@ -405,6 +405,7 @@ public final class DataUtils
 			// THIS IS POTENTIALLY REPAIRABLE!
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
+			// Reject anything with timestamp older than newest so far read.
 //WARNING: [FUELINST, 20230122, 12, 20230122055500, 5380, 0, 501, 5171, 6616, 0, 374, 0, 190, 651, 400, 1002, 153, 2017, 989, 259, 384, 1257]
 //WARNING: [FUELINST, 20230122, 12, 20230122060000, 5779, 0, 500, 5172, 6614, 0, 374, 0, 165, 547, 400, 1003, 127, 2005, 985, 251, 344, 1257]
 //WARNING: [FUELINST, 20230122, 13, 20230122061500, 6749, 0, 498, 5175, 6601, 0, 377, 0, 166, 125, 400, 1003, 51, 2010, 862, 227, 219, 1257]
@@ -420,9 +421,9 @@ public final class DataUtils
 					{
 					// Note the error/repair.
 					lastErrorRepaired = errorMessage;
-					// Null out the later record.
+					// Null out the later ('older') record.
 					repairedBMRCSV.set(r, null);
-					// Keep lastTimestampRaw as-is.
+					// Keep lastTimestampRaw as-is as high water mark.
 					continue;
 					}
 				else
