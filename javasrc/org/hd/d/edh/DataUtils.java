@@ -403,7 +403,7 @@ public final class DataUtils
 			if(14 != timestampRaw.length()) { return(new ValidBMRDataResultError("timestamp wrong lenght")); }
 			// Check for strictly monotonic (lexical) ordering.
 			// Avoids an expensive time conversion...
-			if(lastTimestampRaw.compareTo(timestampRaw) > 0) { return(new ValidBMRDataResultError("timestamps misordered (decreasing)")); }
+			if(lastTimestampRaw.compareTo(timestampRaw) > 0) { return(new ValidBMRDataResultError("timestamps misordered (decreasing) at " + timestampRaw)); }
 			// DHD20221117: after a lot of catching up, multiple records may get the same timestamp
 			// because they seem to be stamped with when they are added,
 			// not the time of day of the samples that they refer to.
