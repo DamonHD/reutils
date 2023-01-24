@@ -277,9 +277,11 @@ public final class TwitterUtils
     private static final boolean SEND_TWEET_ONLY_IF_TWITTER_STATUS_DIFFERENT = true;
 
     /**Character used to separate (trailing) variable part from main part of message.
-     * Generally whitespace would also be inserted to avoid confusion.
+     * There is no longer a need to reliably parse this from a message already sent,
+     * so can be whitespace,
+     * else whitespace would also be inserted to avoid confusion.
      */
-    private static final char TWEET_TAIL_SEP = '|';
+    private static final char TWEET_TAIL_SEP = ' ';
     
     /**Returns true if a social media grid intensity update should be posted.
      * This is based on whether the status has changed since the lost status post,
@@ -397,27 +399,27 @@ public final class TwitterUtils
 		return(e - s);
 	    }
 
-    /**Removes any trailing automatic/variable part from the tweet, leaving the core.
-     * The 'trailing part' starts at the last occurrence of the TWEET_TAIL_SEP,
-     * or the first occurrence of http:// because of Twitter link rewriting.
-     *
-     * @param tweet  full tweet, or null
-     * @return  null if tweet message is null,
-     *     else message stripped of trailing portion if present and trimmed of whitespace.
-     */
-    public static String removeTrailingPart(final String tweet)
-        {
-        // No tweet at all, return null.
-        if(null == tweet) { return(null); }
-        // Trim to last TWEET_TAIL_SEP, if any.
-        final int lastSep = tweet.lastIndexOf(TWEET_TAIL_SEP);
-        String cut = (-1 == lastSep) ? tweet : tweet.substring(0, lastSep);
-        // Trim to first "http:".
-        final int firstHttp = cut.indexOf("http:");
-        cut = (-1 == firstHttp) ? cut : tweet.substring(0, firstHttp);
-        // Trim residual whitespace.
-        return(cut.trim());
-        }
+//    /**Removes any trailing automatic/variable part from the tweet, leaving the core.
+//     * The 'trailing part' starts at the last occurrence of the TWEET_TAIL_SEP,
+//     * or the first occurrence of http:// because of Twitter link rewriting.
+//     *
+//     * @param tweet  full tweet, or null
+//     * @return  null if tweet message is null,
+//     *     else message stripped of trailing portion if present and trimmed of whitespace.
+//     */
+//    public static String removeTrailingPart(final String tweet)
+//        {
+//        // No tweet at all, return null.
+//        if(null == tweet) { return(null); }
+//        // Trim to last TWEET_TAIL_SEP, if any.
+//        final int lastSep = tweet.lastIndexOf(TWEET_TAIL_SEP);
+//        String cut = (-1 == lastSep) ? tweet : tweet.substring(0, lastSep);
+//        // Trim to first "http:".
+//        final int firstHttp = cut.indexOf("http:");
+//        cut = (-1 == firstHttp) ? cut : tweet.substring(0, firstHttp);
+//        // Trim residual whitespace.
+//        return(cut.trim());
+//        }
 
     /**Immutable class containing Mastodon details.
      * These details are enough (other than any security tokens) to make a post.

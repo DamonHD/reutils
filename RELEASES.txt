@@ -26,6 +26,15 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 
+20230124:
+    freezepoint name: V1.1.28
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.27
+    DHD20230124: using ' ' rather than '|' as tweet timestamp separator to avoid breaking links.
+
+
 20230122:
     freezepoint name: V1.1.27
     branch name: HEAD
