@@ -565,13 +565,13 @@ public final class FUELINSTUtils
         // (If no extension is present then ".flag" is simply appended.)
         final File outputFlagFile = new File(baseFileName + ".flag");
         final boolean basicFlagState = TrafficLight.GREEN != statusCapped;
-        System.out.println("INFO: basic (green) flag file is " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
+        System.out.println("INFO: basic (green) flag " + outputFlagFile + ": " + (basicFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputFlagFile, basicFlagState);
         // 7d version.
         final File output7dFlagFile = new File(baseFileName + ".7d.flag");
         final boolean basic7dFlagState = TrafficLight.GREEN != status7dCapped;
-        System.out.println("INFO: basic 7d (green) flag file is " + output7dFlagFile + ": " + (basic7dFlagState ? "set" : "clear"));
+        System.out.println("INFO: basic 7d (green) flag " + output7dFlagFile + ": " + (basic7dFlagState ? "set" : "clear"));
         FUELINSTUtils.doPublicFlagFile(output7dFlagFile, basic7dFlagState);
 
         // Now deal with the flag that is prepared to make predictions from historical data,
@@ -580,7 +580,7 @@ public final class FUELINSTUtils
         // When live data is available then this should be the same as the basic flag.
         final File outputPredictedFlagFile = new File(baseFileName + ".predicted.flag");
         final boolean predictedFlagState = TrafficLight.GREEN != statusUncapped;
-        System.out.println("INFO: predicted flag file is " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
+        System.out.println("INFO: predicted flag " + outputPredictedFlagFile + ": " + (predictedFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputPredictedFlagFile, predictedFlagState);
 
@@ -588,27 +588,27 @@ public final class FUELINSTUtils
         // AND storage is not being drawn from.
         final File outputSupergreenFlagFile = new File(baseFileName + ".supergreen.flag");
         final boolean supergreenFlagState = (basicFlagState) || (currentStorageDrawdownMW > 0);
-        System.out.println("INFO: supergreen flag file is " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
+        System.out.println("INFO: supergreen flag " + outputSupergreenFlagFile + ": " + (supergreenFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputSupergreenFlagFile, supergreenFlagState);
         // 7d version.
         final File outputSupergreen7dFlagFile = new File(baseFileName + ".7d.supergreen.flag");
         final boolean supergreen7dFlagState = (TrafficLight.GREEN != status7dCapped) ||
     		(isDataStale) || (basic7dFlagState) || (currentStorageDrawdownMW > 0);
-        System.out.println("INFO: supergreen 7d flag file is " + outputSupergreen7dFlagFile + ": " + (supergreen7dFlagState ? "set" : "clear"));
+        System.out.println("INFO: supergreen 7d flag " + outputSupergreen7dFlagFile + ": " + (supergreen7dFlagState ? "set" : "clear"));
         FUELINSTUtils.doPublicFlagFile(outputSupergreen7dFlagFile, supergreen7dFlagState);
 
         // Present when red, ie not in most carbon-intensive part of the day.
         // Flag is computed even with stale data.
         final File outputRedFlagFile = new File(baseFileName + ".red.flag");
         final boolean redFlagState = TrafficLight.RED == statusUncapped;
-        System.out.println("INFO: red flag file is " + outputRedFlagFile + ": " + (redFlagState ? "set" : "clear"));
+        System.out.println("INFO: red flag " + outputRedFlagFile + ": " + (redFlagState ? "set" : "clear"));
         // Remove power-low/grid-poor flag file when status is not RED, else create it (for GREEN/YELLOW/unknown).
         FUELINSTUtils.doPublicFlagFile(outputRedFlagFile, redFlagState);
         // 7d version.
         final File output7dRedFlagFile = new File(baseFileName + ".7d.red.flag");
         final boolean red7dFlagState = TrafficLight.RED == status7dCapped;
-        System.out.println("INFO: 7d red flag file is " + output7dRedFlagFile + ": " + (red7dFlagState ? "set" : "clear"));
+        System.out.println("INFO: 7d red flag " + output7dRedFlagFile + ": " + (red7dFlagState ? "set" : "clear"));
         FUELINSTUtils.doPublicFlagFile(output7dRedFlagFile, red7dFlagState);
         }
 
@@ -722,7 +722,7 @@ System.err.println("WARNING: *** invalid CSV FUELINST data as repaired.");
 System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
 	            }            
         	}
-System.out.println("INFO: doTrafficLights(): CHECKPOINT: fresh data fetched, parsed, validated/fixed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+System.out.println("INFO: CHECKPOINT: data fetched etc: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
         // Collect results of long store load.
@@ -796,7 +796,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
         		new FUELINST.CurrentSummary();
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+System.out.println("INFO: CHECKPOINT: 24h summmary computed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
         // Is the data stale?
@@ -876,8 +876,8 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: 
         final String outputMeanTXTFileName = (-1 != lastDot) ?
                 (outputHTMLFileName.substring(0, lastDot) + ".mean.txt") :
                 (outputHTMLFileName + ".mean.txt");
-    	System.out.println("INFO: retail intensity of "+retailIntensity+"gCO2e/kWh being saved to "+outputTXTFileName+"...");
-    	System.out.println("INFO: retail mean intensity of "+retailMeanIntensity+"gCO2e/kWh being saved to "+outputMeanTXTFileName+"...");
+    	System.out.println("INFO: retail intensity "+retailIntensity+"gCO2e/kWh saving to "+outputTXTFileName+"...");
+    	System.out.println("INFO: retail mean intensity "+retailMeanIntensity+"gCO2e/kWh saving to "+outputMeanTXTFileName+"...");
         taskIntensityFiles = executor.submit(() -> {
         	final long s = System.currentTimeMillis();
         	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailIntensity), isDataStale);
@@ -914,7 +914,7 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: 24h summmary computed: 
             // Handle the flag files that can be tested by remote servers.
             try { FUELINSTUtils.doFlagFiles(baseFileName, isDataStale, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
             catch(final IOException e) { e.printStackTrace(); }
-System.out.println("INFO: doTrafficLights(): CHECKPOINT: flags written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+System.out.println("INFO: CHECKPOINT: flags written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
             // Update the (mobile-friendly) XHTML page (in the background).
@@ -941,7 +941,7 @@ System.out.println("INFO: doTrafficLights(): CHECKPOINT: flags written: timestam
                     isDataStale, hourOfDayHistorical, status, td);
                 }
             catch(final IOException e) { e.printStackTrace(); }
-System.out.println("INFO: doTrafficLights(): CHECKPOINT: HTML page written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
