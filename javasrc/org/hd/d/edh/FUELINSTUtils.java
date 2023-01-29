@@ -910,13 +910,6 @@ System.out.println("INFO: CHECKPOINT: 24h summmary computed: timestamp: "+(Syste
             final TrafficLight status7d = (!isDataStale) ? summary7d.status :
                 (NEVER_GREEN_WHEN_STALE ? statusHistoricalCapped : statusHistorical);
 
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-            // Handle the flag files that can be tested by remote servers.
-            try { FUELINSTUtils.doFlagFiles(baseFileName, isDataStale, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
-            catch(final IOException e) { e.printStackTrace(); }
-System.out.println("INFO: CHECKPOINT: flags written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-
             // Update the (mobile-friendly) XHTML page (in the background).
             taskXHTMLsave = executor.submit(() ->
                 {
@@ -928,6 +921,13 @@ System.out.println("INFO: CHECKPOINT: flags written: timestamp: "+(System.curren
                 final long e = System.currentTimeMillis();
                 return(e - s);
                 });
+
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+            // Handle the flag files that can be tested by remote servers.
+            try { FUELINSTUtils.doFlagFiles(baseFileName, isDataStale, status, statusUncapped, summary24h.currentStorageDrawdownMW, status7d); }
+            catch(final IOException e) { e.printStackTrace(); }
+System.out.println("INFO: CHECKPOINT: flags written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
             // Collect social media details.
             final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
