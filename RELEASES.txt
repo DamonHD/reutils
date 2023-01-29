@@ -15,9 +15,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20230115: trimmed logging to better fit in console!
-    DHD20230129: task re-ordering for performance.
-    DHD20230129: added Mastodon link on HTML page above that for Twitter.
 
 
 
@@ -27,6 +24,17 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20230129:
+    freezepoint name: V1.1.29
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.28
+    DHD20230115: trimmed logging to better fit console!
+    DHD20230129: task re-ordering for performance.
+    DHD20230129: added Mastodon link on HTML page above that for Twitter.
 
 
 20230124:
