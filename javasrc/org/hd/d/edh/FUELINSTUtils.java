@@ -1608,11 +1608,26 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 
             w.println("<p>Latest data is from <strong>"+(new Date(summary24h.timestamp))+"</strong>. This page should be updated every few minutes: use your browser's refresh/reload button if you need to check again.</p>");
 
-            // If we have a Twitter account set up then brag about it here,
-            // but only if we believe that we actually have write access to be doing updates...
+            // If there is a Mastodon account set up then brag about it here.
+            if(md != null)
+                {
+                w.print("<p>Follow this grid status on Mastodon <a href=\"https://");
+                w.print(md.hostname);
+                w.print("/@");
+                w.print(md.username);
+                w.print("\">@");
+                w.print(md.username);
+                w.print('@');
+                w.print(md.hostname);
+                w.print("</a>");
+                w.println(".</p>");
+                }
+
+            // If there is  a Twitter account set up then brag about it here,
+            // but only if there is write access...
             if(td != null)
                 {
-                w.print("<p>Follow this grid status on Twitter <a href=\"http://twitter.com/");
+                w.print("<p>Follow this grid status on Twitter <a href=\"https://twitter.com/");
                 w.print(td.username);
                 w.print("\">@");
                 w.print(td.username);
