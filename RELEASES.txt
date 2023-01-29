@@ -16,6 +16,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20230115: trimmed logging to better fit in console!
+    DHD20230129: more task re-ordering for performance.
 
 
 
