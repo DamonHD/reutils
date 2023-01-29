@@ -938,7 +938,7 @@ System.out.println("INFO: CHECKPOINT: flags written: timestamp: "+(System.curren
             try
                 {
                 FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary24h, summary7d,
-                    isDataStale, hourOfDayHistorical, status, td);
+                    isDataStale, hourOfDayHistorical, status, td, md);
                 }
             catch(final IOException e) { e.printStackTrace(); }
 System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
@@ -1542,7 +1542,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         return(sDF);
         }
 
-    /**Update (atomically if possible) the HTML traffic-light page. */
+    /**Update (atomically if possible) the (ASCII) HTML5 traffic-light page. */
     public static void updateHTMLFile(final long startTime,
                                            final String outputHTMLFileName,
                                            final FUELINST.CurrentSummary summary24h,
@@ -1550,11 +1550,12 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                                            final boolean isDataStale,
                                            final int hourOfDayHistorical,
                                            final TrafficLight status,
-                                           final TwitterUtils.TwitterDetails td)
+                                           final TwitterUtils.TwitterDetails td,
+                                           final TwitterUtils.MastodonDetails md)
         throws IOException
         {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(32768); 
-        try ( final PrintWriter w = new PrintWriter(baos); )
+        try ( final PrintWriter w = new PrintWriter(baos, false, StandardCharsets.US_ASCII); )
             {
             final Map<String, String> rawProperties = MainProperties.getRawProperties();
 
