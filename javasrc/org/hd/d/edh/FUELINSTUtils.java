@@ -994,7 +994,7 @@ System.out.println("INFO: sending toot...");
 		                }
 	                
 	                // Send tweet, if set up...
-		            if(td != null)
+		            if(TwitterUtils.ENABLE_TWEETING && (td != null))
 		                {
 System.out.println("INFO: sending tweet...");
 		                taskTweetSend = executor.submit(() ->
@@ -1062,7 +1062,7 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not generate/save XHTML, error: " + e.getMessage());
 		        }
 	    	}
-        if(null != taskTweetSend)
+        if(TwitterUtils.ENABLE_TWEETING && (null != taskTweetSend))
 	    	{
         	if(!taskTweetSend.isDone()) { System.out.println("INFO: tweet still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
 	    	try {

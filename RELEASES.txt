@@ -15,7 +15,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-
+    DHD20230305: added compile-time Twitter kill switch TwitterUtils.ENABLE_TWEETING.
 
 
 

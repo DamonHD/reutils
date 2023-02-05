@@ -52,12 +52,17 @@ import winterwell.jtwitter.Twitter;
 
 
 /**Twitter Utilities.
- * Handles some common interactions with Twitter and other social media.
+ * Handles some common interactions with Twitter and other social media (eg Mastodon).
  */
 public final class TwitterUtils
     {
     /**Prevent creation of an instance. */
     private TwitterUtils() { }
+    
+    /**Enable tweeting.
+     * As of 2023-02-09 Twitter is due to disable all the relevant (free) APIs.
+     */
+    public static final boolean ENABLE_TWEETING = true;
 
     /**Maximum Twitter message length (tweet) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
@@ -140,6 +145,8 @@ public final class TwitterUtils
      */
     public static TwitterDetails getTwitterHandle(final boolean allowReadOnly)
         {
+    	if(!ENABLE_TWEETING) { return(null); }
+
         final String tUsername = getTwitterUsername();
         // We need at least a Twitter user ID to do anything; return null if we don't have one.
         if(null == tUsername) { return(null); }
