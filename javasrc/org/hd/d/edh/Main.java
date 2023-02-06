@@ -131,7 +131,7 @@ public final class Main
                 impl.doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
                 return; // Completed.
                 }
-            else if("extraTweet".equals(command))
+            else if(TwitterUtils.ENABLE_TWEETING && "extraTweet".equals(command))
 				{
 				final int minMsg = 9; // Minimum plausible Tweet length.
 				if((args.length < 2) || (null == args[1]) || (args[1].length() < minMsg))
