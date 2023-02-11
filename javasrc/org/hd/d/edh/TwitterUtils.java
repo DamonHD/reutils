@@ -60,7 +60,7 @@ public final class TwitterUtils
     private TwitterUtils() { }
     
     /**Enable tweeting.
-     * As of 2023-02-09 Twitter is due to disable all the relevant (free) APIs.
+     * As of 2023-02-13 Twitter is due to disable all the relevant (free) APIs.
      */
     public static final boolean ENABLE_TWEETING = true;
 
