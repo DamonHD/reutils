@@ -877,7 +877,7 @@ System.out.println("INFO: CHECKPOINT: 24h summmary computed: timestamp: "+(Syste
                 (outputHTMLFileName.substring(0, lastDot) + ".mean.txt") :
                 (outputHTMLFileName + ".mean.txt");
     	System.out.println("INFO: retail intensity "+retailIntensity+"gCO2e/kWh saving to "+outputTXTFileName+"...");
-    	System.out.println("INFO: retail mean intensity "+retailMeanIntensity+"gCO2e/kWh saving to "+outputMeanTXTFileName+"...");
+    	System.out.println("INFO: mean "+retailMeanIntensity+"gCO2e/kWh saving to "+outputMeanTXTFileName+"...");
         taskIntensityFiles = executor.submit(() -> {
         	final long s = System.currentTimeMillis();
         	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailIntensity), isDataStale);
