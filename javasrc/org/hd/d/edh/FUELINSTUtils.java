@@ -1846,7 +1846,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             }
 
         // Attempt atomic replacement of HTML page...
-        DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
+        DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray(), true);
         }
     
     /**Update (atomically if possible) the plain-text US_ASCII bare gCO2e/kWh intensity value.
