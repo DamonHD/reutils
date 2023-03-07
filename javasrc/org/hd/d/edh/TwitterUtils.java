@@ -130,7 +130,8 @@ public final class TwitterUtils
         final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
         // Transform empty user name to null.
         if((null != tUsername) && tUsername.isEmpty()) { return(null); }
-        return(tUsername);
+        if(null == tUsername) { return(null); }
+        return(tUsername.intern());
         }
 
     /**Get Twitter handle for updates; null if nothing suitable set up.
@@ -479,7 +480,8 @@ public final class TwitterUtils
         final String username = rawProperties.get(PNAME_MASTODON_USERNAME);
         // Transform empty user name to null.
         if((null != username) && username.isEmpty()) { return(null); }
-        return(username);
+        if(null == username) { return(null); }
+        return(username.intern());
         }
 
     /**Get the specified non-empty Mastodon host name or null if none. */
