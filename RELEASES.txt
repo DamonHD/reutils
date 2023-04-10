@@ -16,6 +16,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
     DHD20230205: added compile-time Twitter kill switch TwitterUtils.ENABLE_TWEETING.
+    DHD20230410: activated kill switch given that posting apparently broke 2023-04-07 ~14:00Z.
 
 
 

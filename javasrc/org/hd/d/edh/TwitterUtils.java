@@ -61,8 +61,10 @@ public final class TwitterUtils
     
     /**Enable tweeting.
      * As of 2023-02-13 Twitter is due to disable all the relevant (free) APIs.
+     * <p>
+     * As of 2023-04-07 (~3pm BST) authentication started failing.
      */
-    public static final boolean ENABLE_TWEETING = true;
+    public static final boolean ENABLE_TWEETING = false;
 
     /**Maximum Twitter message length (tweet) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
