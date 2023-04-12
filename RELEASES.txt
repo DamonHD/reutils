@@ -15,8 +15,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-    DHD20230205: added compile-time Twitter kill switch TwitterUtils.ENABLE_TWEETING.
-    DHD20230410: activated kill switch given that posting apparently broke 2023-04-07 ~14:00Z.
 
 
 
@@ -25,6 +23,16 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20230412:
+    freezepoint name: V1.2.1
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.1.29
+    DHD20230205: added compile-time Twitter kill switch TwitterUtils.ENABLE_TWEETING.
+    DHD20230410: activated kill switch given that posting apparently broke 2023-04-07 ~14:00Z.
 
 
 20230129:
