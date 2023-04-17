@@ -17,6 +17,39 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 PENDING:
 
 
+Behave better after timeout:
+	INFO: generating traffic-light summary [_trafficLightsOutput.html]...
+	ERROR: could not fetch data from https://www.bmreports.com/bmrs/?q=ajax/csv_download/FUELINST/csv/&filename=GenerationbyFuelType24HrInstantaneous error: null
+	WARNING: *** invalid CSV FUELINST data as received: null input
+	ERROR: invalid CSV FUELINST data not repaired so rejected: null input
+	INFO: CHECKPOINT: data fetched etc: timestamp: 30836ms.
+	INFO: long store records loaded: 1569
+	INFO: CHECKPOINT: 24h summmary computed: timestamp: 30849ms.
+	WARNING: will not update intensity log, input data is stale.
+	INFO: 24h summary: FUELINST.CurrentSummary:status=null:recentChange=null:timestamp=0:currentMW=0:currentIntensity=0:currentStorageDrawdownMW=0:histMinIntensity=0:histAveIntensity=0:histMaxIntensity=0:minIntensityRecordTimestamp=0:maxIntensityRecordTimestamp=0:histWindowSize=0:histSamples=0:lowerThreshold=0:upperThreshold=0:totalGridLosses=0.0:histAveIntensityByHourOfDay=null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null:computeTime_ms=0
+	INFO: summary7d still running: 30854ms.
+	INFO: 7d summary: FUELINST.CurrentSummary:status=RED:recentChange=YELLOW:timestamp=20230416134500:currentMW=26119:currentIntensity=195:currentStorageDrawdownMW=140:histMinIntensity=50:histAveIntensity=142:histMaxIntensity=269:minIntensityRecordTimestamp=20230410161000:maxIntensityRecordTimestamp=20230414082500:histWindowSize=604500000:histSamples=1569:lowerThreshold=87:upperThreshold=188:totalGridLosses=0.07:histAveIntensityByHourOfDay=134,135,132,131,138,152,160,162,157,150,143,138,138,132,115,122,142,152,157,156,154,148,132,131:computeTime_ms=118
+	INFO: retail intensity 0gCO2e/kWh saving to _trafficLightsOutput.txt...
+	INFO: mean 142gCO2e/kWh saving to _trafficLightsOutput.mean.txt...
+	INFO: basic (green) flag _trafficLightsOutput.flag: set
+	INFO: basic 7d (green) flag _trafficLightsOutput.7d.flag: set
+	INFO: predicted flag _trafficLightsOutput.predicted.flag: set
+	INFO: supergreen flag _trafficLightsOutput.supergreen.flag: set
+	INFO: supergreen 7d flag _trafficLightsOutput.7d.supergreen.flag: set
+	INFO: red flag _trafficLightsOutput.red.flag: clear
+	INFO: 7d red flag _trafficLightsOutput.7d.red.flag: clear
+	INFO: flag file deleted: _trafficLightsOutput.7d.red.flag
+	INFO: CHECKPOINT: flags written: timestamp: 30965ms.
+	WARNING: getMastodonDetails(): Mastodon username and hostname available but not the auth token
+	INFO: CHECKPOINT: HTML page written: timestamp: 30986ms.
+	INFO: intensity files save in 1ms.
+	INFO: XHTML generate and save in 24ms.
+	INFO: buttons draw and save still running: 30986ms.
+	INFO: buttons draw and save in 864ms.
+	INFO: doTrafficLights(): 31718ms.
+
+
+
 
 
 
