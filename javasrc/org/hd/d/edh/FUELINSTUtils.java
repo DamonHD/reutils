@@ -796,7 +796,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
         		new FUELINST.CurrentSummary();
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-System.out.println("INFO: CHECKPOINT: 24h summmary computed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+System.out.println("INFO: CHECKPOINT: 24h summary computed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
         // Is the data stale?
