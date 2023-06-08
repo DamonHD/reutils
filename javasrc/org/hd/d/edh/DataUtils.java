@@ -590,7 +590,7 @@ public final class DataUtils
             if(fields.length < 1)
                 { throw new IOException("unexpected empty row"); }
             final String type = fields[0];
-            if(fields[0].isEmpty())
+            if(type.isEmpty())
                 { throw new IOException("unexpected empty type"); }
 
             // Deal with FTR row.
