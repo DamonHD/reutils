@@ -39,7 +39,6 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -85,7 +84,7 @@ public final class FUELINSTUtils
 
     /**If true then reject points with too few fuel types in mix since this is likely an error. */
     static final int MIN_FUEL_TYPES_IN_MIX = 2;
-    
+
 //    /**If true then enable cacheing of 24h result. */
 //    private static final boolean ENABLE_24H_RESULT_CACHE = false;
 //    /**If true, compress (GZIP) any persisted 24h state. */
@@ -129,7 +128,7 @@ public final class FUELINSTUtils
      * We may share this (read-only) between threads and within this package.
      */
     static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
-    
+
     /**Charset for FUELINST data (ASCII 7-bit). */
     public static final Charset FUELINST_CHARSET = StandardCharsets.US_ASCII;
 
@@ -212,7 +211,7 @@ public final class FUELINSTUtils
                 Collections.<String>emptySet());
 
         // All intensity sample values from good records (assuming roughly equally spaced).
-        final List<Integer> allIntensitySamples = new ArrayList<Integer>(parsedBMRCSV.size());
+        final List<Integer> allIntensitySamples = new ArrayList<>(parsedBMRCSV.size());
 
         // Compute summary.
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
@@ -234,9 +233,9 @@ public final class FUELINSTUtils
         final long[] totalZCGenerationByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
         final long[] totalStorageDrawdownByHourOfDay = new long[FUELINSTUtils.HOURS_PER_DAY]; // Use long to avoid overflow if many samples.
         // Set of all usable fuel types encountered.
-        final Set<String> usableFuels = new HashSet<String>();
+        final Set<String> usableFuels = new HashSet<>();
         // Sample-by-sample list of map of generation by fuel type (in MW) and from "" to weighted intensity (gCO2/kWh).
-        final List<Map<String, Integer>> sampleBySampleGenForCorr = new ArrayList<Map<String,Integer>>(parsedBMRCSV.size());
+        final List<Map<String, Integer>> sampleBySampleGenForCorr = new ArrayList<>(parsedBMRCSV.size());
         // Compute (crude) correlation between fuel use and intensity.
         for(final List<String> row : parsedBMRCSV)
             {
@@ -247,7 +246,7 @@ public final class FUELINSTUtils
             // Reject malformed/unexpected data.
             if(!"FUELINST".equals(namedFields.get("type")))
                 { throw new IOException("Expected FUELINST data but got: " + namedFields.get("type")); }
-            final Map<String,Integer> generationByFuel = new HashMap<String,Integer>();
+            final Map<String,Integer> generationByFuel = new HashMap<>();
             long thisMW = 0; // Total MW generation in this slot.
             long thisStorageDrawdownMW = 0; // Total MW storage draw-down in this slot.
             long thisZCGenerationMW = 0; // Total zero-carbon generation in this slot.
@@ -289,7 +288,7 @@ public final class FUELINSTUtils
             // Add entry only iff both a valid weighted intensity and at least one by-fuel number.
             if(!generationByFuel.isEmpty())
                 {
-                final Map<String, Integer> corrEntry = new HashMap<String, Integer>(generationByFuel);
+                final Map<String, Integer> corrEntry = new HashMap<>(generationByFuel);
                 corrEntry.put("", weightedIntensity);
                 sampleBySampleGenForCorr.add(corrEntry);
                 }
@@ -370,7 +369,7 @@ public final class FUELINSTUtils
             // GREEN when in the lower quartile (and below the mean to be safe), so is fairly conservative,
             // YELLOW otherwise.
             // as long as we're on better-than-median intensity compared to the last 24 hours.
-            final List<Integer> sortedIntensitySamples = new ArrayList<Integer>(allIntensitySamples);
+            final List<Integer> sortedIntensitySamples = new ArrayList<>(allIntensitySamples);
             Collections.sort(sortedIntensitySamples);
             upperThreshold = sortedIntensitySamples.get(allSamplesSize-1 - (allSamplesSize / 4));
             lowerThreshold = Math.min(sortedIntensitySamples.get(allSamplesSize / 4), aveIntensity);
@@ -382,34 +381,34 @@ public final class FUELINSTUtils
         else { System.err.println("Too few samples: " + allSamplesSize); }
 
         // Compute mean intensity by time slot.
-        final List<Integer> aveIntensityByHourOfDay = new ArrayList<Integer>(24);
+        final List<Integer> aveIntensityByHourOfDay = new ArrayList<>(24);
         for(int h = 0; h < 24; ++h)
-            { aveIntensityByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalIntensityByHourOfDay[h] / sampleCount[h]))); }
+            { aveIntensityByHourOfDay.add((sampleCount[h] < 1) ? null : (int) (totalIntensityByHourOfDay[h] / sampleCount[h])); }
 
         // Compute mean generation by time slot.
-        final List<Integer> aveGenerationByHourOfDay = new ArrayList<Integer>(24);
+        final List<Integer> aveGenerationByHourOfDay = new ArrayList<>(24);
         for(int h = 0; h < 24; ++h)
-            { aveGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalGenerationByHourOfDay[h] / sampleCount[h]))); }
+            { aveGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : (int) (totalGenerationByHourOfDay[h] / sampleCount[h])); }
 
         // Compute mean zero-carbon generation by time slot.
-        final List<Integer> aveZCGenerationByHourOfDay = new ArrayList<Integer>(24);
+        final List<Integer> aveZCGenerationByHourOfDay = new ArrayList<>(24);
         for(int h = 0; h < 24; ++h)
-            { aveZCGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalZCGenerationByHourOfDay[h] / sampleCount[h]))); }
+            { aveZCGenerationByHourOfDay.add((sampleCount[h] < 1) ? null : (int) (totalZCGenerationByHourOfDay[h] / sampleCount[h])); }
 
         // Compute mean draw-down from storage by time slot.
-        final List<Integer> aveStorageDrawdownByHourOfDay = new ArrayList<Integer>(24);
+        final List<Integer> aveStorageDrawdownByHourOfDay = new ArrayList<>(24);
         for(int h = 0; h < 24; ++h)
-            { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : Integer.valueOf((int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h]))); }
+            { aveStorageDrawdownByHourOfDay.add((sampleCount[h] < 1) ? null : (int) (totalStorageDrawdownByHourOfDay[h] / sampleCount[h])); }
 
         // Compute fuel/intensity correlation.
-        final Map<String,Float> correlationIntensityToFuel = new HashMap<String,Float>(usableFuels.size());
+        final Map<String,Float> correlationIntensityToFuel = new HashMap<>(usableFuels.size());
         if(!sampleBySampleGenForCorr.isEmpty())
             {
             // Compute correlation by fuel, where there are enough samples.
             for(final String fuel : usableFuels)
                 {
-                final List<Double> fuelMW = new ArrayList<Double>(sampleBySampleGenForCorr.size());
-                final List<Double> gridIntensity = new ArrayList<Double>(sampleBySampleGenForCorr.size());
+                final List<Double> fuelMW = new ArrayList<>(sampleBySampleGenForCorr.size());
+                final List<Double> gridIntensity = new ArrayList<>(sampleBySampleGenForCorr.size());
 
                 for(int i = sampleBySampleGenForCorr.size(); --i >= 0; )
                     {
@@ -506,7 +505,7 @@ public final class FUELINSTUtils
         if(minFuelTypesInMix < 0) { throw new IllegalArgumentException(); }
 
         // Compute set of keys common to both Maps.
-        final Set<String> commonKeys = new HashSet<String>(intensities.keySet());
+        final Set<String> commonKeys = new HashSet<>(intensities.keySet());
         commonKeys.retainAll(generationByFuel.keySet());
         // If too few fuels in the mix then quickly return -1 as a distinguished value.
         if(commonKeys.size() < minFuelTypesInMix) { return(-1); }
@@ -657,7 +656,7 @@ public final class FUELINSTUtils
         final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
 
         // Compute relative paths for caches/stores.
-        final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));        
+        final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));
 
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         // Load long store concurrently with fetching new data.
@@ -700,7 +699,7 @@ System.err.println("WARNING: *** invalid CSV FUELINST data as received: " + vali
         	// Dump troublesome data, as received...
         	if(parsedBMRCSV != null)
 	        	{
-	        	for(List<String> row : parsedBMRCSV)
+	        	for(final List<String> row : parsedBMRCSV)
 		        	{ System.err.println("WARNING: " + row); }
 	        	}
             // Use repaired version if any.
@@ -711,7 +710,7 @@ System.err.println("WARNING: *** invalid CSV FUELINST data as repaired.");
 				// Dump after repair...
 				if(parsedBMRCSV != null)
 					{
-					for(List<String> row : parsedBMRCSV)
+					for(final List<String> row : parsedBMRCSV)
 				    	{ System.err.println("WARNING: " + row); }
 					}
                 }
@@ -720,7 +719,7 @@ System.err.println("WARNING: *** invalid CSV FUELINST data as repaired.");
 	            {
             	parsedBMRCSV = null;
 System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
-	            }            
+	            }
         	}
 System.out.println("INFO: CHECKPOINT: data fetched etc: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
@@ -793,7 +792,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
         // If parsedBMRCSV is null or empty
         // then this will be a empty/default (non-null) result.
         final CurrentSummary summary24h = ((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty()) ?
-        		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :	
+        		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :
         		new FUELINST.CurrentSummary();
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 System.out.println("INFO: CHECKPOINT: 24h summary computed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
@@ -837,7 +836,7 @@ System.out.println("INFO: CHECKPOINT: 24h summary computed: timestamp: "+(System
         else if(!intensityLogFile.isDirectory() || !intensityLogFile.canWrite())
             { System.err.println("ERROR: missing directory for intensity log: " + DEFAULT_INTENSITY_LOG_BASE_DIR); }
         else
-        	{ 	
+        	{
         	taskIntensityLogUpdate = executor.submit(() ->
         	    {
         		final long s = System.currentTimeMillis();
@@ -881,7 +880,7 @@ System.out.println("INFO: CHECKPOINT: 24h summary computed: timestamp: "+(System
         taskIntensityFiles = executor.submit(() -> {
         	final long s = System.currentTimeMillis();
         	FUELINSTUtils.updateTXTFile(startTime, outputTXTFileName, Integer.toString(retailIntensity), isDataStale);
-        	FUELINSTUtils.updateTXTFile(startTime, outputMeanTXTFileName, Integer.toString(retailMeanIntensity), isDataStale);  
+        	FUELINSTUtils.updateTXTFile(startTime, outputMeanTXTFileName, Integer.toString(retailMeanIntensity), isDataStale);
         	final long e = System.currentTimeMillis();
         	return(e - s);
             });
@@ -960,7 +959,7 @@ System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.cu
 	                }
 	            catch(final IOException e) { e.printStackTrace(); }
 	            }
-            
+
             // Update social media if set up ONCE THE HTML PAGE IS UPDATED
             // and there is a change from any previous status posted.
             // There are different messages when working from historical data
@@ -972,18 +971,18 @@ System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.cu
 	            final File socialMediaPostStatusCacheFile = new File(
 	            		(-1 != lastDot) ? (outputHTMLFileName.substring(0, lastDot) + ".postStatusCache") :
 	                (outputHTMLFileName + ".postStatusCache"));
-	
+
 	            // Should an update be posted (yet)?
 	        	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
 	            		socialMediaPostStatusCacheFile,
 	                    status,
 	            		false); // Log if/why a post should be deferred.
-	
+
 	        	if(canPost)
 		        	{
 	                final String statusMessage = FUELINSTUtils.generateSocialMediaStatus(
 		                    isDataStale, statusUncapped, retailIntensity);
-	
+
 	                // Send toot, if set up...
 	                // DHD20230111: time to toot ~1100ms, tweet ~800ms.
 	                if(md != null)
@@ -992,7 +991,7 @@ System.out.println("INFO: sending toot...");
 						taskTootSend = executor.submit(() ->
 						    { return(TwitterUtils.timeSetMastodonStatus(md, statusMessage)); });
 		                }
-	                
+
 	                // Send tweet, if set up...
 		            if(TwitterUtils.ENABLE_TWEETING && (td != null))
 		                {
@@ -1000,7 +999,7 @@ System.out.println("INFO: sending tweet...");
 		                taskTweetSend = executor.submit(() ->
 		                	{ return(TwitterUtils.timeSetTwitterStatus(td, statusMessage)); });
 		                }
-	
+
 		            // Assume that status updates will almost always succeed.
 		            // And that it is not a disaster if an update (silently) fails...
 		            // Cache the new status as plain ASCII "RED" or "YELLOW" or "GREEN".
@@ -1104,7 +1103,7 @@ System.out.println("INFO: sending tweet...");
         // TODO: should probably be part of a finally for robustness.
         executor.shutdown();
         try { executor.awaitTermination(10, TimeUnit.SECONDS); }
-        catch (InterruptedException e) { e.printStackTrace(); }
+        catch (final InterruptedException e) { e.printStackTrace(); }
 
         final long endTime = System.currentTimeMillis();
 System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
@@ -1123,7 +1122,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      * this may produce duplicate/repeated records.
      * <p>
      * Public for testability.
-     * 
+     *
      * @param id  non-null writable directory for the log file
      * @param timestamp  positive timestamp of latest available source data point
      * @param retailIntensity  non-negative retail/domestic intensity gCO2e/kWh
@@ -1174,7 +1173,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 	        	pw.println("# Time gCO2e/kWh");
 	        	// DHD20211031: write out intensities based on today's year (parsed for consistency!)
 	        	final Map<String, Float> configuredIntensities = getConfiguredIntensities(Integer.parseInt(todayDateUTC.substring(0, 4)));
-	        	final SortedSet<String> fuels = new TreeSet<String>(configuredIntensities.keySet());
+	        	final SortedSet<String> fuels = new TreeSet<>(configuredIntensities.keySet());
 	        	final StringBuilder isb = new StringBuilder(RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX.length() + 16*fuels.size());
 	        	isb.append(RETAIL_INTENSITY_LOG_HEADER_LINE_3_PREFIX);
 	        	for(final String f : fuels)
@@ -1201,7 +1200,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      * Intensity values are 'retail', ie as at a typical domestic consumer,
      * after transmission and distribution losses, based on non-embedded
      * generation seen on the GB national grid.
-     * 
+     *
      * The log is line-oriented with lines of the form (no leading spaces)
      *     [ISO8601UTCSTAMPTOMIN] [kgCO2e/kWh]
      * ie two space-separated columns, eg:
@@ -1209,16 +1208,16 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      *     # Time gCO2e/kWh
      *     2019-11-17T16:02Z 352
      *     2019-11-17T16:12Z 351
-     *     
+     *
      * Initial lines may be headers, starting with # in in column 1,
      * and may be ignored for data purposes.
-     * 
+     *
      * This may contain repeat records if data is sampled more often
      * than it is updated at the source.
-     * 
+     *
      * Records will not be generated when data is 'stale',
      * ie when fresh data is not available from the source.
-     * 
+     *
      * Log files will be named with the form YYYYMMDD.log
      * eg 20191117.log.
      */
@@ -1249,7 +1248,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      */
     public static Map<String, String> getConfiguredFuelNames()
         {
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
 
         // Have to scan through all keys, which may be inefficient...
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -1277,7 +1276,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      */
     public static Map<String, Set<String>> getFuelsByCategory()
         {
-        final Map<String, Set<String>> result = new HashMap<String, Set<String>>();
+        final Map<String, Set<String>> result = new HashMap<>();
 
         // Have to scan through all keys, which may be inefficient...
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -1287,7 +1286,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             final String category = key.substring(FUELINST.FUELINST_MAIN_PROPPREFIX_STORAGE_TYPES.length());
             final String fuelnames = rawProperties.get(key).trim();
             if(fuelnames.isEmpty()) { continue; }
-            final HashSet<String> fuels = new HashSet<String>(Arrays.asList(fuelnames.trim().split(",")));
+            final HashSet<String> fuels = new HashSet<>(Arrays.asList(fuelnames.trim().split(",")));
             result.put(category, Collections.unmodifiableSet(fuels));
             }
 
@@ -1317,13 +1316,13 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      * This date format is potentially partly extensible to ISO8601 including ranges.
      *
      * TODO
-     * 
+     *
      * @return map from fuel name to kgCO2/kWh non-negative intensity; never null
      *
      */
     public static Map<String, Float> getConfiguredIntensities(final Integer year)
         {
-        final Map<String, Float> result = new HashMap<String, Float>();
+        final Map<String, Float> result = new HashMap<>();
 
         // Have to scan through all keys, which may be inefficient...
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -1335,15 +1334,15 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             if(keytail.length() < 2)
 	            {
             	System.err.println("Trivially invalid fuel name " + key);
-                continue;	
+                continue;
 	            }
-            
+
             // Extract fuel name.
             final String fuel;
-            
+
             // Is the whole keytail an unqualified fule name (no date range).
             final boolean isUnqualified = FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches();
-            
+
             // For the case where year is null, the entire tail must be a valid fuel name.
             if(year == null)
 	            {
@@ -1354,13 +1353,13 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 		            }
             	fuel = keytail;
 	            }
-            else if(isUnqualified)   
+            else if(isUnqualified)
             	{
             	// This is a default (no date-range) default value.
             	// Usable with a non-null year iff no value already captured for this fuel.
             	if(!result.containsKey(keytail)) { fuel = keytail; }
-            	else { continue; } 
-            	}	
+            	else { continue; }
+            	}
             else // year != null and this is not an unqualified entry...
             	{
             	// Split key tail in two at '.'.
@@ -1368,7 +1367,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             	if(2 != parts.length)
 	            	{
             		System.err.println("Invalid fuel intensity key " + key);
-	                continue;	
+	                continue;
 	            	}
             	fuel = parts[0];
             	if(!FUELINSTUtils.FUEL_NAME_REGEX.matcher(fuel).matches())
@@ -1410,7 +1409,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 		                // Range start year is after current year, so does not apply.
 	                	continue;
 		                }
-	                
+
 	                if(slashParts.length > 1)
 		                {
 		                if(!FUELINSTUtils.FUEL_INTENSITY_YEAR_REGEX.matcher(slashParts[1]).matches())
@@ -1441,7 +1440,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 
             // Reject non-parseable and illegal (eg -ve) values.
             final Float intensity;
-            try { intensity = new Float(rawProperties.get(key)); }
+            try { intensity = Float.valueOf(rawProperties.get(key)); }
             catch(final NumberFormatException e)
                 {
                 System.err.println("Unable to parse kgCO2/kWh intensity value for " + key);
@@ -1462,7 +1461,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
      * This will use the default (eg undated) intensity value for each fuel such as
      * <code>intensity.fuel.INTEW=0.45</code>
      * else the latest-dated value.
-     * 
+     *
      * @return map from each fuel name to kgCO2/kWh non-negative intensity; never null
      */
     @Deprecated
@@ -1485,7 +1484,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         if(null == currentGenerationMWByFuel) { throw new IllegalArgumentException(); }
         if(null == fuelByCategory) { throw new IllegalArgumentException(); }
 
-        final Map<String,Integer> result = new HashMap<String, Integer>((fuelByCategory.size()*2) + 3);
+        final Map<String,Integer> result = new HashMap<>((fuelByCategory.size()*2) + 3);
 
         // Construct each category's total generation....
         for(final Map.Entry<String, Set<String>> c : fuelByCategory.entrySet())
@@ -1497,7 +1496,10 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             for(final String fuel : fuels)
                 {
                 final Integer q = currentGenerationMWByFuel.get(fuel);
-                if(null == q) { System.err.println("no per-fuel MW value for "+fuel); continue; }
+                // Missing per-fuel value may be legit (thus "INFO" not "ERROR") when
+                // properties are set up in anticipation of a production change.
+                // Eg INTKVL added to properties on 2023-08-03 but not expected live until 2023-11-03.
+                if(null == q) { System.out.println("INFO: no per-fuel MW value for "+fuel); continue; }
                 if(q < 0) { throw new IllegalArgumentException("invalid negative per-fuel MW value"); }
                 total += q;
                 }
@@ -1554,7 +1556,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                                            final TwitterUtils.MastodonDetails md)
         throws IOException
         {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(32768); 
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(32768);
         try ( final PrintWriter w = new PrintWriter(baos, false, StandardCharsets.US_ASCII); )
             {
             final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -1585,7 +1587,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             // Note very gently when the 7d status view is different.
             if(summary24h.status != summary7d.status)
 	            {
-                w.println("<p style=\"text-align:center\">(Over a longer period, the current status is "+summary7d.status+".)</p>");	
+                w.println("<p style=\"text-align:center\">(Over a longer period, the current status is "+summary7d.status+".)</p>");
 	            }
 
             // Note carbon savings that were available.
@@ -1673,7 +1675,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             final int startSlot = isDataStale ? 0 : (1 + Math.max(0, newSlot)) % 24;
             for(int h = 0; h < 24; ++h)
                 {
-                final StringBuffer sbh = new StringBuffer(2);
+                final StringBuilder sbh = new StringBuilder(2);
                 final int displayHourGMT = (h + startSlot) % 24;
                 sbh.append(displayHourGMT);
                 if(sbh.length() < 2) { sbh.insert(0, '0'); }
@@ -1752,7 +1754,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                 w.write("<p>Current/latest fuel mix at ");
                     w.write(String.valueOf(new Date(summary24h.timestamp)));
                     w.write(':');
-                    final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary24h.currentGenerationMWByFuelMW);
+                    final SortedMap<String,Integer> power = new TreeMap<>(summary24h.currentGenerationMWByFuelMW);
                     for(final String fuel : power.keySet())
                         {
                         w.write(' '); w.write(fuel);
@@ -1775,7 +1777,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                     {
                     final Map<String,Integer> byCat = getFuelMWByCategory(summary24h.currentGenerationMWByFuelMW, byCategory);
                     w.write("<p>Generation by fuel category (may overlap):</p><dl>");
-                    final SortedMap<String,Integer> powerbyCat = new TreeMap<String, Integer>(byCat);
+                    final SortedMap<String,Integer> powerbyCat = new TreeMap<>(byCat);
                     for(final String category : powerbyCat.keySet())
                         {
                         final Integer genMW = powerbyCat.get(category);
@@ -1785,7 +1787,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                         // Write MW under this category.
                         w.write(String.valueOf(genMW)); w.write("MW");
                         // Write sorted fuel list...
-                        w.write(" "); w.write((new ArrayList<String>(new TreeSet<String>(byCategory.get(category)))).toString()); w.write("");
+                        w.write(" "); w.write((new ArrayList<>(new TreeSet<>(byCategory.get(category)))).toString()); w.write("");
                         w.write("</dd>");
                         }
                     w.write("</dl>");
@@ -1796,7 +1798,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             final LocalDate todayUTC = LocalDate.now(ZoneOffset.UTC);
             final int intensityYear = todayUTC.getYear();
             w.write("<p>Overall generation intensity (kgCO2/kWh) computed using the following fuel year-"+intensityYear+" intensities (other fuels/sources are ignored):");
-            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities(intensityYear));
+            final SortedMap<String,Float> intensities = new TreeMap<>(FUELINSTUtils.getConfiguredIntensities(intensityYear));
             for(final String fuel : intensities.keySet())
                 {
                 w.write(' '); w.write(fuel);
@@ -1806,7 +1808,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.println();
 
             w.write("<p>Rolling correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
-            final SortedMap<String,Float> goodness = new TreeMap<String, Float>(summary24h.correlationIntensityToFuel);
+            final SortedMap<String,Float> goodness = new TreeMap<>(summary24h.correlationIntensityToFuel);
             for(final String fuel : goodness.keySet())
                 {
                 w.format(" %s=%.4f", fuel, goodness.get(fuel));
@@ -1815,7 +1817,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.println();
 
             // Key for fuel names/codes if available.
-            final SortedMap<String,String> fullFuelNames = new TreeMap<String,String>(FUELINSTUtils.getConfiguredFuelNames());
+            final SortedMap<String,String> fullFuelNames = new TreeMap<>(FUELINSTUtils.getConfiguredFuelNames());
             if(!fullFuelNames.isEmpty())
                 {
                 w.write("<p>Key to fuel codes:</p><dl>");
@@ -1835,7 +1837,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.write(Long.toString((summary7d.histWindowSize + (1800*1000)) / (3600*1000)));
             	w.write("h");
             w.write(".)</p>");
-            w.println();            
+            w.println();
 
             w.println("<h3>Methodology</h3>");
             w.println(rawProperties.get("methodology.HTML"));
@@ -1848,7 +1850,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         // Attempt atomic replacement of HTML page...
         DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray(), true);
         }
-    
+
     /**Update (atomically if possible) the plain-text US_ASCII bare gCO2e/kWh intensity value.
      * The file will be removed if the data is stale.
      * Predicted values are not published, only live fresh ones.
@@ -1931,7 +1933,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
         {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
         final PrintWriter w = new PrintWriter(baos);
-        try
+        try (w)
             {
 //            final Map<String, String> rawProperties = MainProperties.getRawProperties();
             w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -2008,7 +2010,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 //            final int maxHourlyIntensity = summary.histAveIntensityByHourOfDay.max0();
             for(int h = 0; h < 24; ++h)
                 {
-                final StringBuffer sbh = new StringBuffer(2);
+                final StringBuilder sbh = new StringBuilder(2);
                 final int displayHourGMT = (h + startSlot) % 24;
                 sbh.append(displayHourGMT);
                 if(sbh.length() < 2) { sbh.insert(0, '0'); }
@@ -2033,7 +2035,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             for(int h = 0; h < 24; ++h)
                 {
                 final int displayHourGMT = (h + startSlot) % 24;
-                final StringBuffer sbh = new StringBuffer(2);
+                final StringBuilder sbh = new StringBuilder(2);
                 sbh.append(displayHourGMT);
                 if(sbh.length() < 2) { sbh.insert(0, '0'); }
 
@@ -2064,7 +2066,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                 {
                 w.println("<fuel_mix>");
                 w.println("<timestamp>"+summary.timestamp+"</timestamp>");
-                final SortedMap<String,Integer> power = new TreeMap<String, Integer>(summary.currentGenerationMWByFuelMW);
+                final SortedMap<String,Integer> power = new TreeMap<>(summary.currentGenerationMWByFuelMW);
                 for(final String fuel : power.keySet()) { w.println("<"+fuel.toLowerCase()+">"+power.get(fuel)+"</"+fuel.toLowerCase()+">"); }
                 w.println("</fuel_mix>");
                 }
@@ -2074,7 +2076,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             // Note: current-year intensities are used.
             final LocalDate todayUTC = LocalDate.now(ZoneOffset.UTC);
             final int intensityYear = todayUTC.getYear();
-            final SortedMap<String,Float> intensities = new TreeMap<String, Float>(FUELINSTUtils.getConfiguredIntensities(intensityYear));
+            final SortedMap<String,Float> intensities = new TreeMap<>(FUELINSTUtils.getConfiguredIntensities(intensityYear));
             for(final String fuel : intensities.keySet()) { w.println("<"+fuel.toLowerCase()+">"+intensities.get(fuel)+"</"+fuel.toLowerCase()+">"); }
             w.println("</fuel_intensities>");
 
@@ -2082,7 +2084,6 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
 
             w.flush();
             }
-        finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
 
         // Attempt atomic replacement of XML page...
         DataUtils.replacePublishedFile(outputXMLFileName, baos.toByteArray());
