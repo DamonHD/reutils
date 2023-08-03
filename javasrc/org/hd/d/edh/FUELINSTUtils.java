@@ -1496,8 +1496,8 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             for(final String fuel : fuels)
                 {
                 final Integer q = currentGenerationMWByFuel.get(fuel);
-                // Missing per-fuel value may be legitimate (thus "INFO" not "ERROR") when
-                // properties are set up in anticipation of a production change.
+                // Missing per-fuel value may be legitimate (thus "INFO" not "ERROR")
+                // when properties are set up in anticipation of a production change.
                 // Eg INTKVL added to properties on 2023-08-03 but not expected live until 2023-11-03.
                 if(null == q) { System.out.println("INFO: no per-fuel MW value for "+fuel); continue; }
                 if(q < 0) { throw new IllegalArgumentException("invalid negative per-fuel MW value"); }
