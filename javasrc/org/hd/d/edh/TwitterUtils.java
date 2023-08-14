@@ -68,8 +68,10 @@ public final class TwitterUtils
 
     /**Maximum Twitter message length (tweet) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
+     * <p>
+     * Was 134 before upgrade to JTwitter 3.8.5.
      */
-    public static final int MAX_TWEET_CHARS = 274; // 134 before upgrade to JTwitter 3.8.5.
+    public static final int MAX_TWEET_CHARS = 274;
 
     /**Maximum Mastodon message length (post) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
