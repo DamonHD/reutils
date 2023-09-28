@@ -49,7 +49,7 @@ public final class IRLgi implements RemoteGenerationIntensity
     private static int MAX_CACHE_MS = 290 * 1000; // Just under 5 minutes.
 
     /**Retrieve current / latest-recent generation intensity in gCO2/kWh; non-negative. */
-    @Override public int getLatest() throws IOException
+	@Override public int getLatest() throws IOException
         {
         final long now = System.currentTimeMillis();
 
@@ -58,7 +58,7 @@ public final class IRLgi implements RemoteGenerationIntensity
             {
             try
                 {
-                @SuppressWarnings("unchecked") final Tuple.Pair<Date, Integer> lastStatus = (Tuple.Pair<Date, Integer>) DataUtils.deserialiseFromFile(CACHE_PATH, false);
+                final Tuple.Pair<Date, Integer> lastStatus = (Tuple.Pair<Date, Integer>) DataUtils.deserialiseFromFile(CACHE_PATH, false);
                 if((null != lastStatus) && ((now - lastStatus.first.getTime()) <= MAX_CACHE_MS))
                     {
                     if(null == lastStatus.second) { throw new IOException("could not fetch/compute"); }
@@ -119,7 +119,7 @@ public final class IRLgi implements RemoteGenerationIntensity
             // Use last non-negative parseable number in second column.
             int lastValue = -1;
             final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            try
+            try (br)
                 {
                 String row;
                 while(null != (row = br.readLine()))
@@ -135,13 +135,12 @@ public final class IRLgi implements RemoteGenerationIntensity
                     catch(final NumberFormatException e) { /* Ignore non-numbers, eg "null". */ }
                     }
                 }
-            finally { br.close(); }
 
             if(lastValue < 0) { throw new IOException("no valid value found"); }
 
             // Persist/cache value.
             if(RGI_CACHE_DIR_BASE_PATH.exists())
-                { DataUtils.serialiseToFile(new Tuple.Pair<Date, Integer>(new Date(), lastValue), CACHE_PATH, false, true); }
+                { DataUtils.serialiseToFile(new Tuple.Pair<>(new Date(), lastValue), CACHE_PATH, false, true); }
             else
                 { System.err.println("No parent dir "+RGI_CACHE_DIR_BASE_PATH.getCanonicalPath()+" to cache intensity in "+CACHE_PATH); }
 

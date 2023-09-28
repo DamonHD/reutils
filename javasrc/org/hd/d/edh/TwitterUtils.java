@@ -58,13 +58,16 @@ public final class TwitterUtils
     {
     /**Prevent creation of an instance. */
     private TwitterUtils() { }
-    
+
     /**Enable tweeting.
      * As of 2023-02-13 Twitter is due to disable all the relevant (free) APIs.
      * <p>
      * As of 2023-04-07 (~3pm BST) authentication started failing.
      */
     public static final boolean ENABLE_TWEETING = false;
+
+    /**Should inferred intensities be tooted when live data is absent? */
+    public static final boolean POST_INFERRED_INTENSITY = false;
 
     /**Maximum Twitter message length (tweet) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
@@ -105,7 +108,7 @@ public final class TwitterUtils
     /**Property name for Mastodon auth token file; not null. */
     public static final String PNAME_MASTODON_AUTH_TOKEN_FILE = "Mastodon.authtokenfile";
 
- 
+
     /**Immutable class containing Twitter handle, user ID and read-only flag. */
     public static final class TwitterDetails
         {
@@ -201,15 +204,13 @@ public final class TwitterUtils
 
         try
             {
-            final BufferedReader r =  new BufferedReader(new FileReader(f));
-            try
+            try(final BufferedReader r =  new BufferedReader(new FileReader(f)))
                 {
                 final String firstLine = r.readLine();
                 if((null == firstLine) || firstLine.trim().isEmpty()) { return(null); }
                 // Return non-null non-empty password.
                 return(firstLine);
                 }
-            finally { r.close(); /* Release resources. */ }
             }
         // In case of error whinge but continue.
         catch(final Exception e)
@@ -251,9 +252,8 @@ public final class TwitterUtils
 
         try
             {
-            final List<String> result = new ArrayList<String>();
-            final BufferedReader r =  new BufferedReader(new FileReader(f));
-            try
+            final List<String> result = new ArrayList<>();
+            try(final BufferedReader r =  new BufferedReader(new FileReader(f)))
                 {
                 String line;
                 while(null != (line = r.readLine()))
@@ -266,7 +266,6 @@ public final class TwitterUtils
                 // Return non-null non-empty token(s).
                 return(result.toArray(new String[result.size()]));
                 }
-            finally { r.close(); /* Release resources. */ }
             }
         // In case of error whinge but continue.
         catch(final Exception e)
@@ -294,13 +293,13 @@ public final class TwitterUtils
      * else whitespace would also be inserted to avoid confusion.
      */
     private static final char TWEET_TAIL_SEP = ' ';
-    
+
     /**Returns true if a social media grid intensity update should be posted.
      * This is based on whether the status has changed since the lost status post,
      * and when that last status post was.
-     * 
+     *
      * This may log reasons to stdout/stderr if returning false, unless quiet is true.
-     * 
+     *
      * @param socialMediaPostStatusCacheFileName  if non-null is the location to cache twitter status messages;
      *     if the new status supplied is the same as the cached value then we won't send an update
      * @param status  overall R/A/G status; never null
@@ -457,7 +456,7 @@ public final class TwitterUtils
      * Note that this is not a live handle/connection.
      * Any authentication details to make a post (say)
      * will need to be looked up on the fly, separately.
-     * 
+     *
      * This will return null and complain if such an auth token is not available
      * if username and hostname are present.
      */
@@ -500,10 +499,10 @@ public final class TwitterUtils
 
     /**Get the specified non-empty Mastodon status post auth token or null if none.
      * Note: this return value is to be treated with care, eg not logged or printed.
-     * 
+     *
      * Any auth token file must be short and be pure (7-bit) ASCII.
      * Surrounding whitespace is trim()med.
-     * 
+     *
      * @return auth token, or null if not available
      */
     public static String getMastodonAuthToken()
@@ -518,7 +517,7 @@ public final class TwitterUtils
 
         try
             { return((new String(Files.readAllBytes(path), StandardCharsets.US_ASCII)).trim()); }
-        catch (IOException e)
+        catch (final IOException e)
             { e.printStackTrace(); }
 
         // Failed.
@@ -539,9 +538,9 @@ public final class TwitterUtils
         if(null == statusMessage) { throw new IllegalArgumentException(); }
         if(statusMessage.length() > MAX_TOOT_CHARS) { throw new IllegalArgumentException("message too long"); }
 
-        // Fetch the auth tokens, or silently abort if not available...  
+        // Fetch the auth tokens, or silently abort if not available...
         final String authtoken = getMastodonAuthToken();
-        if(null == authtoken) { return; }  
+        if(null == authtoken) { return; }
 
         // Send message...
 
@@ -549,15 +548,15 @@ public final class TwitterUtils
         // (MAT is a file containing the access token.)
         // % curl https://mastodon.energy/api/v1/statuses -H "Authorization: Bearer `cat $MAT`" -F "status=$1"
         // See https://dev.to/bitsrfr/getting-started-with-the-mastodon-api-41jj
-        
+
         // Use URL encoding to force into ASCII (7-bit) encoding.
         final String formEncodedBody = "status=" +
             URLEncoder.encode(statusMessage, StandardCharsets.US_ASCII);
-        
+
         final int timeout_ms = 10000;
 
         final URL u = new URL("https", md.hostname, "/api/v1/statuses");
-        
+
         final HttpsURLConnection uc = (HttpsURLConnection) u.openConnection();
         uc.setUseCaches(false);
         uc.setAllowUserInteraction(false);
@@ -587,7 +586,7 @@ public final class TwitterUtils
      * @param md  non-null, Mastodon details
      * @param statusMessage  short (max 140 chars) Twitter status message; never null
      */
-	public static long timeSetMastodonStatus(MastodonDetails md, String statusMessage)
+	public static long timeSetMastodonStatus(final MastodonDetails md, final String statusMessage)
 		throws IOException
 	    {
 		final long s = System.currentTimeMillis();

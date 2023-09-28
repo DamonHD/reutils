@@ -962,10 +962,12 @@ System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.cu
 
             // Update social media if set up ONCE THE HTML PAGE IS UPDATED
             // and there is a change from any previous status posted.
+            // May skip posting stale/inferred intensity values.
             // There are different messages when working from historical data
             // because real-time / live data is not available.
             // *** Only tweet/toot once the HTML is updated since the messages link to it.
-            if((null != td) || (null != md))
+            if(((null != td) || (null != md)) &&
+            		(TwitterUtils.POST_INFERRED_INTENSITY || !isDataStale))
 	            {
 	            // Compute name of file in which to cache last status posted to social media.
 	            final File socialMediaPostStatusCacheFile = new File(
@@ -993,12 +995,15 @@ System.out.println("INFO: sending toot...");
 		                }
 
 	                // Send tweet, if set up...
-		            if(TwitterUtils.ENABLE_TWEETING && (td != null))
-		                {
+		            if(TwitterUtils.ENABLE_TWEETING)
+			            {
+		            	if(td != null)
+			                {
 System.out.println("INFO: sending tweet...");
-		                taskTweetSend = executor.submit(() ->
-		                	{ return(TwitterUtils.timeSetTwitterStatus(td, statusMessage)); });
-		                }
+			                taskTweetSend = executor.submit(() ->
+			                	{ return(TwitterUtils.timeSetTwitterStatus(td, statusMessage)); });
+			                }
+			            }
 
 		            // Assume that status updates will almost always succeed.
 		            // And that it is not a disaster if an update (silently) fails...

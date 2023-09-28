@@ -58,6 +58,15 @@ SIGNIFICANT RELEASES (newest first)
 ===================================
 
 
+20230928:
+    freezepoint name: V1.2.2
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.2.1
+    DHD20230928: avoiding posting inferred intensity, ie when live data is missing.
+
+
 20230412:
     freezepoint name: V1.2.1
     branch name: HEAD
