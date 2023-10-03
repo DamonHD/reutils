@@ -18,7 +18,6 @@ PENDING:
 
 
 
-    DHD20230928: adding 'stale' flag; can retry poll sooner when green or stale flag present/set.
 
 
 
@@ -33,6 +32,15 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20231003:
+    freezepoint name: V1.2.3
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.2.2
+    DHD20230928: added 'stale' flag: can retry poll faster if stale flag file present.
 
 
 20230928:

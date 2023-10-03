@@ -562,7 +562,7 @@ public final class FUELINSTUtils
         final File staleFlagFile = new File(baseFileName + ".stale.flag");
         final boolean staleFlagState = isDataStale;
         System.out.println("INFO: stale flag " + staleFlagFile + ": " + (staleFlagState ? "set" : "clear"));
-        // Remove power-low/grid-poor flag file when status is GREEN, else create it (for RED/YELLOW/unknown).
+        // Create state flag file when data is not live, ie this flag should normally be absent.
         FUELINSTUtils.doPublicFlagFile(staleFlagFile, staleFlagState);
 
         // In the absence of current data,
