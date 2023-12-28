@@ -15,7 +15,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 
 PENDING:
-
+    DHD20231228: additional testing, eg of intensities for next year.
 
 
 

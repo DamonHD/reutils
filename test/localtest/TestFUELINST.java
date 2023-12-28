@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2021, Damon Hart-Davis
+Copyright (c) 2008-2023, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ package localtest;
 
 import java.io.File;
 import java.io.StringReader;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +39,14 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import junit.framework.TestCase;
-
 import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.FUELINST;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
-import org.hd.d.edh.TwitterUtils;
-import org.hd.d.edh.FUELINST.CurrentSummary;
 import org.w3c.dom.Document;
+
+import junit.framework.TestCase;
 
 /**Test the FUELINST handler. */
 public final class TestFUELINST extends TestCase
@@ -74,7 +73,7 @@ public final class TestFUELINST extends TestCase
         assertEquals("123", namedFields.get("OIL"));
 
         // Insert some semi-sane intensities (tCO2/MWh).
-        final Map<String,Float> intensities = new HashMap<String,Float>();
+        final Map<String,Float> intensities = new HashMap<>();
         intensities.put("CCGT",0.36f);
         intensities.put("OCGT",0.48f);
         intensities.put("OIL",0.61f);
@@ -83,7 +82,7 @@ public final class TestFUELINST extends TestCase
         intensities.put("WIND",0f);
         intensities.put("NPSHYD",0f);
         intensities.put("OTHER",0.61f);
-        final Map<String,Integer> generationByFuel = new HashMap<String,Integer>();
+        final Map<String,Integer> generationByFuel = new HashMap<>();
         // Convert MW values to Integer.
         for(final String name : intensities.keySet())
             { generationByFuel.put(name, Integer.parseInt(namedFields.get(name), 10)); }
@@ -109,7 +108,7 @@ public final class TestFUELINST extends TestCase
 //            }
 //        finally { sampleFile1.close(); }
         }
-    
+
     /**Test extended to check use of INTIFA2 interconnector name in CSV with template. */
     public static void testCSVExtractINTIFA2()
         throws Exception
@@ -131,9 +130,9 @@ public final class TestFUELINST extends TestCase
         assertEquals("5242", namedFields.get("NUCLEAR"));
         assertEquals("8422", namedFields.get("WIND"));
         assertEquals("0", namedFields.get("OIL"));
-        assertEquals("880", namedFields.get("INTIFA2"));  
+        assertEquals("880", namedFields.get("INTIFA2"));
         }
-    
+
     /**Test loading of the fuel names from main properties/config. */
     public static void testConfiguredFuelNames()
         {
@@ -147,15 +146,15 @@ public final class TestFUELINST extends TestCase
         assertNotNull(configuredFuelNames.get("INTIFA2"));
         // It should have a non-empty description.
         assertTrue(configuredFuelNames.get("INTIFA2").length() > 0);
-        
+
         // Ensure that only valid fuel names are loaded.
-        for(String k : configuredFuelNames.keySet())
+        for(final String k : configuredFuelNames.keySet())
             {
         	// Ensure that name is generally valid.
             assertTrue(FUELINSTUtils.FUEL_NAME_REGEX.matcher(k).matches());
             }
         }
-    
+
     /**Test loading of the fuel intensities from main properties/config. */
     public static void testConfiguredIntensities()
         {
@@ -176,18 +175,18 @@ System.out.println(configuredIntensitiesDefault); // {PS=Pumped Storage Hydro, I
         assertNotNull(configuredIntensitiesDefault.get("INTIFA2"));
         // It should have a greater-than-zero intensity.
         assertTrue(configuredIntensitiesDefault.get("INTIFA2") > 0);
-        
+
         // Ensure that date-qualified intensities are not being treated as literals,
         // eg there should not be entries such as INTIRL.2009--2011=0.7 present.
         // Ensure that only valid fuel names are loaded.
-        for(String k : configuredIntensitiesDefault.keySet())
+        for(final String k : configuredIntensitiesDefault.keySet())
             {
         	// Ensure no '-' left in due to mis-parse.
         	assertEquals("should be no '/' in key/name", -1, k.indexOf('/'));
         	// Ensure that name is generally valid.
             assertTrue(FUELINSTUtils.FUEL_NAME_REGEX.matcher(k).matches());
             }
- 
+
 /* With the following in main.properties...
 intensity.fuel.INTIRL./2009=0.7
 intensity.fuel.INTIRL.2010/2010=0.7
@@ -210,6 +209,7 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
  */
         assertEquals(0.45f, configuredIntensitiesDefault.get("INTIRL") , eps);
 
+        assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2007).get("INTIRL"), eps);
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2008).get("INTIRL"), eps);
 
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2009).get("INTIRL"), eps);
@@ -230,10 +230,40 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
 
         assertEquals(0.458f, FUELINSTUtils.getConfiguredIntensities(2023).get("INTIRL"), eps);
 
-        // Should be able to fall back to undated "always this" value.		
+        assertEquals(0.053f, FUELINSTUtils.getConfiguredIntensities(2023).get("INTELEC"), eps);
+        assertEquals(0.062f, FUELINSTUtils.getConfiguredIntensities(2024).get("INTELEC"), eps);
+
+        // Should be able to fall back to undated "always this" value.
         assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2009).get("NUCLEAR"), eps);
         assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2023).get("NUCLEAR"), eps);
         }
+
+    /**Test that fuel intensities are defined for next year.
+     * There should always be an intensity for next year (or indefinitely)
+     * for any fuel that has an intensity for 'now'.
+     */
+    public static void testConfiguredIntensitiesNextYear()
+        {
+        assertTrue("Must be able to load the main properties", MainProperties.getTimestamp() > 0);
+        final Map<String, Float> configuredIntensitiesDefault = FUELINSTUtils.getConfiguredIntensities(null);
+        assertNotNull(configuredIntensitiesDefault);
+        assertTrue(configuredIntensitiesDefault.size() > 0);
+
+        final int nextYear = 1 + YearMonth.now().getYear();
+        final Map<String, Float> configuredIntensitiesNextYear = FUELINSTUtils.getConfiguredIntensities(nextYear);
+
+		for(final Map.Entry<String, Float> fi : configuredIntensitiesDefault.entrySet())
+			{
+            final String fuel = fi.getKey();
+            assertNotNull(fuel);
+            final Float intensity = fi.getValue();
+            assertNotNull(intensity);
+
+            final Float nextYearIntensity = configuredIntensitiesNextYear.get(fuel);
+            assertNotNull(nextYearIntensity);
+			}
+        }
+
 
     /**Cached summary information. */
     public static final File CACHE1 = new File("_gridCarbonIntensityGB.201503231711.cache");

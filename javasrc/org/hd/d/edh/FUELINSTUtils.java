@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2021, Damon Hart-Davis,
+Copyright (c) 2008-2023, Damon Hart-Davis,
                          Ecotricity (Rob Clews).
 All rights reserved.
 
@@ -1352,7 +1352,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             // Extract fuel name.
             final String fuel;
 
-            // Is the whole keytail an unqualified fule name (no date range).
+            // Is the whole keytail an unqualified fuel name (no date range).
             final boolean isUnqualified = FUELINSTUtils.FUEL_NAME_REGEX.matcher(keytail).matches();
 
             // For the case where year is null, the entire tail must be a valid fuel name.
