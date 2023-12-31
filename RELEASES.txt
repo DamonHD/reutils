@@ -36,7 +36,7 @@ SIGNIFICANT RELEASES (newest first)
 20231003:
     freezepoint name: V1.3.0
     branch name: HEAD
-    Deployed where: Zenodo
+    Deployed where: Zenodo invariant DOI 10.5281/zenodo.10447168
     Changes since last freezepoint (developer/mgr initials and brief description):
     Previous significant freezepoint: V1.2.3
     DHD20231228: additional testing, eg of intensities for next year.
