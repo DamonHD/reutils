@@ -791,6 +791,9 @@ public final class DataUtils
         return(Collections.unmodifiableList(result));
         }
 
+
+
+
     /**Brave new world of 2024.
      * See: https://bmrs.elexon.co.uk/api-documentation/endpoint/datasets/FUELINST
 
@@ -855,4 +858,37 @@ FUELINST,2022-06-25T23:50:00Z,2022-06-25T23:45:00Z,2022-06-26,2,OTHER,141
 FUELINST,2022-06-25T23:50:00Z,2022-06-25T23:45:00Z,2022-06-26,2,PS,-9
 ...
      */
+
+    /**Convert from new (2024) format data to (immutable) older one-line-per-time-sample format; never null.
+     * Uses the same template as used to extract these re-extract positional parameters.
+     * <p>
+     * Can optionally clamp negative values to zero
+     * <p>
+     * This allows us to use this compact form for storage internally,
+     * and minimises disruption to the pre-2024 logic for the time being!
+     *
+     * @param template  CSV list of names for each position with empty positions ignored; never null
+     * @param clampNonNegative  if true then clamp all values to be non-negative
+
+     * New format:
+     * <pre>
+FUELINST,2022-06-25T23:55:00Z,2022-06-25T23:50:00Z,2022-06-26,2,PS,-9
+FUELINST,2022-06-25T23:55:00Z,2022-06-25T23:50:00Z,2022-06-26,2,WIND,10532
+FUELINST,2022-06-25T23:50:00Z,2022-06-25T23:45:00Z,2022-06-26,2,BIOMASS,870
+FUELINST,2022-06-25T23:50:00Z,2022-06-25T23:45:00Z,2022-06-26,2,CCGT,6087
+FUELINST,2022-06-25T23:50:00Z,2022-06-25T23:45:00Z,2022-06-26,2,COAL,0
+     * </pre>
+     *
+     * Old/compact format:
+     * <pre>
+FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
+     * </pre>
+     */
+    public static final List<List<String>> convertToCompactForm(
+    		final String template,
+    		final boolean clampNonNegative
+    		)
+	    {
+	    throw new RuntimeException("NOT IMPLEMENTED");
+	    }
     }
