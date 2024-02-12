@@ -583,7 +583,7 @@ public final class FUELINSTHistorical
                         (new StreamCSV()).StreamIt(wCSV);
 
                         wCSV.close();
-                        DataUtils.replacePublishedFile(outputCSVFileName, baosCSV.toByteArray());
+                        FileUtils.replacePublishedFile(outputCSVFileName, baosCSV.toByteArray());
                         }
                     continue;
                     }
@@ -787,7 +787,7 @@ public final class FUELINSTHistorical
         finally { w.close(); /* Ensure file is flushed/closed.  Release resources. */ }
 
         // Attempt atomic replacement of HTML page...
-        DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
+        FileUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray());
 
         System.out.println("Report run took "+(System.currentTimeMillis() - startTime)+"ms.");
         }

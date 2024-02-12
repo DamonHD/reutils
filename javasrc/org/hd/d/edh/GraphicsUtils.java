@@ -193,7 +193,7 @@ public final class GraphicsUtils
         ImageIO.write(buffer, "png", baos);
 
         final String suffix = "intico1-" + sizePX + ".png";
-        DataUtils.replacePublishedFile(basename + suffix, baos.toByteArray(), true);
+        FileUtils.replacePublishedFile(basename + suffix, baos.toByteArray(), true);
 
         return(suffix);
         }

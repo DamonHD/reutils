@@ -1018,7 +1018,7 @@ System.out.println("INFO: sending tweet...");
 		            // Only do this for non-null statuses.
 		            if(null != status)
 		                {
-		            	try { DataUtils.replacePublishedFile(socialMediaPostStatusCacheFile.getPath(), status.toString().getBytes(StandardCharsets.US_ASCII), false); }
+		            	try { FileUtils.replacePublishedFile(socialMediaPostStatusCacheFile.getPath(), status.toString().getBytes(StandardCharsets.US_ASCII), false); }
 		                catch(final Exception e) { e.printStackTrace(); /* Absorb errors for robustness but whinge. */ }
 		                }
 		        	}
@@ -1860,7 +1860,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             }
 
         // Attempt atomic replacement of HTML page...
-        DataUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray(), true);
+        FileUtils.replacePublishedFile(outputHTMLFileName, baos.toByteArray(), true);
         }
 
     /**Update (atomically if possible) the plain-text US_ASCII bare gCO2e/kWh intensity value.
@@ -1885,7 +1885,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             { w.write(content); }
 
         // Attempt atomic replacement of HTML page...
-        DataUtils.replacePublishedFile(outputTXTFileName, baos.toByteArray(), true);
+        FileUtils.replacePublishedFile(outputTXTFileName, baos.toByteArray(), true);
     	}
 
     /**Update (atomically if possible) the mobile-friendly XHTML traffic-light page.
@@ -1929,7 +1929,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             }
 
         // Attempt atomic replacement of XHTML page (quietly)...
-        DataUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray(), true);
+        FileUtils.replacePublishedFile(outputXHTMLFileName, baos.toByteArray(), true);
         }
 
     /**Update (atomically if possible) the XML traffic-light data dump.
@@ -2098,6 +2098,6 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             }
 
         // Attempt atomic replacement of XML page...
-        DataUtils.replacePublishedFile(outputXMLFileName, baos.toByteArray());
+        FileUtils.replacePublishedFile(outputXMLFileName, baos.toByteArray());
         }
     }

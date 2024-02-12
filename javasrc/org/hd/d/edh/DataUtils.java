@@ -36,13 +36,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.ProtocolException;
@@ -57,15 +53,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 
 /**Data utilities.
- * Handles the bmreports style of CSV (with an initial HDR row and a trailing FTR row),
+ * Handles the old bmreports style of CSV (with an initial HDR row and a trailing FTR row),
+ * and new data.elexon.co.uk (as of 2024) CSV API V1 response style,
  * along with TIBCO data and other records.
  */
 public final class DataUtils
@@ -103,7 +98,7 @@ public final class DataUtils
         // Wrap a buffered reader around the input if not already so.
         final BufferedReader br = (r instanceof BufferedReader) ? (BufferedReader)r : new BufferedReader(r, 8192);
 
-        final ArrayList<Map<String,String>> result = new ArrayList<Map<String,String>>(1024); // Allow for reasonable number of messages...
+        final ArrayList<Map<String,String>> result = new ArrayList<>(1024); // Allow for reasonable number of messages...
 
         String line;
         while(null != (line = br.readLine()))
@@ -145,7 +140,7 @@ public final class DataUtils
 
             final String messageBody = message.substring(9, message.length() - 1);
             final String mappingsRaw[] = delimTM.split(messageBody);
-            final Map<String,String> m = new HashMap<String, String>(mappingsRaw.length*2);
+            final Map<String,String> m = new HashMap<>(mappingsRaw.length*2);
             for(final String mr : mappingsRaw)
                 {
                 final int ei = mr.indexOf('=');
@@ -183,7 +178,7 @@ public final class DataUtils
      */
     public static final Pattern delimCSV = delimTM; // We can use delimTR to save an extra instance! // Pattern.compile(",");
 
-    
+
     /**Append newer records to existing data.
      * This can be used new data to an existing archive,
      * and fill in temporarily-missing records from new data.
@@ -193,7 +188,7 @@ public final class DataUtils
      * <p>
      * If the existing record set is null
      * then the new record set is returned as-is.
-     * 
+     *
      * @return  new List if the records were appended, else null
      */
     public static List<List<String>> appendNewBMRDataRecords(
@@ -204,7 +199,7 @@ public final class DataUtils
     	if(null == newRecords) { return(null); }
     	if(newRecords.isEmpty()) { return(null); }
     	// If no existing data then return the new data as-is.
-	    if(null == existingRecords) { return(newRecords); }	    
+	    if(null == existingRecords) { return(newRecords); }
 		final int nRowsExisting = existingRecords.size();
 		if(0 == nRowsExisting) { return(newRecords); }
 
@@ -213,7 +208,7 @@ public final class DataUtils
 		final String lastExistingTimestampRaw = existingRecords.get(nRowsExisting-1).get(3);
         Date dle;
 		try { dle = timestampParser.parse(lastExistingTimestampRaw); }
-		catch (ParseException e) { e.printStackTrace(); return(null); }
+		catch (final ParseException e) { e.printStackTrace(); return(null); }
         final long lastExistingTimestamp = dle.getTime();
 
 		// Compute newest/last timestamp in new data.
@@ -223,7 +218,7 @@ public final class DataUtils
         final String lastNewTimestampRaw = newRecords.get(nRowsNew-1).get(3);
         Date dln;
         try { dln = timestampParser.parse(lastNewTimestampRaw); }
-		catch (ParseException e) { e.printStackTrace(); return(null); }
+		catch (final ParseException e) { e.printStackTrace(); return(null); }
         final long lastNewTimestamp = dln.getTime();
         if(lastNewTimestamp <= lastExistingTimestamp)
         	{ return(null); }
@@ -249,17 +244,17 @@ public final class DataUtils
 
         // Initially-empty result...
         final ArrayList<List<String>> result =
-            new ArrayList<List<String>>(nRowsExisting + newRecordsToAppend.size());
+            new ArrayList<>(nRowsExisting + newRecordsToAppend.size());
         result.addAll(existingRecords);
         result.addAll(newRecordsToAppend);
 
         result.trimToSize(); // Free resources...
         return(Collections.unmodifiableList(result)); // Make outer list immutable...
 	    }
-    
+
     /**Trim BMR FUELINST data to span at most the specified number of hours.
      * Trims away the oldest records until the limit is met.
-     * 
+     *
      * @param parsedBMRCSV  BMR FUELINST list to trim
      * @param maxHoursSpan  maximum span of hours between newest and oldest record;
      *             strictly positive
@@ -280,7 +275,7 @@ public final class DataUtils
 		final String lastTimestampRaw = parsedBMRCSV.get(nRows-1).get(3);
         Date dl;
 		try { dl = timestampParser.parse(lastTimestampRaw); }
-		catch (ParseException e) { e.printStackTrace(); return(null); }
+		catch (final ParseException e) { e.printStackTrace(); return(null); }
         final long lastTimestamp = dl.getTime();
         final long oldestAllowedTimestamp = lastTimestamp - (maxHoursSpan*3600*1000) + 1;
 
@@ -288,7 +283,7 @@ public final class DataUtils
 		final String firstTimestampRaw = parsedBMRCSV.get(0).get(3);
         Date df;
 		try { df = timestampParser.parse(firstTimestampRaw); }
-		catch (ParseException e) { e.printStackTrace(); return(null); }
+		catch (final ParseException e) { e.printStackTrace(); return(null); }
         final long firstTimestamp = df.getTime();
 
         // If oldest existing record is not too old then there is nothing to do.
@@ -307,7 +302,7 @@ public final class DataUtils
     		final String timestampRaw = parsedBMRCSV.get(i).get(3);
             Date d;
     		try { d = timestampParser.parse(timestampRaw); }
-    		catch (ParseException e) { e.printStackTrace(); return(null); }
+    		catch (final ParseException e) { e.printStackTrace(); return(null); }
             final long timestamp = d.getTime();
 	        if(timestamp >= oldestAllowedTimestamp)
 		        {
@@ -326,9 +321,9 @@ public final class DataUtils
      */
     static final class ValidBMRDataResultError
 	    {
-    	public ValidBMRDataResultError(String errorMessage)
+    	public ValidBMRDataResultError(final String errorMessage)
     	    { this(errorMessage, null); }
-    	public ValidBMRDataResultError(final String errorMessage, List<List<String>> repairedBMRCSV)
+    	public ValidBMRDataResultError(final String errorMessage, final List<List<String>> repairedBMRCSV)
     	    {
     		this.errorMessage = errorMessage;
     		this.repairedBMRCSV = repairedBMRCSV;
@@ -340,7 +335,7 @@ public final class DataUtils
 	    }
 
     /**Validate an and possibly fix up BMR FUELINST data on a number of key points.
-     *      * 
+     *      *
      * @return non-null error if any problem found (usually first error).
      */
 	public static ValidBMRDataResultError isValidBMRData(
@@ -350,7 +345,7 @@ public final class DataUtils
 	    { return(isValidBMRData(parsedBMRCSV, newestPossibleValidRecord, maxHoursSpan, false)); }
 
     /**Validate (and possibly fix up) BMR FUELINST data on a number of key points.
-     * 
+     *
      * @param parsedBMRCSV  parsed FUELINST records (minus HDR and FTR), never modified;
      *             never null
      * @param newestPossibleValidRecord  no record may be newer than (timestamped after) this;
@@ -360,7 +355,7 @@ public final class DataUtils
      * @param attemptRepair if true and any repairable error or errors are found,
      *             attempt to create a repaired version in the result object
      *             and if the repaired version is non-null it can be used
-     * 
+     *
      * @return non-null error if any problem found (usually first error).
      */
 	public static ValidBMRDataResultError isValidBMRData(
@@ -373,14 +368,14 @@ public final class DataUtils
 
 		// Null if no repair is performed.
 		String lastErrorRepaired = null;
-		// A mutable (must be wrapped for return) repaired result so far. 
+		// A mutable (must be wrapped for return) repaired result so far.
 		// If repairs are not to be attempted this is null.
 		// If repairs are to be attempted this is initially a copy of the input rows,
 		// then bad rows are nulled out,
 		// then null entries are deleted,
 		// and an immutable copy is returned.
-		ArrayList<List<String>> repairedBMRCSV = !attemptRepair ? null :
-			new ArrayList<List<String>>(parsedBMRCSV);
+		final ArrayList<List<String>> repairedBMRCSV = !attemptRepair ? null :
+			new ArrayList<>(parsedBMRCSV);
 
 // Sample data...
 //FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
@@ -393,7 +388,7 @@ public final class DataUtils
 		String lastTimestampRaw = FUELINST.FUELINST_TIMESTAMP_JUST_TOO_OLD;
 //		for(List<String> row : parsedBMRCSV)
 		final int nRows = parsedBMRCSV.size();
-		for(int r = 0; r < nRows; ++r)		
+		for(int r = 0; r < nRows; ++r)
 			{
 			final List<String> row = parsedBMRCSV.get(r);
 			if(null == row) { return(new ValidBMRDataResultError("null row")); }
@@ -467,7 +462,7 @@ public final class DataUtils
         final SimpleDateFormat timestampParser = FUELINSTUtils.getCSVTimestampParser();
         Date d;
 		try { d = timestampParser.parse(lastTimestampRaw); }
-		catch (ParseException e) { return(new ValidBMRDataResultError("cannot parse timestamp")); }
+		catch (final ParseException e) { return(new ValidBMRDataResultError("cannot parse timestamp")); }
         final long finalTimestamp = d.getTime();
         if(finalTimestamp > newestPossibleValidRecord) { return(new ValidBMRDataResultError("last record timestamp too new")); }
 
@@ -581,7 +576,7 @@ public final class DataUtils
 
         // Initially-empty result...
         // Size it to initially accommodate ~288-row live FUELINST datum.
-        final ArrayList<List<String>> result = new ArrayList<List<String>>(300);
+        final ArrayList<List<String>> result = new ArrayList<>(300);
 
         String row;
         while(null != (row = br.readLine()))
@@ -607,7 +602,7 @@ public final class DataUtils
                 // OK, all seems fine, so break out.
                 break;
                 }
-            
+
 //System.out.println("Data row: " + row);
 //Data row: FUELINST,20221104,20,20221104093500,15219,0,0,4640,7999,0,901,1,123,0,0,406,0,2229,122,0,0,1257
 //Data row: FUELINST,20221104,20,20221104094000,14981,0,0,4643,8140,0,901,0,122,0,0,406,0,2233,123,0,0,1257
@@ -629,7 +624,7 @@ public final class DataUtils
             // but may save more than that in avoided GC on small JVM instance.
             if(OPTIMISE_MEMORY_IN_FUELINST_PARSE && !result.isEmpty())
 	            {
-	            final List<String> prevRow = result.get(result.size() - 1);	
+	            final List<String> prevRow = result.get(result.size() - 1);
 	            if(fields.length == prevRow.size())
 		            {
 		            for(int i = fields.length; --i >= 0; )
@@ -653,7 +648,7 @@ public final class DataUtils
         }
 
     /**Load from file gzipped parsed FUELINST data in a form that parseBMRCSV() can read; never null but may be empty.
-     * 
+     *
      * @throws IOException  if file not present or unreadable/unparseable.
      */
     public static List<List<String>> loadBMRCSV(final File longStoreFile)
@@ -673,7 +668,7 @@ public final class DataUtils
      * May be run as an async task/thread, as no logging output is generated.
      * <p>
      * Write atomically, world-readable.
-     * 
+     *
      * @throws IllegalArgumentException  may be thrown if asked to serialise invalid
      *     (eg misordered or non-FUELINST) data
      * @throws IOException  in case of trouble writing to the filesystem
@@ -683,12 +678,12 @@ public final class DataUtils
 	    {
     	if(null == longStoreFile) { throw new IllegalArgumentException(); }
     	final byte[] csvgz = saveBMRCSV(data, true);
-    	replacePublishedFile(longStoreFile.getPath(), csvgz, true);
+    	FileUtils.replacePublishedFile(longStoreFile.getPath(), csvgz, true);
 	    }
 
     /**Save/serialise parsed BMR FUELINST data in a form that parseBMRCSV() can read, optionally gzipped.
      * Generate ASCII CSV, with newlines to terminate rows.
-     * 
+     *
      * @param data  FUELINST CSV data rows (no header or footer); never null
      * @param gzip  if true then gzip the result (on the fly to reduce memory usage)
      *
@@ -696,7 +691,7 @@ public final class DataUtils
      *     (eg misordered or non-FUELINST) data
      * @throws IOException  in case of trouble serialising the data (should never happen)
      */
-    public static byte[] saveBMRCSV(final List<List<String>> data, boolean gzip)
+    public static byte[] saveBMRCSV(final List<List<String>> data, final boolean gzip)
         throws IOException
 	    {
     	if(null == data) { throw new IllegalArgumentException(); }
@@ -710,7 +705,7 @@ public final class DataUtils
 				new BufferedOutputStream(new java.util.zip.GZIPOutputStream(baos)) : baos
             )
 
-	        {        	
+	        {
 	        // Write header.
 	        os.write("HDR\n".getBytes(FUELINSTUtils.FUELINST_CHARSET));
 
@@ -720,7 +715,7 @@ public final class DataUtils
 		        {
 	        	// Clear the new row under construction.
 	        	rowBuilder.setLength(0);
-	        	
+
 		        final int fields = row.size();
 
 		        // Do some simple validation.
@@ -767,7 +762,7 @@ public final class DataUtils
 
         final String[] names = delimCSV.split(template);
         final int maxResultSize = Math.min(names.length, rowData.size());
-        final Map<String,String> result = new HashMap<String,String>(maxResultSize);
+        final Map<String,String> result = new HashMap<>(maxResultSize);
         for(int i = maxResultSize; --i >= 0; )
             {
             final String name = names[i];
@@ -790,278 +785,9 @@ public final class DataUtils
         {
         if((null == template) || (null == rows)) { throw new IllegalArgumentException(); }
 
-        final List<Map<String,String>> result = new ArrayList<Map<String,String>>(rows.size());
+        final List<Map<String,String>> result = new ArrayList<>(rows.size());
         for(final List<String> rowData : rows)
             { result.add(extractNamedFieldsByPositionFromRow(template, rowData)); }
         return(Collections.unmodifiableList(result));
-        }
-
-
-    /**Prefix used on temporary files, eg while doing atomic replacements.
-     * This used to be in GlobalParams but we may even need it
-     * while loading GlobalParams.
-     */
-    public static final String F_tmpPrefix = ".tmp.";
-
-    /**Private moderate pseudo-random-number source for replacePublishedFile(); not null. */
-    private static final Random rnd = new Random();
-
-    /**Replaces an existing published file with a new one (see 3-arg version).
-     * Is verbose when it replaces the file.
-     */
-    public static boolean replacePublishedFile(final String name, final byte data[])
-        throws IOException
-        { return(replacePublishedFile(name, data, false)); }
-
-    /**Replaces an existing published file with a new one.
-     * This replaces (atomically if possible) the existing file (if any)
-     * of the given name, ensuring the correct permissions for
-     * a file to be published with a Web server (ie basically
-     * global read permissions), provided the following
-     * conditions are met:
-     * <p>
-     * <ul>
-     * <li>The filename extension is acceptable (not checked yet).
-     * <li>The data array is non-null and not zero-length.
-     * <li>The content of the data array is different to the file.
-     * <li>All the required permissions are available.
-     * </ul>
-     * <p>
-     * If the file is successfully replaced, true is returned.
-     * <p>
-     * If the file does not need replacing, false is returned.
-     * <p>
-     * If an error occurs, eg in the input data or during file
-     * operations, an IOException is thrown.
-     * <p>
-     * This routine enforces locking so that only one such
-     * operation may be performed at any one time.  This does
-     * not avoid the possibility of externally-generated races.
-     * <p>
-     * The final file, once replaced, will be globally readable,
-     * and writable by us.
-     * <p>
-     * (If the final component of the file starts with ".",
-     * then the file will be accessible only by us.)
-     *
-     * @param quiet     if true then only error messages will be output
-     */
-    public static boolean replacePublishedFile(final String name, final byte data[],
-                                               final boolean quiet)
-        throws IOException
-        {
-        if((name == null) || (name.length() == 0))
-            { throw new IOException("inappropriate file name"); }
-        if((data == null) || (data.length == 0))
-            { throw new IOException("inappropriate file content"); }
-
-        final File extant = new File(name);
-
-        // Lock the critical external bits against read and write updates.
-        rPF_rwlock.writeLock().lock();
-        try
-            {
-            // Use a temporary file in the same directory (and thus the same filesystem)
-            // to avoid unexpectedly truncating the file when copying/moving it.
-            File tempFile;
-            for( ; ; )
-                {
-                tempFile = new File(extant.getParent(),
-                    F_tmpPrefix +
-                    Long.toString((rnd.nextLong() >>> 1),
-                        Character.MAX_RADIX) /* +
-                    "." +
-                    extant.getName() */ ); // Avoid making very long names...
-                if(tempFile.exists())
-                    {
-                    System.err.println("WARNING: FileTools.replacePublishedFile(): "+
-                        "temporary file " + tempFile.getPath() +
-                        " exists, looping...");
-                    continue;
-                    }
-                break;
-                }
-
-            // Get extant file's length.
-            final long oldLength = extant.length();
-            // Should we overwrite it?
-            boolean overwrite = (oldLength < 1); // Missing or zero length.
-
-            // If length has changed, we should overwrite.
-            if(data.length != oldLength) { overwrite = true; }
-
-            // Now, if we haven't already decided to overwrite the file,
-            // check the content.
-            if(!overwrite)
-                {
-                try
-                    {
-                    final InputStream is = new BufferedInputStream(
-                        new FileInputStream(extant));
-                    try
-                        {
-                        final int l = data.length;
-                        for(int i = 0; i < l; ++i)
-                            {
-                            if(data[i] != is.read())
-                                { overwrite = true; break; }
-                            }
-                        }
-                    finally
-                        { is.close(); }
-                    }
-                catch(final FileNotFoundException e) { overwrite = true; }
-                }
-
-            // OK, we don't want to overwrite, so return.
-            if(!overwrite) { return(false); }
-
-
-            // OVERWRITE OLD FILE WITH NEW...
-
-            try {
-                // Write new temp file...
-                // (Allow any IOException to terminate the function.)
-                OutputStream os = new FileOutputStream(tempFile);
-                os.write(data);
-                // os.flush(); // Possibly avoid unnecessary premature disc flush here.
-                os.close();
-                os = null; // Help GC.
-                if(tempFile.length() != data.length)
-                    { new IOException("temp file not written correctly"); }
-
-                final boolean globalRead = !extant.getName().startsWith(".");
-
-                // Ensure that the temp file has the correct read permissions.
-                tempFile.setReadable(true, !globalRead);
-                tempFile.setWritable(true, true);
-
-                // Warn if target does not have write perms, and try to add them.
-                // This should allow us to replace it with the new file.
-                final boolean alreadyExists = extant.exists();
-                if(alreadyExists && !extant.canWrite())
-                    {
-                    System.err.println("FileTools.replacePublishedFile(): "+
-                        "WARNING: " + name + " not writable.");
-                    extant.setWritable(true, true);
-                    if(!extant.canWrite())
-                        {
-                        throw new IOException("can't make target writable");
-                        }
-                    }
-
-                // (Atomically) move tempFile to extant file.
-                // Note that renameTo() may not be atomic
-                // and we may have to remove the target file first.
-                if(!tempFile.renameTo(extant))
-                    {
-                    // If the target already exists,
-                    // then be prepared to explicitly delete it.
-                    if(!alreadyExists || !extant.delete() || !tempFile.renameTo(extant))
-                        { throw new IOException("renameTo/update of "+name+" failed"); }
-                    if(!quiet) { System.err.println("[WARNING: atomic replacement not possible for: " + name + ": used explicit delete.]"); }
-                    }
-
-                if(extant.length() != data.length)
-                    { new IOException("update of "+name+" failed"); }
-                extant.setReadable(true, !globalRead);
-                extant.setWritable(true, true);
-                if(!quiet) { System.err.println("["+(alreadyExists?"Updated":"Created")+" " + name + "]"); }
-                return(true); // All seems OK.
-                }
-            finally // Tidy up...
-                {
-                tempFile.delete(); // Remove the temp file.
-//                Thread.yield(); // That was probably expensive; give up the CPU...
-                }
-            }
-        finally { rPF_rwlock.writeLock().unlock(); }
-
-        // Can't get here...
-        }
-
-    /**Private lock for replacePublishedFile().
-     * We use a read/write lock to improve available concurrency.
-     * <p>
-     * TODO: We could extend this to a lock per distinct directory or filesystem.
-     */
-    private static final ReentrantReadWriteLock rPF_rwlock = new ReentrantReadWriteLock();
-
-    /**Given a file, serialises an object to it.
-     * This atomically replaces the target file if possible.
-     *
-     * @param gzipped  if true, the file is written GZIP-compressed
-     *     to (usually) save significant space
-     * @param quiet  if true, only outputs errors
-     *
-     * @throws IOException  if something bad happens
-     */
-    public static void serialiseToFile(final Object o,
-                                       final File filename, final boolean gzipped,
-                                       final boolean quiet)
-        throws IOException
-        {
-        ObjectOutputStream oos = null;
-        try {
-            // Serialise to a byte[].
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            // We may gzip the stream to remove some of the redundancy.
-            final java.util.zip.GZIPOutputStream gos = gzipped ?
-                new java.util.zip.GZIPOutputStream(baos) : null;
-            oos = new ObjectOutputStream(gzipped ?
-        		new BufferedOutputStream(gos) : baos);
-            oos.writeObject(o);
-            oos.flush();
-            if(gos != null) { gos.finish(); }
-            final byte data[] = baos.toByteArray();
-
-            // Now save to file using pure Java APIs.
-            // Write-locked against other file replacements.
-            replacePublishedFile(filename.getPath(), data, quiet);
-            }
-        finally
-            {
-            if(oos != null) { oos.close(); } // Free up OS resources.
-            }
-        }
-
-    /**Given a file, deserialises an object from it.
-     * This buffers the input for efficiency.
-     *
-     * @param gzipped  if true, the file is assumed to be in GZIP
-     *     format and the stream is decompressed on the fly
-     * @throws IOException  if something bad happens
-     */
-    public static Object deserialiseFromFile(final File filename, final boolean gzipped)
-        throws IOException
-        {
-        ObjectInputStream ois = null;
-
-        // Lock out concurrent published-file updates.
-        rPF_rwlock.readLock().lock();
-        try {
-            // Need to reload from disc.
-            InputStream is = new BufferedInputStream(new FileInputStream(
-                filename), 8192);
-            if(gzipped) { is = new java.util.zip.GZIPInputStream(is, 8192); }
-            ois = new ObjectInputStream(is);
-            return(ois.readObject());
-            }
-        catch(final ClassNotFoundException e)
-            { throw new IOException("ClassNotFoundException deserialising file ``"+filename+"'': " + e.getMessage()); }
-        catch(final Exception e)
-            {
-            final IOException err = new IOException("unexpected exception deserialising file ``"+filename+"'': " + e.getMessage());
-            err.initCause(e);
-            throw err;
-            }
-        finally
-            {
-            // Potentially allow updates again.
-            rPF_rwlock.readLock().unlock();
-
-            // Ensure that we release OS file-handling resources.
-            if(ois != null) { ois.close(); }
-            }
         }
     }

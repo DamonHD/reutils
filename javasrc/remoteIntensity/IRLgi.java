@@ -14,6 +14,7 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.hd.d.edh.DataUtils;
+import org.hd.d.edh.FileUtils;
 import org.hd.d.edh.RemoteGenerationIntensity;
 import org.hd.d.edh.Tuple;
 
@@ -58,7 +59,7 @@ public final class IRLgi implements RemoteGenerationIntensity
             {
             try
                 {
-                final Tuple.Pair<Date, Integer> lastStatus = (Tuple.Pair<Date, Integer>) DataUtils.deserialiseFromFile(CACHE_PATH, false);
+                final Tuple.Pair<Date, Integer> lastStatus = (Tuple.Pair<Date, Integer>) FileUtils.deserialiseFromFile(CACHE_PATH, false);
                 if((null != lastStatus) && ((now - lastStatus.first.getTime()) <= MAX_CACHE_MS))
                     {
                     if(null == lastStatus.second) { throw new IOException("could not fetch/compute"); }
@@ -140,7 +141,7 @@ public final class IRLgi implements RemoteGenerationIntensity
 
             // Persist/cache value.
             if(RGI_CACHE_DIR_BASE_PATH.exists())
-                { DataUtils.serialiseToFile(new Tuple.Pair<>(new Date(), lastValue), CACHE_PATH, false, true); }
+                { FileUtils.serialiseToFile(new Tuple.Pair<>(new Date(), lastValue), CACHE_PATH, false, true); }
             else
                 { System.err.println("No parent dir "+RGI_CACHE_DIR_BASE_PATH.getCanonicalPath()+" to cache intensity in "+CACHE_PATH); }
 
@@ -150,7 +151,7 @@ public final class IRLgi implements RemoteGenerationIntensity
             {
             // Negatively cache failure if parent dir exists (silently ignore if not)...
             if(RGI_CACHE_DIR_BASE_PATH.exists())
-                { DataUtils.serialiseToFile(new Tuple.Pair<Date, Integer>(new Date(), null), CACHE_PATH, false, true); }
+                { FileUtils.serialiseToFile(new Tuple.Pair<Date, Integer>(new Date(), null), CACHE_PATH, false, true); }
             // Rethrow...
             throw e;
             }
