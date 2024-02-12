@@ -903,7 +903,7 @@ curl -X 'GET' \
      * </pre>
      * Sample response fragment (pretty-printed):
      * <pre>
-{
+  {
     "dataset": "FUELINST",
     "publishTime": "2022-06-26T00:00:00Z",
     "startTime": "2022-06-25T23:55:00Z",
@@ -921,6 +921,16 @@ curl -X 'GET' \
     "fuelType": "CCGT",
     "generation": 6030
   },
+     * </pre>
+     * or (no end date):
+     * <pre>
+curl -X 'GET' \
+  'https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST/stream?publishDateTimeFrom=2024-02-12T17%3A50%3A00Z' \
+  -H 'accept: text/plain'
+     * </pre>
+     * results in:
+     * <pre>
+[{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"BIOMASS","generation":2249},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"CCGT","generation":15842},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"COAL","generation":478},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTELEC","generation":19},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTEW","generation":-83},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTFR","generation":267},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTIFA2","generation":-4},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTIRL","generation":-26},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTNED","generation":-170},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTNEM","generation":-353},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTNSL","generation":612},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTVKL","generation":-790},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"NPSHYD","generation":721},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"NUCLEAR","generation":3696},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"OCGT","generation":2},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"OIL","generation":0},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"OTHER","generation":1461},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"PS","generation":1457},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"WIND","generation":12829}]
      * </pre>
      */
     }
