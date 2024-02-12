@@ -47,6 +47,7 @@ import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import junit.framework.TestCase;
@@ -191,7 +192,10 @@ public final class TestMisc extends TestCase
     /**Test JSON support. */
     public static void testJSONBasics()
 	    {
-    	final JSONObject jo = new JSONObject("{}");
-	    assertNotNull(jo);
+    	final JSONObject jo0 = new JSONObject("{}");
+	    assertNotNull(jo0);
+	    final String sample1 = "[{\"dataset\":\"FUELINST\",\"publishTime\":\"2022-06-20T00:00:00Z\",\"startTime\":\"2022-06-19T23:55:00Z\",\"settlementDate\":\"2022-06-20\",\"settlementPeriod\":2,\"fuelType\":\"PS\",\"generation\":-360},{\"dataset\":\"FUELINST\",\"publishTime\":\"2022-06-20T00:00:00Z\",\"startTime\":\"2022-06-19T23:55:00Z\",\"settlementDate\":\"2022-06-20\",\"settlementPeriod\":2,\"fuelType\":\"WIND\",\"generation\":6400}]";
+    	final JSONArray ja1 = new JSONArray(sample1);
+	    assertNotNull(ja1);
 	    }
     }
