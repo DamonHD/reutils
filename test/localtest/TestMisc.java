@@ -43,13 +43,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.hd.d.edh.DataUtils;
-import org.hd.d.edh.FUELINST;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
+import org.json.JSONObject;
+
+import junit.framework.TestCase;
 
 /**Miscellaneous tests.
  *
@@ -93,7 +93,7 @@ public final class TestMisc extends TestCase
         // Parse again, but this time checking for the correct type/heading.
         assertNotNull(DataUtils.parseBMRCSV(new StringReader(tinyTestCSV), "type"));
         }
-    
+
     /**Test serialising/saving of BMRCSV data. */
     public static void testSaveBMRCSV()
         throws Exception
@@ -130,8 +130,8 @@ public final class TestMisc extends TestCase
         assertFalse("RED must not be better than YELLOW", TrafficLight.RED.betterThan(TrafficLight.YELLOW));
         assertFalse("YELLOW must not be better than GREEN", TrafficLight.YELLOW.betterThan(TrafficLight.GREEN));
         }
-    
-    /**Test writing of intensity log. 
+
+    /**Test writing of intensity log.
      * @throws IOException
      */
     public static void testAppendToRetailIntensityLog() throws IOException
@@ -143,7 +143,7 @@ public final class TestMisc extends TestCase
 
     	// Write first row (and create file with header), and validate.
     	final int retailIntensity1 = 123;
-    	final File logFile = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), now, retailIntensity1);	
+    	final File logFile = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), now, retailIntensity1);
     	try(BufferedReader br = new BufferedReader(new FileReader(logFile)))
     	    {
     	    assertEquals(FUELINSTUtils.RETAIL_INTENSITY_LOG_HEADER_LINE_1, br.readLine());
@@ -181,10 +181,17 @@ public final class TestMisc extends TestCase
     	    assertTrue(datarow2.endsWith(" "+retailIntensity2));
     	    assertNull(br.readLine());
 		    }
- 
+
     	// Tidy up.
     	if(null != logFile) { logFile.delete(); }
     	Files.delete(tempDirectory);
 	    }
-	
+
+
+    /**Test JSON support. */
+    public static void testJSONBasics()
+	    {
+    	final JSONObject jo = new JSONObject("{}");
+	    assertNotNull(jo);
+	    }
     }

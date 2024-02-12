@@ -891,4 +891,36 @@ FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,22
 	    {
 	    throw new RuntimeException("NOT IMPLEMENTED");
 	    }
+
+
+    /**FUELINST stream...
+     * See: https://bmrs.elexon.co.uk/api-documentation/endpoint/datasets/FUELINST/stream
+     * "This endpoint has an optimised JSON payload and is aimed at frequent requests for the data."
+     * <pre>
+curl -X 'GET' \
+  'https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST/stream?publishDateTimeFrom=2022-06-20T00%3A00%3A00Z&publishDateTimeTo=2022-06-26T00%3A00%3A00Z' \
+  -H 'accept: text/plain'
+     * </pre>
+     * Sample response fragment (pretty-printed):
+     * <pre>
+{
+    "dataset": "FUELINST",
+    "publishTime": "2022-06-26T00:00:00Z",
+    "startTime": "2022-06-25T23:55:00Z",
+    "settlementDate": "2022-06-26",
+    "settlementPeriod": 2,
+    "fuelType": "BIOMASS",
+    "generation": 864
+  },
+  {
+    "dataset": "FUELINST",
+    "publishTime": "2022-06-26T00:00:00Z",
+    "startTime": "2022-06-25T23:55:00Z",
+    "settlementDate": "2022-06-26",
+    "settlementPeriod": 2,
+    "fuelType": "CCGT",
+    "generation": 6030
+  },
+     * </pre>
+     */
     }

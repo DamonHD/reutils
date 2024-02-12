@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="/Users/dhd/git/reutils/libs/signpost-core.jar"/>
 	<classpathentry kind="lib" path="/Users/dhd/git/reutils/libs/commons-codec.jar"/>
 	<classpathentry kind="lib" path="libs/signpost-commonshttp4.jar"/>
+	<classpathentry kind="lib" path="libs/json-20240205.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
