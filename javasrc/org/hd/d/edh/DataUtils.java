@@ -51,6 +51,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1091,7 +1092,7 @@ curl -X 'GET' \
         throws IOException, URISyntaxException
         {
     	// Compute full URL to request latest 24h of FUELINST data.
-    	final Instant dayAgo = Instant.now().minusSeconds(24 * 60 * 60);
+    	final Instant dayAgo = Instant.now().minusSeconds(24 * 60 * 60).truncatedTo(ChronoUnit.SECONDS);
     	final String suffix = URLEncoder.encode(dayAgo.toString(), StandardCharsets.US_ASCII);
     	final URL fullURL = new URI(urlPrefix.toString() + suffix).toURL();
  System.err.println("Full JSON URL: " + fullURL);
