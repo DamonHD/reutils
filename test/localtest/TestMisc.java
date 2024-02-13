@@ -47,8 +47,6 @@ import org.hd.d.edh.DataUtils;
 import org.hd.d.edh.FUELINSTUtils;
 import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import junit.framework.TestCase;
 
@@ -186,23 +184,5 @@ public final class TestMisc extends TestCase
     	// Tidy up.
     	if(null != logFile) { logFile.delete(); }
     	Files.delete(tempDirectory);
-	    }
-
-    /**Significant small JSON streaming FUELINST sample. */
-    public static final String FUELINST_JSON_sample_20240212 = "[{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"BIOMASS\",\"generation\":2249},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"CCGT\",\"generation\":15842},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"COAL\",\"generation\":478},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTELEC\",\"generation\":19},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTEW\",\"generation\":-83},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTFR\",\"generation\":267},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTIFA2\",\"generation\":-4},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTIRL\",\"generation\":-26},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTNED\",\"generation\":-170},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTNEM\",\"generation\":-353},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTNSL\",\"generation\":612},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"INTVKL\",\"generation\":-790},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"NPSHYD\",\"generation\":721},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"NUCLEAR\",\"generation\":3696},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"OCGT\",\"generation\":2},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"OIL\",\"generation\":0},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"OTHER\",\"generation\":1461},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"PS\",\"generation\":1457},{\"dataset\":\"FUELINST\",\"publishTime\":\"2024-02-12T17:50:00Z\",\"startTime\":\"2024-02-12T17:45:00Z\",\"settlementDate\":\"2024-02-12\",\"settlementPeriod\":36,\"fuelType\":\"WIND\",\"generation\":12829}]";
-
-    /**Test basic JSON support. */
-    public static void testJSONBasics()
-	    {
-    	final JSONObject jo0 = new JSONObject("{}");
-	    assertNotNull(jo0);
-	    assertEquals(0, jo0.length());
-	    final String sample1 = "[{\"dataset\":\"FUELINST\",\"publishTime\":\"2022-06-20T00:00:00Z\",\"startTime\":\"2022-06-19T23:55:00Z\",\"settlementDate\":\"2022-06-20\",\"settlementPeriod\":2,\"fuelType\":\"PS\",\"generation\":-360},{\"dataset\":\"FUELINST\",\"publishTime\":\"2022-06-20T00:00:00Z\",\"startTime\":\"2022-06-19T23:55:00Z\",\"settlementDate\":\"2022-06-20\",\"settlementPeriod\":2,\"fuelType\":\"WIND\",\"generation\":6400}]";
-    	final JSONArray ja1 = new JSONArray(sample1);
-	    assertNotNull(ja1);
-	    assertEquals(2, ja1.length());
-    	final JSONArray ja2 = new JSONArray(FUELINST_JSON_sample_20240212);
-	    assertNotNull(ja2);
-	    assertEquals(19, ja2.length());
 	    }
     }
