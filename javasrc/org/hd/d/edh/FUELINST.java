@@ -56,6 +56,11 @@ public final class FUELINST
      */
     public static final String FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL = "intensity.URL.current.csv";
 
+    /**URL of source of partial streaming FUELINST JSON; not null.
+     * Needs an ISO 8601 published from UTC data appended, or form 2024-01-01T00:00:00Z.
+     */
+    public static final String FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL = "intensity.URL.JSON.prefix";
+
     /**Field names for FUELINST csv file row; not null. */
     public static final String FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES = "intensity.csv.fueltype";
 
@@ -214,7 +219,7 @@ public final class FUELINST
          * Likely actual precision only warrants float.
          */
         public final Map<String,Float> correlationIntensityToFuel;
-        
+
         /**Compute time (ms); 0 if unknown. */
         public final long computeTime_ms;
 
@@ -263,7 +268,7 @@ public final class FUELINST
             this.currentMW = currentMW;
             this.currentIntensity = currentIntensity;
             if(currentGenerationMWByFuelMW == null) { throw new IllegalArgumentException(); }
-            this.currentGenerationMWByFuelMW = Collections.unmodifiableMap(new HashMap<String, Integer>(currentGenerationMWByFuelMW)); // Defensive copy.
+            this.currentGenerationMWByFuelMW = Collections.unmodifiableMap(new HashMap<>(currentGenerationMWByFuelMW)); // Defensive copy.
             this.currentStorageDrawdownMW = currentStorageDrawdownMW;
             this.histMinIntensity = histMinIntensity;
             this.histAveIntensity = histAveIntensity;
@@ -281,7 +286,7 @@ public final class FUELINST
             this.histAveStorageDrawdownByHourOfDay = new SummaryByHour(histAveStorageDrawdownByHourOfDay); // Defensive copy.
             this.totalGridLosses = totalGridLosses;
             if(correlationIntensityToFuel == null) { throw new IllegalArgumentException(); }
-            this.correlationIntensityToFuel = Collections.unmodifiableMap(new HashMap<String, Float>(correlationIntensityToFuel)); // Defensive copy.
+            this.correlationIntensityToFuel = Collections.unmodifiableMap(new HashMap<>(correlationIntensityToFuel)); // Defensive copy.
             this.computeTime_ms = computeTime_ms;
             }
 
@@ -370,7 +375,8 @@ public final class FUELINST
          * @param args   arguments/parameters; never null but may be empty
          * @throws IOException  in case of difficulty generating the output(s)
          */
-        public void doTrafficLights(final String[] args)
+        @Override
+		public void doTrafficLights(final String[] args)
             throws IOException
             {
             // Delegate to static utilities method!
