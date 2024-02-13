@@ -164,7 +164,7 @@ public final class TestMisc extends TestCase
     	// Write second row and validate.
     	final long later = now + 1;
     	final int retailIntensity2 = 321;
-    	final File logFile2 = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), now, retailIntensity2);
+    	final File logFile2 = FUELINSTUtils.appendToRetailIntensityLog(tempDirectory.toFile(), later, retailIntensity2);
     	assertEquals(logFile, logFile2);
     	try(BufferedReader br = new BufferedReader(new FileReader(logFile2)))
 		    {
