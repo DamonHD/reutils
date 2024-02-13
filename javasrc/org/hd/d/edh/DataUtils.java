@@ -975,6 +975,17 @@ curl -X 'GET' \
 					clampNonNegative ? 0 : Integer.MIN_VALUE)
 				);
 			}
+
+		/**Throws an exception if the supplied record is not suitable to parse as FUELINST stream.
+		 * This may not reject all possible bad records.
+		 * @param jo  putative JSON stream FUELINST record; should not be null
+		 */
+		public static void validateJSONRecord(final JSONObject jo)
+			{
+			Objects.requireNonNull(jo);
+			if(!"FUELINST".equals(jo.get("dataset"))) { throw new IllegalArgumentException("not a FUELINST dataset"); }
+			// TODO: add more tests
+			}
 	    }
 
     /**Convert from new (2024) format JSON stream FUELINST data to (immutable) by-time fuel-generation Map; never null.
@@ -1004,7 +1015,14 @@ curl -X 'GET' \
     	// Attempt to parse the JSON first.
     	final JSONArray ja = new JSONArray(rawJSONa);
 
-        // Result.
+    	// If empty return empty immutable result
+    	// else validate that first record looks somewhat sane.
+    	if(0 == ja.length()) { return(Collections.emptySortedMap()); }
+    	final Object ja0 = ja.get(0);
+    	if(!(ja0 instanceof JSONObject)) { throw new IllegalArgumentException("first array element not an object/map"); }
+    	FuelMWByTime.validateJSONRecord(ja.getJSONObject(0));
+
+        // Result to be populated.
         final SortedMap<Long, Map<String, FuelMWByTime>> r = new TreeMap<>();
 
 
