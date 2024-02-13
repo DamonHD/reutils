@@ -17,7 +17,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 PENDING:
 
     DHD20240212: broke out FileUtils from DataUtils.
-    DHD20240210: added json-20240205.jar (org.json, public domain)
+    DHD20240212: added json-20240205.jar (org.json, public domain)
 
 
 
