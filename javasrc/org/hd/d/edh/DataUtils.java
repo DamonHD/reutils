@@ -68,6 +68,7 @@ import java.util.zip.GZIPInputStream;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 
 /**Data utilities.
@@ -1019,9 +1020,23 @@ curl -X 'GET' \
     		)
 	    {
     	Objects.requireNonNull(rawJSONa);
+    	return(convertStreamJSONToRecord(new JSONArray(rawJSONa), clampNonNegative));
+	    }
 
-    	// Attempt to parse the JSON first.
-    	final JSONArray ja = new JSONArray(rawJSONa);
+    /**Convert from new (2024) format JSON stream FUELINST data to (immutable) by-time fuel-generation Map; never null.
+     * Can optionally clamp negative values to zero
+     *
+     * @param rawJSONa  raw JSON array "[...]"; never null.
+     * @param clampNonNegative  if true then clamp all values to be non-negative
+     *
+     * Will throw an exception if the input data is malformed.
+     */
+    public static final SortedMap<Long, Map<String, FuelMWByTime>> convertStreamJSONToRecord(
+    		final JSONArray ja,
+    		final boolean clampNonNegative
+    		)
+	    {
+    	Objects.requireNonNull(ja);
 
     	// If empty then return empty immutable result
     	// else validate that first record looks somewhat sane.
@@ -1087,6 +1102,7 @@ curl -X 'GET' \
         conn.setUseCaches(false); // Ensure that we get non-stale values each time.
         conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
+//        conn.setRequestProperty("accept", "text/plain"); // or maybe specify JSON...
 
         try(final InputStreamReader is = new InputStreamReader(conn.getInputStream()))
             { return(DataUtils.parseBMRJSON(is)); }
@@ -1105,6 +1121,9 @@ curl -X 'GET' \
 		// Wrap a buffered reader around the input if not already so.
 		final BufferedReader br = (r instanceof BufferedReader) ?
 				(BufferedReader) r : new BufferedReader(r, 8192);
+
+		final SortedMap<Long, Map<String, FuelMWByTime>> records =
+			convertStreamJSONToRecord(new JSONArray(new JSONTokener(r)), true);
 
 
 
