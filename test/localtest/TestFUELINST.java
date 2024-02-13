@@ -346,5 +346,12 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
 	    		(new Random()).nextBoolean());
 	    assertNotNull(m0);
 	    assertEquals(0, m0.size());
+
+		final SortedMap<Long, Map<String, FuelMWByTime>> m1 =
+				DataUtils.convertStreamJSONToRecord(
+				FUELINST_JSON_sample_20240212,
+	    		true);
+	    assertNotNull(m1);
+	    assertEquals(2, m1.size());
 		}
     }
