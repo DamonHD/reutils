@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
@@ -994,6 +995,8 @@ curl -X 'GET' \
      * @param rawJSONa  raw JSON array "[...]"; never null.
      * @param clampNonNegative  if true then clamp all values to be non-negative
      *
+     * Will throw an exception if the input data is malformed.
+     *
      * New format from open-ended query (no end date):
      * <pre>
 curl -X 'GET' \
@@ -1015,25 +1018,31 @@ curl -X 'GET' \
     	// Attempt to parse the JSON first.
     	final JSONArray ja = new JSONArray(rawJSONa);
 
-    	// If empty return empty immutable result
+    	// If empty then return empty immutable result
     	// else validate that first record looks somewhat sane.
-    	if(0 == ja.length()) { return(Collections.emptySortedMap()); }
+    	final int recordCount = ja.length();
+		if(0 == recordCount) { return(Collections.emptySortedMap()); }
     	final Object ja0 = ja.get(0);
     	if(!(ja0 instanceof JSONObject)) { throw new IllegalArgumentException("first array element not an object/map"); }
     	FuelMWByTime.validateJSONRecord(ja.getJSONObject(0));
 
-        // Result to be populated.
+        // Working result: copied to immutable form when done.
         final SortedMap<Long, Map<String, FuelMWByTime>> r = new TreeMap<>();
 
+        for(int i = recordCount; --i >= 0; )
+	        {
+        	final JSONObject jo = ja.getJSONObject(i);
+            final FuelMWByTime record = new FuelMWByTime(jo, true);
 
-
-
-
-
-
-
+            if(!r.containsKey(record.time)) { r.put(record.time, new HashMap<>()); }
+            final Map<String, FuelMWByTime> m = r.get(record.time);
+            m.put(record.fuelType, record);
+	        }
 
 //	    throw new RuntimeException("NOT IMPLEMENTED");
-	    return(Collections.unmodifiableSortedMap(r));
+        final SortedMap<Long, Map<String, FuelMWByTime>> r2 = new TreeMap<>();
+        for(final Entry<Long, Map<String, FuelMWByTime>> entry : r.entrySet())
+	        { r2.put(entry.getKey(), Collections.unmodifiableMap(entry.getValue())); }
+	    return(Collections.unmodifiableSortedMap(r2));
 	    }
     }
