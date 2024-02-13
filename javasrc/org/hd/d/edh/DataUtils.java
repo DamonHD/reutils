@@ -60,6 +60,9 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 /**Data utilities.
  * Handles the old bmreports style of CSV (with an initial HDR row and a trailing FTR row),
@@ -928,21 +931,49 @@ curl -X 'GET' \
 
 
 
-    /**Record of ME generation by a named fuel in a timed slot/instant.
+    /**Record of MW generation by a named fuel in a timed slot/instant.
      *
      * @param time  interval/instant for this generation
-     * @param fuelName  fuel name; non-empty, non-null
+     * @param fuelType  fuel name; non-empty, non-null
      *
      *
-     * TODO: break this out into own top-level class
+     * TODO: break this out into its own top-level class
      */
-    public record FuelMWByTime(long time, String fuelName, int generationMW)
+    public record FuelMWByTime(long time, String fuelType, int generation)
 	    {
 		public FuelMWByTime
 			{
 			if(time < 1) { throw new IllegalArgumentException(); }
-			Objects.requireNonNull(fuelName);
-			if("".equals(fuelName)) { throw new IllegalArgumentException(); }
+			Objects.requireNonNull(fuelType);
+			if("".equals(fuelType)) { throw new IllegalArgumentException(); }
+			}
+
+        /**Ppulate from a JSON map/object.
+         *
+         * @param jo  populate using "startTime", "fuelType" and "generation" fields; non-null
+         * @param clampNonNegative  if true then clamp all values to be non-negative
+         *
+         * All required fields must be present and non-empty.
+         * <p>
+         * The time format "2024-02-12T17:50:00Z" ie ISO 8601 UTC down to at least minutes.
+         * <p>
+         * The fuelType format "INTIFA2" ie upper-case ASCII letters and digits.
+         * <p>
+         * The generation number "12234" ie and integer, possibly negative.
+         * <p>
+         * Sample record:
+         * <pre>
+{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"BIOMASS","generation":2249}
+         * </pre>
+         */
+		public FuelMWByTime(final JSONObject jo, final boolean clampNonNegative)
+			{
+			this(
+				java.time.Instant.parse(Objects.requireNonNull(jo).getString("startTime")).toEpochMilli(),
+				Objects.requireNonNull(jo).getString("fuelType"),
+				Math.max(Objects.requireNonNull(jo).getInt("generation"),
+					clampNonNegative ? 0 : Integer.MIN_VALUE)
+				);
 			}
 	    }
 
@@ -969,6 +1000,9 @@ curl -X 'GET' \
     		)
 	    {
     	Objects.requireNonNull(rawJSONa);
+
+    	// Attempt to parse the JSON first.
+    	final JSONArray ja = new JSONArray(rawJSONa);
 
         // Result.
         final SortedMap<Long, Map<String, FuelMWByTime>> r = new TreeMap<>();
