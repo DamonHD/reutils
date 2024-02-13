@@ -36,6 +36,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -672,10 +674,22 @@ public final class FUELINSTUtils
         final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
 	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
 
+        // Load system properties now, if not already done.
+        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+
+        // Fetch and parse streaming JSON, at most 24h.
+        final String dataJSONURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL);
+        if(null == dataJSONURL)
+            { throw new IllegalStateException("Property undefined for data JSON streaming URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL); }
+
+
+
+
+
+
 
         // Fetch and parse the FUELINST CSV file from the data source.
         // Will be null in case of inability to fetch or parse.
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
         final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
         if(null == dataURL)
             { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
@@ -684,12 +698,17 @@ public final class FUELINSTUtils
         try
             {
             // Set up URL connection to fetch the data.
-            url = new URL(dataURL.trim()); // Trim to avoid problems with trailing whitespace...
+            url = new URI(dataURL.trim()).toURL(); // Trim to avoid problems with trailing whitespace...
             final long dataFetchStart = System.currentTimeMillis();
             parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
             final long dataFetchEnd = System.currentTimeMillis();
 System.out.println("INFO: record/row count of CSV FUELINST data: "+(dataFetchEnd-dataFetchStart)+"ms, " + parsedBMRCSV.size() + " records from source: " + url + " fetch and parse");
             }
+        catch(final URISyntaxException e)
+	        {
+        	System.err.println("ERROR: unparseable URL " + dataURL + " error: " + e.getMessage());
+	        throw new IllegalStateException(e);
+	        }
         catch(final IOException e)
             {
             // Could not get data, so status is unknown.
