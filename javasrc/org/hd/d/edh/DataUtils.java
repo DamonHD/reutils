@@ -53,7 +53,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
@@ -859,7 +862,7 @@ FUELINST,2022-06-25T23:50:00Z,2022-06-25T23:45:00Z,2022-06-26,2,PS,-9
 ...
      */
 
-    /**Convert from new (2024) format data to (immutable) older one-line-per-time-sample format; never null.
+    /**Convert from new (2024) format CSV FUELINST data to (immutable) older one-line-per-time-sample format; never null.
      * Uses the same template as used to extract these re-extract positional parameters.
      * <p>
      * Can optionally clamp negative values to zero
@@ -921,8 +924,35 @@ curl -X 'GET' \
     "fuelType": "CCGT",
     "generation": 6030
   },
-     * </pre>
-     * or (no end date):
+     */
+
+
+
+    /**Record of ME generation by a named fuel in a timed slot/instant.
+     *
+     * @param time  interval/instant for this generation
+     * @param fuelName  fuel name; non-empty, non-null
+     *
+     *
+     * TODO: break this out into own top-level class
+     */
+    public record FuelMWByTime(long time, String fuelName, int generationMW)
+	    {
+		public FuelMWByTime
+			{
+			if(time < 1) { throw new IllegalArgumentException(); }
+			Objects.requireNonNull(fuelName);
+			if("".equals(fuelName)) { throw new IllegalArgumentException(); }
+			}
+	    }
+
+    /**Convert from new (2024) format JSON stream FUELINST data to (immutable) by-time fuel-generation Map; never null.
+     * Can optionally clamp negative values to zero
+     *
+     * @param rawJSONa  raw JSON array "[...]"; never null.
+     * @param clampNonNegative  if true then clamp all values to be non-negative
+     *
+     * New format from open-ended query (no end date):
      * <pre>
 curl -X 'GET' \
   'https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELINST/stream?publishDateTimeFrom=2024-02-12T17%3A50%3A00Z' \
@@ -933,4 +963,25 @@ curl -X 'GET' \
 [{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"BIOMASS","generation":2249},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"CCGT","generation":15842},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"COAL","generation":478},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTELEC","generation":19},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTEW","generation":-83},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTFR","generation":267},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTIFA2","generation":-4},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTIRL","generation":-26},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTNED","generation":-170},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTNEM","generation":-353},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTNSL","generation":612},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"INTVKL","generation":-790},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"NPSHYD","generation":721},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"NUCLEAR","generation":3696},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"OCGT","generation":2},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"OIL","generation":0},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"OTHER","generation":1461},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"PS","generation":1457},{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"WIND","generation":12829}]
      * </pre>
      */
+    public static final SortedMap<Long, Map<String, FuelMWByTime>> convertStreamJSONToRecord(
+    		final String rawJSONa,
+    		final boolean clampNonNegative
+    		)
+	    {
+    	Objects.requireNonNull(rawJSONa);
+
+        // Result.
+        final SortedMap<Long, Map<String, FuelMWByTime>> r = new TreeMap<>();
+
+
+
+
+
+
+
+
+
+	    throw new RuntimeException("NOT IMPLEMENTED");
+//	    return(Collections.unmodifiableSortedMap(r));
+	    }
     }
