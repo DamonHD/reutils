@@ -677,10 +677,10 @@ public final class FUELINSTUtils
         // Load system properties now, if not already done.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
 
-        // Fetch and parse streaming JSON, at most 24h.
-        final String dataJSONURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL);
-        if(null == dataJSONURL)
-            { throw new IllegalStateException("Property undefined for data JSON streaming URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL); }
+//        // Fetch and parse streaming JSON, at most 24h.
+//        final String dataJSONURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL);
+//        if(null == dataJSONURL)
+//            { throw new IllegalStateException("Property undefined for data JSON streaming URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL); }
 
 
 
