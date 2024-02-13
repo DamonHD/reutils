@@ -31,6 +31,7 @@ package localtest;
 
 import java.io.File;
 import java.io.StringReader;
+import java.time.Instant;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
@@ -353,5 +354,9 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
 	    		true);
 	    assertNotNull(m1);
 	    assertEquals(1, m1.size());
+	    assertNull(m1.get(0L));
+	    assertEquals(12829, m1.get(Instant.parse("2024-02-12T17:45:00Z").toEpochMilli()).get("WIND").generation());
+	    assertEquals(0, m1.get(Instant.parse("2024-02-12T17:45:00Z").toEpochMilli()).get("INTEW").generation());
+	    assertNull(m1.get(Instant.parse("2024-02-12T17:45:00Z").toEpochMilli()).get("NONESUCH"));
 		}
     }
