@@ -42,10 +42,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1065,18 +1070,30 @@ curl -X 'GET' \
      * @return a non-null but possibly-empty in-order immutable List of rows,
      *    each of which is a non-null but possibly-empty in-order immutable List of fields,
      *    as if returned by parseBMRCSV().
+     * @throws URISyntaxException
      */
-   public static List<List<String>> parseBMRJSON(final URL urlPrefix)
-        throws IOException
+    public static List<List<String>> parseBMRJSON(final URL urlPrefix)
+        throws IOException, URISyntaxException
         {
+    	// Compute full URL to request latest 24h of FUELINST data.
+    	final Instant dayAgo = Instant.now().minusSeconds(24 * 60 * 60);
+    	final String suffix = URLEncoder.encode(dayAgo.toString(), StandardCharsets.US_ASCII);
+    	final URL fullURL = new URI(urlPrefix.toString() + suffix).toURL();
+ System.err.println("Full JSON URL: " + fullURL);
 
+        // Set up URL connection to fetch the data.
+        final URLConnection conn = fullURL.openConnection();
+        conn.setAllowUserInteraction(false);
+        conn.setUseCaches(false); // Ensure that we get non-stale values each time.
+        conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
+        conn.setReadTimeout(60000); // Set a long-ish read timeout.
 
-	    throw new RuntimeException("NOT IMPLEMENTED");
+        try(final InputStreamReader is = new InputStreamReader(conn.getInputStream()))
+            { return(DataUtils.parseBMRJSON(is)); }
         }
 
-	/**
-	 * Parse JSON file/stream and return as if parsed from pre-2024 CSV; never null
-	 * but may be empty. Extracts up to 24h of data up to now from JSON streaming V1
+	/**Parse JSON file/stream and return as if parsed from pre-2024 CSV; never null but may be empty.
+	 * Extracts up to 24h of data up to now from JSON streaming V1
 	 * API, as URL-argument version.
 	 * <p>
 	 * This buffers its input for efficiency if not already a BufferedReader.
