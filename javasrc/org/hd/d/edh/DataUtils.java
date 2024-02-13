@@ -518,7 +518,7 @@ public final class DataUtils
      * @throws IOException  if there is an I/O problem or the data is malformed
      *
      * @return a non-null but possibly-empty in-order immutable List of rows,
-     *    each of which is a non-null but possibly-empty in-order List of fields
+     *    each of which is a non-null but possibly-empty in-order immutable List of fields
      */
     public static List<List<String>> parseBMRCSV(final URL url, final String headerCheck)
         throws IOException
@@ -1039,10 +1039,60 @@ curl -X 'GET' \
             m.put(record.fuelType, record);
 	        }
 
-//	    throw new RuntimeException("NOT IMPLEMENTED");
         final SortedMap<Long, Map<String, FuelMWByTime>> r2 = new TreeMap<>();
         for(final Entry<Long, Map<String, FuelMWByTime>> entry : r.entrySet())
 	        { r2.put(entry.getKey(), Collections.unmodifiableMap(entry.getValue())); }
 	    return(Collections.unmodifiableSortedMap(r2));
 	    }
-    }
+
+
+    /**Parse JSON file/stream and return as if parsed from pre-2024 CSV; never null but may be empty.
+     * Extracts up to 24h of data up to now from JSON streaming V1 API.
+     * <p>
+     * Appends a start date time to the URL,
+     * and queries the new (2024) Elexon data service.
+     * Parses the returned JSON, assembles into records, one per interval,
+     * with all generation values for that interval,
+     * in increasing time order.
+     * <p>
+     * The outer and inner Lists implement RandomAccess.
+     * <p>
+     * This buffers its input for efficiency if not already a BufferedReader.
+     *
+     * @throws IOException  if there is an I/O problem or the data is malformed
+     *
+     * @param urlPrefix  prefix of URL to read from; never null
+     * @return a non-null but possibly-empty in-order immutable List of rows,
+     *    each of which is a non-null but possibly-empty in-order immutable List of fields,
+     *    as if returned by parseBMRCSV().
+     */
+   public static List<List<String>> parseBMRJSON(final URL urlPrefix)
+        throws IOException
+        {
+
+
+	    throw new RuntimeException("NOT IMPLEMENTED");
+        }
+
+	/**
+	 * Parse JSON file/stream and return as if parsed from pre-2024 CSV; never null
+	 * but may be empty. Extracts up to 24h of data up to now from JSON streaming V1
+	 * API, as URL-argument version.
+	 * <p>
+	 * This buffers its input for efficiency if not already a BufferedReader.
+	 */
+	public static List<List<String>> parseBMRJSON(final Reader r) throws IOException
+		{
+		Objects.requireNonNull(r);
+
+		// Wrap a buffered reader around the input if not already so.
+		final BufferedReader br = (r instanceof BufferedReader) ?
+				(BufferedReader) r : new BufferedReader(r, 8192);
+
+
+
+
+
+		throw new RuntimeException("NOT IMPLEMENTED");
+		}
+	}
