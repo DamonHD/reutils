@@ -1152,4 +1152,21 @@ System.err.println("Full JSON URL: " + fullURL);
 //			return(Collections.unmodifiableList(result));
 			}
 		}
+
+
+
+
+	/**Generate an immutable old (pre-2024) FUELINST CSV record from FuelMWByTime records; never null.
+	 * The records must all be from the same time instant/interval.
+	 * <p>
+	 * Fuel types specified in the template but missing from the map
+	 * will have a generation of zero shown.
+	 */
+	public static List<String> generateOldCSVRecord(final String tenplate,
+			                                        final Map<String, FuelMWByTime> s)
+    	{
+
+
+		throw new RuntimeException("NOT IMPLEMENTED");
+		}
 	}
