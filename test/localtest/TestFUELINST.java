@@ -45,9 +45,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.hd.d.edh.DataUtils;
-import org.hd.d.edh.DataUtils.FuelMWByTime;
 import org.hd.d.edh.FUELINST;
 import org.hd.d.edh.FUELINSTUtils;
+import org.hd.d.edh.FuelMWByTime;
 import org.hd.d.edh.MainProperties;
 import org.hd.d.edh.TrafficLight;
 import org.json.JSONArray;

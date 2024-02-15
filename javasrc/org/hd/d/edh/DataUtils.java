@@ -939,78 +939,6 @@ curl -X 'GET' \
 
 
 
-    /**Record of MW generation by a named fuel in a timed slot/instant.
-     *
-     * @param time  interval/instant for this generation
-     * @param fuelType  fuel name; non-empty, non-null
-     * @param generation  generation in MW
-     * @param settlementPeriod  half-hourly settlement period within the day, non-negative
-     *
-     * The settlementPeriod is canonical,
-     * and is useful for reconstructing old CSV style records.
-     *
-     * <p>
-     * TODO: break this out into its own top-level class
-     */
-    public record FuelMWByTime(long time, String fuelType, int generation, int settlementPeriod)
-	    {
-		public FuelMWByTime
-			{
-			if(time < 1) { throw new IllegalArgumentException(); }
-			Objects.requireNonNull(fuelType);
-			if("".equals(fuelType)) { throw new IllegalArgumentException(); }
-			if(settlementPeriod < 1) { throw new IllegalArgumentException(); }
-			}
-
-        /**Populate from a JSON map/object.
-         *
-         * @param jo  populate using "startTime", "fuelType", "generation" and settlementPeriod fields; non-null
-         * @param clampNonNegative  if true then clamp all values to be non-negative
-         *
-         * All required fields must be present and non-empty.
-         * <p>
-         * The time format "2024-02-12T17:50:00Z" ie ISO 8601 UTC down to at least minutes.
-         * <p>
-         * The fuelType format "INTIFA2" ie upper-case ASCII letters and digits.
-         * <p>
-         * The generation number "12234" ie an integer, possibly negative.
-         * <p>
-         * The settlement period "12" ie a small positive integer.
-         * <p>
-         * Sample record:
-         * <pre>
-{"dataset":"FUELINST","publishTime":"2024-02-12T17:50:00Z","startTime":"2024-02-12T17:45:00Z","settlementDate":"2024-02-12","settlementPeriod":36,"fuelType":"BIOMASS","generation":2249}
-         * </pre>
-         */
-		public FuelMWByTime(final JSONObject jo, final boolean clampNonNegative)
-			{
-			this(
-				java.time.Instant.parse(Objects.requireNonNull(jo).getString(TIME_IS_START ? "startTime" : "publishTime")).toEpochMilli(),
-				Objects.requireNonNull(jo).getString("fuelType"),
-				Math.max(Objects.requireNonNull(jo).getInt("generation"),
-					clampNonNegative ? 0 : Integer.MIN_VALUE),
-				Objects.requireNonNull(jo).getInt("settlementPeriod")
-				);
-			}
-
-		/**If true, the time is the 'start' time, else it is the publish time.
-		 * Publication time may lump several intervals together
-		 * if there is a delay in Elexon's data processing,
-		 * so start time is usually preferable.
-		 */
-		public static final boolean TIME_IS_START = true;
-
-		/**Throws an exception if the supplied record is not suitable to parse as FUELINST stream.
-		 * This may not reject all possible bad records.
-		 * @param jo  putative JSON stream FUELINST record; should not be null
-		 */
-		public static void validateJSONRecord(final JSONObject jo)
-			{
-			Objects.requireNonNull(jo);
-			if(!"FUELINST".equals(jo.get("dataset"))) { throw new IllegalArgumentException("not a FUELINST dataset"); }
-			// TODO: add more tests
-			}
-	    }
 
     /**Convert from new (2024) format JSON stream FUELINST data to (immutable) by-time fuel-generation Map; never null.
      * Can optionally clamp negative values to zero
@@ -1071,9 +999,9 @@ curl -X 'GET' \
         	final JSONObject jo = ja.getJSONObject(i);
             final FuelMWByTime record = new FuelMWByTime(jo, true);
 
-            if(!r.containsKey(record.time)) { r.put(record.time, new HashMap<>()); }
-            final Map<String, FuelMWByTime> m = r.get(record.time);
-            m.put(record.fuelType, record);
+            if(!r.containsKey(record.time())) { r.put(record.time(), new HashMap<>()); }
+            final Map<String, FuelMWByTime> m = r.get(record.time());
+            m.put(record.fuelType(), record);
 	        }
 
         final SortedMap<Long, Map<String, FuelMWByTime>> r2 = new TreeMap<>();
@@ -1180,7 +1108,7 @@ curl -X 'GET' \
         	if(time < 1) { throw new IllegalArgumentException("bad (negative) timestamp key: "+ time); }
             final Map<String, FuelMWByTime> m = entry.getValue();
             if(m.isEmpty()) { throw new IllegalArgumentException("empty map for timestamp key: " + time); }
-	        if(m.values().iterator().next().time != time) { throw new IllegalArgumentException("map entry with non-matching time for timestamp key: " + time); }
+	        if(m.values().iterator().next().time() != time) { throw new IllegalArgumentException("map entry with non-matching time for timestamp key: " + time); }
 	        result.add(generateOldCSVRecord(template, m));
 	        }
 
@@ -1235,13 +1163,13 @@ FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,22
         // Date as UTCDAYFILENAME_FORMAT
         final SimpleDateFormat sDF1 = new SimpleDateFormat(FUELINSTUtils.UTCDAYFILENAME_FORMAT);
         sDF1.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
-        result.add(sDF1.format(new Date(times.time)));
+        result.add(sDF1.format(new Date(times.time())));
         // Settlement period.
         result.add(Integer.toString(times.settlementPeriod()));
         // Datetime as CSVTIMESTAMP_FORMAT
         final SimpleDateFormat sDF2 = new SimpleDateFormat(FUELINSTUtils.CSVTIMESTAMP_FORMAT);
         sDF2.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
-        result.add(sDF2.format(new Date(times.time)));
+        result.add(sDF2.format(new Date(times.time())));
 
         for(int i = 4; i < templateFieldCount; ++i)
 	        {
@@ -1254,7 +1182,7 @@ FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,22
 		        }
 	        // Do some validation for consistency.
 	        if(!fuelType.equals(f.fuelType())) { throw new IllegalArgumentException("generation map mismatched fuelType key/value for " + fuelType); }
-	        if(times.time != f.time()) { throw new IllegalArgumentException("generation map mismatched time for " + fuelType); }
+	        if(times.time() != f.time()) { throw new IllegalArgumentException("generation map mismatched time for " + fuelType); }
 	        if(times.settlementPeriod() != f.settlementPeriod()) { throw new IllegalArgumentException("generation map mismatched settlementPeriod for " + fuelType); }
 	        // Add in the generation.
 	        result.add(Integer.toString(f.generation()));
