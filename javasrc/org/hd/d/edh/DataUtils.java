@@ -943,22 +943,28 @@ curl -X 'GET' \
      *
      * @param time  interval/instant for this generation
      * @param fuelType  fuel name; non-empty, non-null
+     * @param generation  generation in MW
+     * @param settlementPeriod  half-hourly settlement period within the day, non-negative
      *
+     * The settlementPeriod is canonical,
+     * and is useful for reconstructing old CSV style records.
      *
+     * <p>
      * TODO: break this out into its own top-level class
      */
-    public record FuelMWByTime(long time, String fuelType, int generation)
+    public record FuelMWByTime(long time, String fuelType, int generation, int settlementPeriod)
 	    {
 		public FuelMWByTime
 			{
 			if(time < 1) { throw new IllegalArgumentException(); }
 			Objects.requireNonNull(fuelType);
 			if("".equals(fuelType)) { throw new IllegalArgumentException(); }
+			if(settlementPeriod < 1) { throw new IllegalArgumentException(); }
 			}
 
-        /**Ppulate from a JSON map/object.
+        /**Populate from a JSON map/object.
          *
-         * @param jo  populate using "startTime", "fuelType" and "generation" fields; non-null
+         * @param jo  populate using "startTime", "fuelType", "generation" and settlementPeriod fields; non-null
          * @param clampNonNegative  if true then clamp all values to be non-negative
          *
          * All required fields must be present and non-empty.
@@ -967,7 +973,9 @@ curl -X 'GET' \
          * <p>
          * The fuelType format "INTIFA2" ie upper-case ASCII letters and digits.
          * <p>
-         * The generation number "12234" ie and integer, possibly negative.
+         * The generation number "12234" ie an integer, possibly negative.
+         * <p>
+         * The settlement period "12" ie a small positive integer.
          * <p>
          * Sample record:
          * <pre>
@@ -980,7 +988,8 @@ curl -X 'GET' \
 				java.time.Instant.parse(Objects.requireNonNull(jo).getString(TIME_IS_START ? "startTime" : "publishTime")).toEpochMilli(),
 				Objects.requireNonNull(jo).getString("fuelType"),
 				Math.max(Objects.requireNonNull(jo).getInt("generation"),
-					clampNonNegative ? 0 : Integer.MIN_VALUE)
+					clampNonNegative ? 0 : Integer.MIN_VALUE),
+				Objects.requireNonNull(jo).getInt("settlementPeriod")
 				);
 			}
 
@@ -1161,12 +1170,36 @@ System.err.println("Full JSON URL: " + fullURL);
 	 * <p>
 	 * Fuel types specified in the template but missing from the map
 	 * will have a generation of zero shown.
+	 * <p>
+	 * The template will typically come from
+	 * <code>rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES)</code>
+	 * where <code>FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES = "intensity.csv.fueltype"</code>.
+	 * As of 2023-08-03 this was defined:
+	 * <pre>
+intensity.csv.fueltype=type,date,settlementperiod,timestamp,CCGT,OIL,COAL,NUCLEAR,WIND,PS,NPSHYD,OCGT,OTHER,INTFR,INTIRL,INTNED,INTEW,BIOMASS,INTNEM,INTELEC,INTIFA2,INTNSL,INTVKL
+	 * </pre>
 	 */
-	public static List<String> generateOldCSVRecord(final String tenplate,
+	public static List<String> generateOldCSVRecord(final String template,
 			                                        final Map<String, FuelMWByTime> s)
     	{
+        final String[] names = delimCSV.split(template);
+
 
 
 		throw new RuntimeException("NOT IMPLEMENTED");
 		}
+
+//    /**Test the extraction of fields from parsed CSV to named values.
+//     */
+//    public static void testExtractNamedFieldsByPosition()
+//        {
+//        final List<String> rowData = Arrays.asList(new String[]{"SOMETYPENAME","1","two","verymany","other","stuff",""});
+//        final String template = "type,ONE,TWO,THREE,,STUFF";
+//        final Map<String, String> namedFields = DataUtils.extractNamedFieldsByPositionFromRow(template, rowData);
+//
+//        assertEquals("must extract correct number of fields", 5, namedFields.size());
+//        assertEquals("must extract correct value for named field", "SOMETYPENAME", namedFields.get("type"));
+//        assertEquals("must extract correct value for named field", "stuff", namedFields.get("STUFF"));
+//        }
+
 	}
