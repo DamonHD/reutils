@@ -414,5 +414,7 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
 
         assertTrue(Arrays.equals(expectedRecord1, records.get(0).toArray()));
         assertTrue(Arrays.equals(expectedRecord2, records.get(1).toArray()));
+
+        assertNull(DataUtils.isValidBMRData(records, time2, 1));
 		}
     }

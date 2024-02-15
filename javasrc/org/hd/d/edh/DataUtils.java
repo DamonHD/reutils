@@ -349,7 +349,7 @@ public final class DataUtils
 	    }
 
     /**Validate an and possibly fix up BMR FUELINST data on a number of key points.
-     *      *
+     *
      * @return non-null error if any problem found (usually first error).
      */
 	public static ValidBMRDataResultError isValidBMRData(
