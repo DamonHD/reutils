@@ -1114,22 +1114,30 @@ System.err.println("Full JSON URL: " + fullURL);
 	 * API, as URL-argument version.
 	 * <p>
 	 * This buffers its input for efficiency if not already a BufferedReader.
+	 * <p>
+	 * Returns an immutable List (by increasing times: each entry is one time)
+	 * of generation across all sources at each time,
+	 * in the old CSV format.
 	 */
 	public static List<List<String>> parseBMRJSON(final Reader r) throws IOException
 		{
 		Objects.requireNonNull(r);
 
 		// Wrap a buffered reader around the input if not already so.
-		final BufferedReader br = (r instanceof BufferedReader) ?
-				(BufferedReader) r : new BufferedReader(r, 8192);
-
-		final SortedMap<Long, Map<String, FuelMWByTime>> records =
-			convertStreamJSONToRecord(new JSONArray(new JSONTokener(r)), true);
-
+		try(final BufferedReader br = (r instanceof BufferedReader) ?
+				(BufferedReader) r : new BufferedReader(r, 8192))
+			{
+            // Parse and group the JSON records by time.
+			final SortedMap<Long, Map<String, FuelMWByTime>> records =
+				convertStreamJSONToRecord(new JSONArray(new JSONTokener(r)), true);
 //System.err.println("Records after convertStreamJSONToRecord(): " + records.size());
 
+			final ArrayList result = new ArrayList<>(records.size());
 
 
-		throw new RuntimeException("NOT IMPLEMENTED");
+
+			throw new RuntimeException("NOT IMPLEMENTED");
+//			return(Collections.unmodifiableList(result));
+			}
 		}
 	}
