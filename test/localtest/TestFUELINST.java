@@ -215,7 +215,7 @@ intensity.fuel.INTIRL.2012/=0.45
 intensity.fuel.INTIRL=0.45
 intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
  */
-        assertEquals(0.45f, configuredIntensitiesDefault.get("INTIRL") , eps);
+        assertEquals(0.288f, configuredIntensitiesDefault.get("INTIRL") , eps);
 
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2007).get("INTIRL"), eps);
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2008).get("INTIRL"), eps);

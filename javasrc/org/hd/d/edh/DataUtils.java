@@ -1044,8 +1044,8 @@ curl -X 'GET' \
     	final Instant dayAgo = Instant.now().minusSeconds(24 * 60 * 60).truncatedTo(ChronoUnit.SECONDS);
     	// Push back request just over 30 minutes (HH) before limit, if set.
     	final Instant requestDataFrom =
-    			((null == noOlderThan) || (noOlderThan.longValue() < dayAgo.toEpochMilli())) ? dayAgo :
-    			Instant.ofEpochMilli(noOlderThan).minusSeconds(31 * 60);
+			((null == noOlderThan) || (noOlderThan.longValue() < dayAgo.toEpochMilli())) ?
+				dayAgo : Instant.ofEpochMilli(noOlderThan).minusSeconds(31 * 60);
     	final String suffix = URLEncoder.encode(requestDataFrom.toString(), StandardCharsets.US_ASCII);
     	final URL fullURL = new URI(urlPrefix.toString() + suffix).toURL();
 //System.err.println("Full JSON URL: " + fullURL);
@@ -1165,18 +1165,22 @@ FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,22
 
         // Prefix of form (as CSV):
         //    FUELINST,20221104,20,20221104095000,
-        // Type is FUELINST.
-        result.add("FUELINST");
-        // Date as UTCDAYFILENAME_FORMAT
-        final SimpleDateFormat sDF1 = new SimpleDateFormat(FUELINSTUtils.UTCDAYFILENAME_FORMAT);
-        sDF1.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
-        result.add(sDF1.format(new Date(times.time())));
-        // Settlement period.
-        result.add(Integer.toString(times.settlementPeriod()));
         // Datetime as CSVTIMESTAMP_FORMAT
         final SimpleDateFormat sDF2 = new SimpleDateFormat(FUELINSTUtils.CSVTIMESTAMP_FORMAT);
         sDF2.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
-        result.add(sDF2.format(new Date(times.time())));
+        final String datetime = sDF2.format(new Date(times.time()));
+        // Type is FUELINST.
+        result.add("FUELINST");
+        // Date as UTCDAYFILENAME_FORMAT
+//        final SimpleDateFormat sDF1 = new SimpleDateFormat(FUELINSTUtils.UTCDAYFILENAME_FORMAT);
+//        sDF1.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+//        result.add(sDF1.format(new Date(times.time())));
+        final String date = datetime.substring(0, 8);
+		result.add(date); // Avoids new date munging!
+        // Settlement period.
+        result.add(Integer.toString(times.settlementPeriod()));
+        // Datetime as CSVTIMESTAMP_FORMAT
+        result.add(datetime);
 
         for(int i = 4; i < templateFieldCount; ++i)
 	        {
@@ -1192,7 +1196,8 @@ FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,22
 	        if(times.time() != f.time()) { throw new IllegalArgumentException("generation map mismatched time for " + fuelType); }
 	        if(times.settlementPeriod() != f.settlementPeriod()) { throw new IllegalArgumentException("generation map mismatched settlementPeriod for " + fuelType); }
 	        // Add in the generation.
-	        result.add(Integer.toString(f.generation()));
+	        final int gen = f.generation();
+	        result.add((0 == gen) ? "0" : Integer.toString(gen));
 	        }
 
 		return(Collections.unmodifiableList(result));
