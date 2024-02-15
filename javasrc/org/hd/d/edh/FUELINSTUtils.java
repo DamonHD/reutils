@@ -679,50 +679,53 @@ public final class FUELINSTUtils
 
         // Parsed latest data will go here...
         List<List<String>> parsedBMRCSV = null;
+        URL url = null;
 
 
 
 
-//        // Fetch and parse streaming JSON, at most 24h.
-//        final String dataJSONURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL);
-//        if(null == dataJSONURL)
-//            { throw new IllegalStateException("Property undefined for data JSON streaming URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL); }
+        // Fetch and parse streaming JSON, at most 24h.
+        final String dataJSONURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL);
+        if(null == dataJSONURL)
+            { throw new IllegalStateException("Property undefined for data JSON streaming URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL); }
+        try
+	        {
+            url = new URI(dataJSONURL.trim()).toURL(); // Trim to avoid problems with trailing whitespace...
+            final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
+            parsedBMRCSV = DataUtils.parseBMRJSON(url, template);
+	        }
+        catch(final URISyntaxException e)
+	        {
+        	System.err.println("ERROR: unparseable JSON streaming data URL " + dataJSONURL + " error: " + e.getMessage());
+	        throw new IllegalStateException(e);
+	        }
+
+
+
+
+
+//        // Fetch and parse the FUELINST CSV file from the data source.
+//        // Will be null in case of inability to fetch or parse.
+//        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
+//        if(null == dataURL)
+//            { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
 //        try
-//	        {
-//            URL url = null;
-//            url = new URI(dataJSONURL.trim()).toURL(); // Trim to avoid problems with trailing whitespace...
-//	        parsedBMRCSV = DataUtils.parseBMRJSON(url);
+//            {
+//            // Set up URL connection to fetch the data.
+//            url = new URI(dataURL.trim()).toURL(); // Trim to avoid problems with trailing whitespace...
+//            final long dataFetchStart = System.currentTimeMillis();
+//            parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
+//            final long dataFetchEnd = System.currentTimeMillis();
+//System.out.println("INFO: record/row count of CSV FUELINST data: "+(dataFetchEnd-dataFetchStart)+"ms, " + parsedBMRCSV.size() + " records from source: " + url + " fetch and parse");
 //            }
 //        catch(final URISyntaxException e)
 //	        {
-//        	System.err.println("ERROR: unparseable JSON streaming data URL " + dataJSONURL + " error: " + e.getMessage());
+//        	System.err.println("ERROR: unparseable URL " + dataURL + " error: " + e.getMessage());
 //	        throw new IllegalStateException(e);
 //	        }
 
 
 
-
-
-        // Fetch and parse the FUELINST CSV file from the data source.
-        // Will be null in case of inability to fetch or parse.
-        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
-        if(null == dataURL)
-            { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
-        URL url = null;
-        try
-            {
-            // Set up URL connection to fetch the data.
-            url = new URI(dataURL.trim()).toURL(); // Trim to avoid problems with trailing whitespace...
-            final long dataFetchStart = System.currentTimeMillis();
-            parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
-            final long dataFetchEnd = System.currentTimeMillis();
-System.out.println("INFO: record/row count of CSV FUELINST data: "+(dataFetchEnd-dataFetchStart)+"ms, " + parsedBMRCSV.size() + " records from source: " + url + " fetch and parse");
-            }
-        catch(final URISyntaxException e)
-	        {
-        	System.err.println("ERROR: unparseable URL " + dataURL + " error: " + e.getMessage());
-	        throw new IllegalStateException(e);
-	        }
         catch(final IOException e)
             {
             // Could not get data, so status is unknown.

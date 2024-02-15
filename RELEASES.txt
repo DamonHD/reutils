@@ -17,7 +17,8 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 PENDING:
 
     DHD20240212: broke out FileUtils from DataUtils.
-    DHD20240212: added json-20240205.jar (org.json, public domain)
+    DHD20240212: added json-20240205.jar (org.json, public domain).
+    DHD20240215: can now fetch 24h of data from new FUELINST JSON streaming API.
 
 
 

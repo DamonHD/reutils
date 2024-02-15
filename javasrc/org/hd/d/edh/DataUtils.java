@@ -1112,7 +1112,7 @@ curl -X 'GET' \
     	final Instant dayAgo = Instant.now().minusSeconds(24 * 60 * 60).truncatedTo(ChronoUnit.SECONDS);
     	final String suffix = URLEncoder.encode(dayAgo.toString(), StandardCharsets.US_ASCII);
     	final URL fullURL = new URI(urlPrefix.toString() + suffix).toURL();
-System.err.println("Full JSON URL: " + fullURL);
+//System.err.println("Full JSON URL: " + fullURL);
 
         // Set up URL connection to fetch the data.
         final URLConnection conn = fullURL.openConnection();
