@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.StringReader;
 import java.time.Instant;
 import java.time.YearMonth;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -358,5 +359,23 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
 	    assertEquals(12829, m1.get(Instant.parse("2024-02-12T17:45:00Z").toEpochMilli()).get("WIND").generation());
 	    assertEquals(0, m1.get(Instant.parse("2024-02-12T17:45:00Z").toEpochMilli()).get("INTEW").generation());
 	    assertNull(m1.get(Instant.parse("2024-02-12T17:45:00Z").toEpochMilli()).get("NONESUCH"));
+		}
+
+	/**Test generation of a old-style (pre-2024) CSV FUELINST record from a FuelMWByTime map.
+	 */
+	public static void testGenerateOldCSVRecord()
+		{
+        final String template1 = "type,date,settlementperiod,timestamp,CCGT,OIL,COAL,NUCLEAR,WIND";
+        final long time1 = Instant.parse("2024-02-12T17:45:00Z").toEpochMilli();
+        final Map<String, FuelMWByTime> m1 = new HashMap<>();
+        m1.put("CCGT", new FuelMWByTime(time1, "CCGT", 33333, 35));
+        m1.put("COAL", new FuelMWByTime(time1, "COAL", 0, 35));
+        m1.put("NUCLEAR", new FuelMWByTime(time1, "NUCLEAR", 4000, 35));
+        m1.put("WIND", new FuelMWByTime(time1, "WIND", 14000, 35));
+        final List<String> record1 = DataUtils.generateOldCSVRecord(template1, m1);
+        final String[] expectedRecord =
+        	{"FUELINST","20240212","35","20240212174500","33333","0","0","4000","14000"};
+        assertEquals(expectedRecord.length, record1.size());
+        assertTrue(Arrays.equals(expectedRecord, record1.toArray()));
 		}
     }

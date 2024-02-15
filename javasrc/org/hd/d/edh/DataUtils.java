@@ -1169,7 +1169,9 @@ System.err.println("Full JSON URL: " + fullURL);
 	 * The records must all be from the same time instant/interval.
 	 * <p>
 	 * Fuel types specified in the template but missing from the map
-	 * will have a generation of zero shown.
+	 * will have a generation of zero inserted.
+	 * <p>
+	 * Values in the map not named in the template will be quietly unused.
 	 * <p>
 	 * The template will typically come from
 	 * <code>rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES)</code>
@@ -1178,28 +1180,64 @@ System.err.println("Full JSON URL: " + fullURL);
 	 * <pre>
 intensity.csv.fueltype=type,date,settlementperiod,timestamp,CCGT,OIL,COAL,NUCLEAR,WIND,PS,NPSHYD,OCGT,OTHER,INTFR,INTIRL,INTNED,INTEW,BIOMASS,INTNEM,INTELEC,INTIFA2,INTNSL,INTVKL
 	 * </pre>
+	 * Result looks something like if expressed as CSV:
+	 * <pre>
+FUELINST,20221104,20,20221104095000,14429,0,0,4649,8379,0,901,0,123,0,0,406,0,2235,122,0,0,1257
+	 * </pre>
+	 *
+	 * @param template  for where to insert values by fuel type; non-null and non-empty
+	 * @param generation  generation MW by fuel time; non-null, non-empty,
+	 *     time and settlement period must be the same across all entries,
+	 *     fuel type of value must match key
 	 */
 	public static List<String> generateOldCSVRecord(final String template,
-			                                        final Map<String, FuelMWByTime> s)
+			                                        final Map<String, FuelMWByTime> generation)
     	{
+		Objects.requireNonNull(template);
+		Objects.requireNonNull(generation);
+        if(generation.isEmpty()) { throw new IllegalArgumentException("generation map cannot be empty"); }
         final String[] names = delimCSV.split(template);
+        final int templateFieldCount = names.length;
+		if(templateFieldCount <= 4) { throw new IllegalArgumentException("template too short"); }
 
+        // Extract model FuelMWByTime for times.
+        // These times must be the same for all values.
+        final FuelMWByTime times = generation.values().iterator().next();
 
+        final ArrayList<String> result = new ArrayList<>(templateFieldCount);
 
-		throw new RuntimeException("NOT IMPLEMENTED");
+        // Prefix of form (as CSV):
+        //    FUELINST,20221104,20,20221104095000,
+        // Type is FUELINST.
+        result.add("FUELINST");
+        // Date as UTCDAYFILENAME_FORMAT
+        final SimpleDateFormat sDF1 = new SimpleDateFormat(FUELINSTUtils.UTCDAYFILENAME_FORMAT);
+        sDF1.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+        result.add(sDF1.format(new Date(times.time)));
+        // Settlement period.
+        result.add(Integer.toString(times.settlementPeriod()));
+        // Datetime as CSVTIMESTAMP_FORMAT
+        final SimpleDateFormat sDF2 = new SimpleDateFormat(FUELINSTUtils.CSVTIMESTAMP_FORMAT);
+        sDF2.setTimeZone(FUELINSTUtils.GMT_TIME_ZONE); // All timestamps should be GMT/UTC.
+        result.add(sDF2.format(new Date(times.time)));
+
+        for(int i = 4; i < templateFieldCount; ++i)
+	        {
+        	final String fuelType = names[i];
+	        final FuelMWByTime f = generation.get(fuelType);
+	        if(null == f)
+		        {
+		        result.add("0");
+		        continue;
+		        }
+	        // Do some validation for consistency.
+	        if(!fuelType.equals(f.fuelType())) { throw new IllegalArgumentException("generation map mismatched fuelType key/value for " + fuelType); }
+	        if(times.time != f.time()) { throw new IllegalArgumentException("generation map mismatched time for " + fuelType); }
+	        if(times.settlementPeriod() != f.settlementPeriod()) { throw new IllegalArgumentException("generation map mismatched settlementPeriod for " + fuelType); }
+	        // Add in the generation.
+	        result.add(Integer.toString(f.generation()));
+	        }
+
+		return(Collections.unmodifiableList(result));
 		}
-
-//    /**Test the extraction of fields from parsed CSV to named values.
-//     */
-//    public static void testExtractNamedFieldsByPosition()
-//        {
-//        final List<String> rowData = Arrays.asList(new String[]{"SOMETYPENAME","1","two","verymany","other","stuff",""});
-//        final String template = "type,ONE,TWO,THREE,,STUFF";
-//        final Map<String, String> namedFields = DataUtils.extractNamedFieldsByPositionFromRow(template, rowData);
-//
-//        assertEquals("must extract correct number of fields", 5, namedFields.size());
-//        assertEquals("must extract correct value for named field", "SOMETYPENAME", namedFields.get("type"));
-//        assertEquals("must extract correct value for named field", "stuff", namedFields.get("STUFF"));
-//        }
-
 	}
