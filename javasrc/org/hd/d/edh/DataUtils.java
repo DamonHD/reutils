@@ -1011,8 +1011,8 @@ curl -X 'GET' \
 	    }
 
 
-    /**Parse JSON file/stream and return as if parsed from pre-2024 CSV; never null but may be empty.
-     * Extracts up to 24h of data up to now from JSON streaming V1 API.
+    /**Parse recent JSON file/stream data and return as if parsed from pre-2024 CSV; never null but may be empty.
+     * Extracts up to 48h of data up to now from JSON streaming V1 API.
      * <p>
      * Appends a start date time to the URL,
      * and queries the new (2024) Elexon data service.
@@ -1040,8 +1040,8 @@ curl -X 'GET' \
     		final String template)
         throws IOException, URISyntaxException
         {
-    	// Compute full URL to request latest 24h of FUELINST data.
-    	final Instant dayAgo = Instant.now().minusSeconds(24 * 60 * 60).truncatedTo(ChronoUnit.SECONDS);
+    	// Compute full URL to request latest 48h of FUELINST data.
+    	final Instant dayAgo = Instant.now().minusSeconds(48 * 60 * 60).truncatedTo(ChronoUnit.SECONDS);
     	// Push back request just over 30 minutes (HH) before limit, if set.
     	final Instant requestDataFrom =
 			((null == noOlderThan) || (noOlderThan.longValue() < dayAgo.toEpochMilli())) ?

@@ -699,7 +699,7 @@ public final class FUELINSTUtils
 
 
 
-        // Fetch and parse streaming JSON, at most 24h.
+        // Fetch and parse streaming recent JSON.
         final String dataJSONURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL);
         if(null == dataJSONURL)
             { throw new IllegalStateException("Property undefined for data JSON streaming URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL); }
