@@ -977,12 +977,19 @@ curl -X 'GET' \
 		public FuelMWByTime(final JSONObject jo, final boolean clampNonNegative)
 			{
 			this(
-				java.time.Instant.parse(Objects.requireNonNull(jo).getString("startTime")).toEpochMilli(),
+				java.time.Instant.parse(Objects.requireNonNull(jo).getString(TIME_IS_START ? "startTime" : "publishTime")).toEpochMilli(),
 				Objects.requireNonNull(jo).getString("fuelType"),
 				Math.max(Objects.requireNonNull(jo).getInt("generation"),
 					clampNonNegative ? 0 : Integer.MIN_VALUE)
 				);
 			}
+
+		/**If true, the time is the 'start' time, else it is the publish time.
+		 * Publication time may lump several intervals together
+		 * if there is a delay in Elexon's data processing,
+		 * so start time is usually preferable.
+		 */
+		public static final boolean TIME_IS_START = true;
 
 		/**Throws an exception if the supplied record is not suitable to parse as FUELINST stream.
 		 * This may not reject all possible bad records.
@@ -1134,6 +1141,11 @@ System.err.println("Full JSON URL: " + fullURL);
 
 			final ArrayList result = new ArrayList<>(records.size());
 
+			for(final Map.Entry<Long, Map<String, FuelMWByTime>> entry : records.entrySet())
+				{
+
+
+				}
 
 
 			throw new RuntimeException("NOT IMPLEMENTED");
