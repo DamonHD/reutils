@@ -1037,7 +1037,7 @@ curl -X 'GET' \
     		)
 	    {
     	Objects.requireNonNull(rawJSONa);
-    	return(convertStreamJSONToRecord(new JSONArray(rawJSONa), clampNonNegative));
+    	return(convertStreamJSONToRecords(new JSONArray(rawJSONa), clampNonNegative));
 	    }
 
     /**Convert from new (2024) format JSON stream FUELINST data to (immutable) by-time fuel-generation Map; never null.
@@ -1048,7 +1048,7 @@ curl -X 'GET' \
      *
      * Will throw an exception if the input data is malformed.
      */
-    public static final SortedMap<Long, Map<String, FuelMWByTime>> convertStreamJSONToRecord(
+    public static final SortedMap<Long, Map<String, FuelMWByTime>> convertStreamJSONToRecords(
     		final JSONArray ja,
     		final boolean clampNonNegative
     		)
@@ -1099,12 +1099,13 @@ curl -X 'GET' \
      * @throws IOException  if there is an I/O problem or the data is malformed
      *
      * @param urlPrefix  prefix of URL to read from; never null
+     * @param template  for where to insert values by fuel type; non-null and non-empty
      * @return a non-null but possibly-empty in-order immutable List of rows,
      *    each of which is a non-null but possibly-empty in-order immutable List of fields,
      *    as if returned by parseBMRCSV().
      * @throws URISyntaxException
      */
-    public static List<List<String>> parseBMRJSON(final URL urlPrefix)
+    public static List<List<String>> parseBMRJSON(final URL urlPrefix, final String template)
         throws IOException, URISyntaxException
         {
     	// Compute full URL to request latest 24h of FUELINST data.
@@ -1122,7 +1123,7 @@ System.err.println("Full JSON URL: " + fullURL);
 //        conn.setRequestProperty("accept", "text/plain"); // or maybe specify JSON...
 
         try(final InputStreamReader is = new InputStreamReader(conn.getInputStream()))
-            { return(DataUtils.parseBMRJSON(is)); }
+            { return(DataUtils.parseBMRJSON(is, template)); }
         }
 
 	/**Parse JSON file/stream and return as if parsed from pre-2024 CSV; never null but may be empty.
@@ -1134,8 +1135,10 @@ System.err.println("Full JSON URL: " + fullURL);
 	 * Returns an immutable List (by increasing times: each entry is one time)
 	 * of generation across all sources at each time,
 	 * in the old CSV format.
+	 *
+	 * @param template  for where to insert values by fuel type; non-null and non-empty
 	 */
-	public static List<List<String>> parseBMRJSON(final Reader r) throws IOException
+	public static List<List<String>> parseBMRJSON(final Reader r, final String template) throws IOException
 		{
 		Objects.requireNonNull(r);
 
@@ -1145,27 +1148,46 @@ System.err.println("Full JSON URL: " + fullURL);
 			{
             // Parse and group the JSON records by time.
 			final SortedMap<Long, Map<String, FuelMWByTime>> records =
-				convertStreamJSONToRecord(new JSONArray(new JSONTokener(r)), true);
+				convertStreamJSONToRecords(new JSONArray(new JSONTokener(r)), true);
 //System.err.println("Records after convertStreamJSONToRecord(): " + records.size());
 
-			final ArrayList result = new ArrayList<>(records.size());
-
-			for(final Map.Entry<Long, Map<String, FuelMWByTime>> entry : records.entrySet())
-				{
-
-
-				}
-
-
-			throw new RuntimeException("NOT IMPLEMENTED");
-//			return(Collections.unmodifiableList(result));
+			return(generateOldCSVRecords(template, records));
 			}
 		}
 
+	/**Generate an in-order immutable List of immutable old (pre-2024) FUELINST CSV record equivalents from FuelMWByTime records; never null.
+	 * @param template  for where to insert values by fuel type; non-null and non-empty
+	 * @param generation  generation MW by fuel time by time; non-null, sub-maps must be non-empty,
+	 *     time and settlement period must be the same across all entries in one sub-map,
+	 *     fuel type of value must match key
+	 */
+	public static List<List<String>> generateOldCSVRecords(final String template,
+			final SortedMap<Long, Map<String, FuelMWByTime>> generation)
+		{
+		Objects.requireNonNull(template);
+		Objects.requireNonNull(generation);
+		if(generation.isEmpty()) { throw new IllegalArgumentException("generation map cannot be empty"); }
+		final String[] names = delimCSV.split(template);
+		final int templateFieldCount = names.length;
+		if(templateFieldCount <= 4) { throw new IllegalArgumentException("template too short"); }
 
+        final ArrayList<List<String>> result = new ArrayList<>(generation.size());
 
+        // Iterate through in time order.
+        for(final Map.Entry<Long, Map<String, FuelMWByTime>> entry : generation.entrySet())
+	        {
+        	final long time = entry.getKey();
+        	if(time < 1) { throw new IllegalArgumentException("bad (negative) timestamp key: "+ time); }
+            final Map<String, FuelMWByTime> m = entry.getValue();
+            if(m.isEmpty()) { throw new IllegalArgumentException("empty map for timestamp key: " + time); }
+	        if(m.values().iterator().next().time != time) { throw new IllegalArgumentException("map entry with non-matching time for timestamp key: " + time); }
+	        result.add(generateOldCSVRecord(template, m));
+	        }
 
-	/**Generate an immutable old (pre-2024) FUELINST CSV record from FuelMWByTime records; never null.
+        return(Collections.unmodifiableList(result));
+		}
+
+	/**Generate an immutable old (pre-2024) FUELINST CSV record equivalent from FuelMWByTime records; never null.
 	 * The records must all be from the same time instant/interval.
 	 * <p>
 	 * Fuel types specified in the template but missing from the map

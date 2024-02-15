@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -377,5 +378,41 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
         	{"FUELINST","20240212","35","20240212174500","33333","0","0","4000","14000"};
         assertEquals(expectedRecord.length, record1.size());
         assertTrue(Arrays.equals(expectedRecord, record1.toArray()));
+		}
+
+	/**Test generation of old-style (pre-2024) CSV FUELINST records from FuelMWByTime maps.
+	 */
+	public static void testGenerateOldCSVRecords()
+		{
+        final String template1 = "type,date,settlementperiod,timestamp,CCGT,OIL,COAL,NUCLEAR,WIND";
+
+        final long time1 = Instant.parse("2024-02-12T17:45:00Z").toEpochMilli();
+        final Map<String, FuelMWByTime> m1 = new HashMap<>();
+        m1.put("CCGT", new FuelMWByTime(time1, "CCGT", 33333, 35));
+        m1.put("COAL", new FuelMWByTime(time1, "COAL", 0, 35));
+        m1.put("NUCLEAR", new FuelMWByTime(time1, "NUCLEAR", 4000, 35));
+        m1.put("WIND", new FuelMWByTime(time1, "WIND", 14000, 35));
+        final String[] expectedRecord1 =
+        	{"FUELINST","20240212","35","20240212174500","33333","0","0","4000","14000"};
+
+        // Second record 5 minutes after the first.
+        final long time2 = Instant.ofEpochMilli(time1).plusSeconds(5 * 60).toEpochMilli();
+        final Map<String, FuelMWByTime> m2 = new HashMap<>();
+        m2.put("CCGT", new FuelMWByTime(time2, "CCGT", 33300, 35));
+        m2.put("NUCLEAR", new FuelMWByTime(time2, "NUCLEAR", 4000, 35));
+        m2.put("WIND", new FuelMWByTime(time2, "WIND", 14050, 35));
+        final String[] expectedRecord2 =
+        	{"FUELINST","20240212","35","20240212175000","33300","0","0","4000","14050"};
+
+        final SortedMap<Long, Map<String, FuelMWByTime>> mm = new TreeMap<>();
+        mm.put(time1, m1);
+        mm.put(time2, m2);
+
+        final List<List<String>> records = DataUtils.generateOldCSVRecords(template1, mm);
+        assertNotNull(records);
+        assertEquals(2, records.size());
+
+        assertTrue(Arrays.equals(expectedRecord1, records.get(0).toArray()));
+        assertTrue(Arrays.equals(expectedRecord2, records.get(1).toArray()));
 		}
     }
