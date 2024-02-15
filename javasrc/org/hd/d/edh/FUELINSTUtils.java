@@ -669,10 +669,16 @@ public final class FUELINSTUtils
 
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         // Load long store concurrently with fetching new data.
-        // As well as overlapping the I/O
-        // this may get JIT compilation done fairly optimally in parallel.
-        final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
-	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
+//        // As well as overlapping the I/O
+//        // this may get JIT compilation done fairly optimally in parallel.
+//        final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
+//	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
+
+        // Load long store file.
+        // Allow later munging and replacement (eg trimming, extending, etc).
+        List<List<String>> longStoreData = null;
+        try { longStoreData = DataUtils.loadBMRCSV(longStoreFile); }
+        catch(final IOException e) { System.err.println("Long store file not loaded: " + longStoreFile); }
 
         // Load system properties now, if not already done.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
@@ -681,6 +687,15 @@ public final class FUELINSTUtils
         List<List<String>> parsedBMRCSV = null;
         URL url = null;
 
+
+        // Find the timestamp of the last record in the long store, if any: null if none.
+        Long lastLongStoreTime = null;
+        try {
+        	lastLongStoreTime =
+                ((null == longStoreData) || longStoreData.isEmpty()) ? null :
+        	        (getCSVTimestampParser().parse(longStoreData.get(longStoreData.size()-1).get(3)).getTime());
+            }
+        catch(final ParseException e) { System.err.println("Long store file final record has bad timestamp: " + longStoreFile); }
 
 
 
@@ -692,7 +707,8 @@ public final class FUELINSTUtils
 	        {
             url = new URI(dataJSONURL.trim()).toURL(); // Trim to avoid problems with trailing whitespace...
             final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
-            parsedBMRCSV = DataUtils.parseBMRJSON(url, template);
+//System.err.println("lastLongStoreTime = " + lastLongStoreTime);
+            parsedBMRCSV = DataUtils.parseBMRJSON(url, lastLongStoreTime, template);
 	        }
         catch(final URISyntaxException e)
 	        {
@@ -767,29 +783,34 @@ System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: "
 System.out.println("INFO: CHECKPOINT: data fetched etc: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
-        // Collect results of long store load.
-//System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-		if(!longStoreLoad.isDone()) { System.out.println("INFO: long store load still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
-		List<List<String>> _ls = null;
-        try { _ls = longStoreLoad.get(); }
-        catch(final ExecutionException|InterruptedException e)
-	        {
-System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
-	        }
-if(null != _ls) { System.out.println("INFO: long store records loaded: "+_ls.size()); }
+//        // Collect results of long store load.
+////System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
+//		if(!longStoreLoad.isDone()) { System.out.println("INFO: long store load still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
+//		List<List<String>> _ls = null;
+//        try { _ls = longStoreLoad.get(); }
+//        catch(final ExecutionException|InterruptedException e)
+//	        {
+//System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
+//	        }
+//if(null != _ls) { System.out.println("INFO: long store records loaded: "+_ls.size()); }
 
-        // Sometimes last few live records are omitted apparently when server is busy.
-        // Attempt to patch them up from the long store if so...
-        if((null != parsedBMRCSV) && (null != longStoreFile))
-	        {
-        	final List<List<String>> appendedNewData = DataUtils.appendNewBMRDataRecords(
-        			parsedBMRCSV, _ls);
-        	if(null != appendedNewData)
-	        	{
-System.err.println("WARNING: some recent records omitted from this data fetch: patched back in.");
-				parsedBMRCSV = appendedNewData;
-	        	}
-	        }
+
+
+
+//        // Sometimes last few live records are omitted apparently when server is busy.
+//        // Attempt to patch them up from the long store if so...
+//        if((null != parsedBMRCSV) && (null != longStoreFile))
+//	        {
+//        	final List<List<String>> appendedNewData = DataUtils.appendNewBMRDataRecords(
+//        			parsedBMRCSV, longStoreData);
+//        	if(null != appendedNewData)
+//	        	{
+//System.err.println("WARNING: some recent records omitted from this data fetch: patched back in.");
+//				parsedBMRCSV = appendedNewData;
+//	        	}
+//	        }
+
+
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         // Attempt to update the long store with the new data received, then save it.
         // Keep the store length trimmed.
@@ -799,15 +820,15 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             {
 	        // Append any new records to long store.
 	        final List<List<String>> appendedlongStore = DataUtils.appendNewBMRDataRecords(
-	        		_ls, parsedBMRCSV);
-	        if(null != appendedlongStore) { _ls = appendedlongStore; }
+	        		longStoreData, parsedBMRCSV);
+	        if(null != appendedlongStore) { longStoreData = appendedlongStore; }
 	        // Trim history in long store to maximum of 7 days.
 	        final List<List<String>> trimmedLongStore = DataUtils.trimBMRData(
-	        		_ls, HOURS_PER_WEEK);
-	        if(null != trimmedLongStore) { _ls = trimmedLongStore; }
+	        		longStoreData, HOURS_PER_WEEK);
+	        if(null != trimmedLongStore) { longStoreData = trimmedLongStore; }
 	        // Save long store (asynchronously, atomically, world-readable).
 	        // The long store must not be mutated.
-	        final List<List<String>> lsf = _ls;
+	        final List<List<String>> lsf = longStoreData;
 	        taskLongStoreSave = executor.submit(() ->
 	            {
 				final long longStoreSaveStart = System.currentTimeMillis();
@@ -817,7 +838,7 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
 	            });
             }
         // Immutable view.
-        final List<List<String>> longStore = _ls;
+        final List<List<String>> longStore = longStoreData;
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
@@ -828,14 +849,18 @@ System.err.println("WARNING: some recent records omitted from this data fetch: p
             executor.submit(() -> {return(FUELINSTUtils.computeCurrentSummary(longStore));});
 
 
-        // Compute 24hr summary if we have fresh data, and cache.
+        // Compute 24hr summary from the newest data.
         // Will be empty rather than null if not able to be computed/loaded.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         //
         // If parsedBMRCSV is null or empty
         // then this will be a empty/default (non-null) result.
-        final CurrentSummary summary24h = ((null != parsedBMRCSV) && !parsedBMRCSV.isEmpty()) ?
-        		FUELINSTUtils.computeCurrentSummary(parsedBMRCSV) :
+
+        // Trim history in long store to maximum of 7 days.
+        final List<List<String>> lastDay = DataUtils.trimBMRData(
+        		longStoreData, 24);
+        final CurrentSummary summary24h = ((null != lastDay) && !lastDay.isEmpty()) ?
+        		FUELINSTUtils.computeCurrentSummary(lastDay) :
         		new FUELINST.CurrentSummary();
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 System.out.println("INFO: CHECKPOINT: 24h summary computed: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
