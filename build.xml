@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-Copyright (c) 2008-2023, Damon Hart-Davis
+Copyright (c) 2008-2024, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="dist.jar" value="${app.name}-${app.version}.jar"/>
 
     <!-- Target/minimum JDK/JSE version for build and run. -->
-    <property name="JDKVER" value="18"/>
+    <property name="JDKVER" value="19"/>
 
     <!-- Stub names, used in source and output dirs and package names. -->
     <!-- This is core code. -->
@@ -108,11 +108,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="javadoc.dir" value="${build.dir.cmn}/javadoc"/>
 	
 	<!-- ProGuard static optimiser/shrunker.  -->
-	<!--
-	<property name="pg.dir" value="../proguard/" />
-	<taskdef resource="proguard/ant/task.properties"
-	         classpath="${pg.dir}/lib/proguard-ant.jar" />
-	-->
 	<property name="pg.dir" value="../proguard-7.4.2" />
 	<taskdef resource="proguard/ant/task.properties"
 	         classpath="${pg.dir}/lib/proguard-ant.jar" />
