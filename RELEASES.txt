@@ -16,11 +16,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
 
-    DHD20240212: broke out FileUtils from DataUtils.
-    DHD20240212: added json-20240205.jar (org.json, public domain).
-    DHD20240215: can now fetch from new FUELINST JSON streaming API.
-    DHD20240215: have rationalised cacheing etc somewhat; needs tidy-up of doTrafficLights().
-    DHD20240215: changed recent data fetch to max of 48h (from 24h).
 
 
 
@@ -35,6 +30,20 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20240216:
+    freezepoint name: V1.4.0
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.3.0
+    DHD20240212: broke out FileUtils from DataUtils.
+    DHD20240212: added json-20240205.jar (org.json, public domain).
+    DHD20240215: now fetches from new FUELINST JSON streaming API.
+    DHD20240215: have rationalised cacheing etc somewhat; needs tidy-up of doTrafficLights().
+    DHD20240215: fetches only as much data as needed (not usually full 24h).
+    DHD20240215: changed recent data fetch to max of 48h (from 24h).
 
 
 20231003:
