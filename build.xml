@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <property name="app.name" value="reutils"/>
     <property name="app.version.major" value="1"/>
-    <property name="app.version.minor" value="3"/>
+    <property name="app.version.minor" value="4"/>
     <property name="app.version.micro" value="0"/>
     <property name="app.version" value="${app.version.major}.${app.version.minor}.${app.version.micro}"/>
     <!-- Version excluding the "micro" portion, thus reflecting only significant API/functionality changes. -->
@@ -89,7 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="tmp.workdir" value="work.tmp"/>
 
     <!-- Basic class path we compile against; includes any external libs. -->
-    <property name="cp.common.basic" value="libs/jtwitter.jar"/>
+    <property name="cp.common.basic" value="libs/jtwitter.jar:libs/json-20240205.jar"/>
     <!-- Provided in debug/non-debug versions. -->
     <!-- Expects cp.J2EEAPI to contain a classpath fragment for the J2EE API. -->
     <property name="cp.dbg.basic" value="${cp.common.basic}"/>
@@ -108,11 +108,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="javadoc.dir" value="${build.dir.cmn}/javadoc"/>
 	
 	<!-- ProGuard static optimiser/shrunker.  -->
+	<!--
 	<property name="pg.dir" value="../proguard/" />
 	<taskdef resource="proguard/ant/task.properties"
 	         classpath="${pg.dir}/lib/proguard-ant.jar" />
+	-->
+	<property name="pg.dir" value="../proguard-7.4.2" />
+	<taskdef resource="proguard/ant/task.properties"
+	         classpath="${pg.dir}/lib/proguard-ant.jar" />
 	
-
+	
     <!-- General initialisation target. -->
     <target name="init">
         <tstamp/>
@@ -316,7 +321,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <a href="http://d.hd.org/" target="_top">EDH</a> V${app.version}<br />
                             ]]></header>
             <footer>EDH V${app.version}</footer>
-            <bottom>Copyright (c) 2009-2023, Damon Hart-Davis. All rights reserved.</bottom>
+            <bottom>Copyright (c) 2009-2024, Damon Hart-Davis. All rights reserved.</bottom>
         </javadoc>
     </target>
 
