@@ -30,9 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.hd.d.edh;
 
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.hd.d.edh.FUELINST.TrafficLightsInterface;
 
@@ -109,44 +106,29 @@ public final class Main
                 {
                 final TrafficLightsInterface impl;
 
-//                // Check if "-class" "name" optional args are present.
-//                final boolean classSpecified = (args.length >= 2) && "-class".equals(args[1]);
-//
-//                // If first optional argument is "-class"
-//                // then attempt to create an instance of the specified class.
-//                if(classSpecified)
-//                    {
-//                    final String classname = args[2];
-//                    System.out.println("Class specified: " + classname);
-//                    impl = (TrafficLightsInterface) Class.forName(classname).newInstance();
-//                    }
-//                // Else use the default implementation.
-//                else
-                    { impl = (new FUELINST.TrafficLightsDEFAULT()); }
+                impl = (new FUELINST.TrafficLightsDEFAULT());
 
                 // Pass in trailing args (if any) to impl;
-//                // leading 'trafficLights' (and possible -class name) is omitted.
-//                impl.doTrafficLights(Arrays.copyOfRange(args, classSpecified ? 3 : 1, args.length));
                 // leading 'trafficLights' (and possible -class name) is omitted.
                 impl.doTrafficLights(Arrays.copyOfRange(args, 1, args.length));
                 return; // Completed.
                 }
-            else if(TwitterUtils.ENABLE_TWEETING && "extraTweet".equals(command))
-				{
-				final int minMsg = 9; // Minimum plausible Tweet length.
-				if((args.length < 2) || (null == args[1]) || (args[1].length() < minMsg))
-					{
-					System.err.println("extraTweet tweet missing or too short");
-					System.exit(1);
-					}
-				else
-					{
-					final String messageText = args[1];
-					final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
-					TwitterUtils.setTwitterStatus(td, messageText);
-					}
-				return; // Completed.
-				}
+//            else if(TwitterUtils.ENABLE_TWEETING && "extraTweet".equals(command))
+//				{
+//				final int minMsg = 9; // Minimum plausible Tweet length.
+//				if((args.length < 2) || (null == args[1]) || (args[1].length() < minMsg))
+//					{
+//					System.err.println("extraTweet tweet missing or too short");
+//					System.exit(1);
+//					}
+//				else
+//					{
+//					final String messageText = args[1];
+//					final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+//					TwitterUtils.setTwitterStatus(td, messageText);
+//					}
+//				return; // Completed.
+//				}
             }
         catch(final Throwable e)
             {

@@ -934,7 +934,7 @@ System.out.println("INFO: CHECKPOINT: flags written: timestamp: "+(System.curren
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
             // Collect social media details.
-            final TwitterUtils.TwitterDetails td = TwitterUtils.getTwitterHandle(false);
+            final TwitterUtils.TwitterDetails td = null; // TwitterUtils.getTwitterHandle(false);
             final TwitterUtils.MastodonDetails md = TwitterUtils.getMastodonDetails();
 
             // Update the HTML page.

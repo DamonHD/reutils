@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +49,6 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
 
 
@@ -141,39 +142,39 @@ public final class TwitterUtils
         return(tUsername.intern());
         }
 
-    /**Get Twitter handle for updates; null if nothing suitable set up.
-     * May return a read-only handle for testing
-     * if that is permitted by the argument.
-     * <p>
-     * A read/write handle is a valid return value if read-only is allowed.
-     * <p>
-     * We may test that we actually have authenticated (read/write) access
-     * before claiming it as such,
-     * so obtaining one of these may require network access and significant time.
-     */
-    public static TwitterDetails getTwitterHandle(final boolean allowReadOnly)
-        {
-    	if(!ENABLE_TWEETING) { return(null); }
-
-        final String tUsername = getTwitterUsername();
-        // We need at least a Twitter user ID to do anything; return null if we don't have one.
-        if(null == tUsername) { return(null); }
-
-        // Try first the primary password file, then the alternate if need be.
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String[] authtokens1 = getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME), allowReadOnly);
-        final String[] authtokens = (authtokens1 != null) ? authtokens1 : getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME2), allowReadOnly);
-
-        // If we have no password then we are definitely read-only.
-        final boolean noWriteAccess = (authtokens == null);
-        // If definitely read-only and that is not acceptable then return null.
-        if(noWriteAccess && !allowReadOnly) { return(null); }
-
-        // Build new client...
-        final OAuthSignpostClient client = new OAuthSignpostClient(OAuthSignpostClient.JTWITTER_OAUTH_KEY, OAuthSignpostClient.JTWITTER_OAUTH_SECRET, authtokens[0], authtokens[1]);
-
-        return(new TwitterDetails(tUsername, new Twitter(tUsername, client), noWriteAccess));
-        }
+//    /**Get Twitter handle for updates; null if nothing suitable set up.
+//     * May return a read-only handle for testing
+//     * if that is permitted by the argument.
+//     * <p>
+//     * A read/write handle is a valid return value if read-only is allowed.
+//     * <p>
+//     * We may test that we actually have authenticated (read/write) access
+//     * before claiming it as such,
+//     * so obtaining one of these may require network access and significant time.
+//     */
+//    public static TwitterDetails getTwitterHandle(final boolean allowReadOnly)
+//        {
+//    	if(!ENABLE_TWEETING) { return(null); }
+//
+//        final String tUsername = getTwitterUsername();
+//        // We need at least a Twitter user ID to do anything; return null if we don't have one.
+//        if(null == tUsername) { return(null); }
+//
+//        // Try first the primary password file, then the alternate if need be.
+//        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+//        final String[] authtokens1 = getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME), allowReadOnly);
+//        final String[] authtokens = (authtokens1 != null) ? authtokens1 : getAuthTokensFromFile(rawProperties.get(PNAME_TWITTER_AUTHTOK_FILENAME2), allowReadOnly);
+//
+//        // If we have no password then we are definitely read-only.
+//        final boolean noWriteAccess = (authtokens == null);
+//        // If definitely read-only and that is not acceptable then return null.
+//        if(noWriteAccess && !allowReadOnly) { return(null); }
+//
+//        // Build new client...
+//        final OAuthSignpostClient client = new OAuthSignpostClient(OAuthSignpostClient.JTWITTER_OAUTH_KEY, OAuthSignpostClient.JTWITTER_OAUTH_SECRET, authtokens[0], authtokens[1]);
+//
+//        return(new TwitterDetails(tUsername, new Twitter(tUsername, client), noWriteAccess));
+//        }
 
     /**Extract a (non-empty) password from the specified file, or null if none or if the filename is bad.
      * This does not throw an exception if it cannot find or open the specified file
@@ -555,7 +556,10 @@ public final class TwitterUtils
 
         final int timeout_ms = 10000;
 
-        final URL u = new URL("https", md.hostname, "/api/v1/statuses");
+//        final URL u = new URL("https", md.hostname, "/api/v1/statuses");
+        final URL u;
+        try { u = new URI("https", md.hostname, "/api/v1/statuses", null).toURL(); }
+        catch(final URISyntaxException e) { throw new IllegalArgumentException(e); }
 
         final HttpsURLConnection uc = (HttpsURLConnection) u.openConnection();
         uc.setUseCaches(false);

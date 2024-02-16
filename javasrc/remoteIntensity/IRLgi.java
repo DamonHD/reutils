@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -104,18 +106,18 @@ public final class IRLgi implements RemoteGenerationIntensity
             if(0 != i) { sb.append("&"); }
             }
 
-        // Set up URL connection to fetch the data.
-        final URL url = new URL(URL + "?" + sb.toString());
-        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setDoInput(true);
-        conn.setRequestMethod("GET");
-        conn.setAllowUserInteraction(false);
-        conn.setUseCaches(false); // Ensure non-stale values each time.
-        conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
-        conn.setReadTimeout(60000); // Set a long-ish read timeout.
-
         try
             {
+	        // Set up URL connection to fetch the data.
+	        final URL url = new URI(URL + "?" + sb.toString()).toURL();
+	        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	        conn.setDoInput(true);
+	        conn.setRequestMethod("GET");
+	        conn.setAllowUserInteraction(false);
+	        conn.setUseCaches(false); // Ensure non-stale values each time.
+	        conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
+	        conn.setReadTimeout(60000); // Set a long-ish read timeout.
+
             // Read the response.
             // Use last non-negative parseable number in second column.
             int lastValue = -1;
@@ -147,6 +149,10 @@ public final class IRLgi implements RemoteGenerationIntensity
 
             return(lastValue);
             }
+        catch(final URISyntaxException e)
+	        {
+	        throw new InternalError(e); // Should not happen.
+	        }
         catch(final IOException e)
             {
             // Negatively cache failure if parent dir exists (silently ignore if not)...
