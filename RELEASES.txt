@@ -16,6 +16,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
 
+    DHD20240216: reduced redundant data fetch to ~2 intervals.
 
 
 

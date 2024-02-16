@@ -1031,7 +1031,7 @@ curl -X 'GET' \
      * @param noOlderThan  data with timestamps older than this need not be fetched, if non-null
      * @return a non-null but possibly-empty in-order immutable List of rows,
      *    each of which is a non-null but possibly-empty in-order immutable List of fields,
-     *    as if returned by parseBMRCSV().
+     *    as if returned by parseBMRCSV()
      * @throws URISyntaxException
      */
     public static List<List<String>> parseBMRJSON(
@@ -1041,11 +1041,11 @@ curl -X 'GET' \
         throws IOException, URISyntaxException
         {
     	// Compute full URL to request latest 48h of FUELINST data.
-    	final Instant dayAgo = Instant.now().minusSeconds(48 * 60 * 60).truncatedTo(ChronoUnit.SECONDS);
-    	// Push back request just over 30 minutes (HH) before limit, if set.
+    	final Instant twoDaysAgo = Instant.now().minusSeconds(48 * 60 * 60).truncatedTo(ChronoUnit.SECONDS);
+    	// Push back request to allow for some clock skew, if set.
     	final Instant requestDataFrom =
-			((null == noOlderThan) || (noOlderThan.longValue() < dayAgo.toEpochMilli())) ?
-				dayAgo : Instant.ofEpochMilli(noOlderThan).minusSeconds(31 * 60);
+			((null == noOlderThan) || (noOlderThan.longValue() < twoDaysAgo.toEpochMilli())) ?
+				twoDaysAgo : Instant.ofEpochMilli(noOlderThan).minusSeconds(61);
     	final String suffix = URLEncoder.encode(requestDataFrom.toString(), StandardCharsets.US_ASCII);
     	final URL fullURL = new URI(urlPrefix.toString() + suffix).toURL();
 //System.err.println("Full JSON URL: " + fullURL);

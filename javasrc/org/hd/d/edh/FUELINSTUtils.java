@@ -672,6 +672,7 @@ public final class FUELINSTUtils
         List<List<String>> longStoreData = null;
         try { longStoreData = DataUtils.loadBMRCSV(longStoreFile); }
         catch(final IOException e) { System.err.println("Long store file not loaded: " + longStoreFile); }
+System.out.println("INFO: doTrafficLights(): long store loaded: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
         // Load system properties now, if not already done.
