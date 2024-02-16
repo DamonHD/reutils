@@ -664,28 +664,18 @@ public final class FUELINSTUtils
         // Base/prefix onto which to append specific extensions.
         final String baseFileName = (-1 == lastDot) ? outputHTMLFileName : outputHTMLFileName.substring(0, lastDot);
 
-        // Compute relative paths for caches/stores.
-        final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));
 
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-        // Load long store concurrently with fetching new data.
-//        // As well as overlapping the I/O
-//        // this may get JIT compilation done fairly optimally in parallel.
-//        final Future<List<List<String>>> longStoreLoad = executor.submit(() ->
-//	    	{ return(DataUtils.loadBMRCSV(longStoreFile)); });
-
         // Load long store file.
+        final File longStoreFile = (null == baseFileName) ? null : (new File(baseFileName + LONG_STORE_SUFFIX));
         // Allow later munging and replacement (eg trimming, extending, etc).
         List<List<String>> longStoreData = null;
         try { longStoreData = DataUtils.loadBMRCSV(longStoreFile); }
         catch(final IOException e) { System.err.println("Long store file not loaded: " + longStoreFile); }
 
+
         // Load system properties now, if not already done.
         final Map<String, String> rawProperties = MainProperties.getRawProperties();
-
-        // Parsed latest data will go here...
-        List<List<String>> parsedBMRCSV = null;
-        URL url = null;
 
 
         // Find the timestamp of the last record in the long store, if any: null if none.
@@ -696,10 +686,10 @@ public final class FUELINSTUtils
         	        (getCSVTimestampParser().parse(longStoreData.get(longStoreData.size()-1).get(3)).getTime());
             }
         catch(final ParseException e) { System.err.println("Long store file final record has bad timestamp: " + longStoreFile); }
-
-
-
-        // Fetch and parse streaming recent JSON.
+        // Fetch and parse streaming recent JSON as needed to bring up to date.
+        // Parsed latest data will go here...
+        List<List<String>> parsedBMRCSV = null;
+        URL url = null;
         final String dataJSONURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL);
         if(null == dataJSONURL)
             { throw new IllegalStateException("Property undefined for data JSON streaming URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_STREAMING_JSON_DATA_PARTIAL_URL); }
@@ -709,107 +699,53 @@ public final class FUELINSTUtils
             final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
 //System.err.println("lastLongStoreTime = " + lastLongStoreTime);
             parsedBMRCSV = DataUtils.parseBMRJSON(url, lastLongStoreTime, template);
-System.err.println("INFO: fetched rows: " + parsedBMRCSV.size());
+System.out.println("INFO: fetched rows: " + parsedBMRCSV.size());
 	        }
         catch(final URISyntaxException e)
 	        {
         	System.err.println("ERROR: unparseable JSON streaming data URL " + dataJSONURL + " error: " + e.getMessage());
 	        throw new IllegalStateException(e);
 	        }
-
-
-
-
-
-//        // Fetch and parse the FUELINST CSV file from the data source.
-//        // Will be null in case of inability to fetch or parse.
-//        final String dataURL = rawProperties.get(FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL);
-//        if(null == dataURL)
-//            { throw new IllegalStateException("Property undefined for data source URL: " + FUELINST.FUEL_INTENSITY_MAIN_PROPNAME_CURRENT_DATA_URL); }
-//        try
-//            {
-//            // Set up URL connection to fetch the data.
-//            url = new URI(dataURL.trim()).toURL(); // Trim to avoid problems with trailing whitespace...
-//            final long dataFetchStart = System.currentTimeMillis();
-//            parsedBMRCSV = DataUtils.parseBMRCSV(url, null);
-//            final long dataFetchEnd = System.currentTimeMillis();
-//System.out.println("INFO: record/row count of CSV FUELINST data: "+(dataFetchEnd-dataFetchStart)+"ms, " + parsedBMRCSV.size() + " records from source: " + url + " fetch and parse");
-//            }
-//        catch(final URISyntaxException e)
-//	        {
-//        	System.err.println("ERROR: unparseable URL " + dataURL + " error: " + e.getMessage());
-//	        throw new IllegalStateException(e);
-//	        }
-
-
-
         catch(final IOException e)
             {
             // Could not get data, so status is unknown.
 System.err.println("ERROR: could not fetch data from " + url + " error: " + e.getMessage());
             }
-        // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
-        // If containable defects are found then repair on the fly.
-        // Be prepared to reject entirely if unrepairable problem found.
-        final DataUtils.ValidBMRDataResultError validationError =
-    		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1, true);
-        if(null != validationError)
-            {
-System.err.println("WARNING: *** invalid CSV FUELINST data as received: " + validationError.errorMessage);
-        	// Dump troublesome data, as received...
-        	if(parsedBMRCSV != null)
-	        	{
-	        	for(final List<String> row : parsedBMRCSV)
-		        	{ System.err.println("WARNING: " + row); }
-	        	}
-            // Use repaired version if any.
-            if(null != validationError.repairedBMRCSV)
-                {
-            	parsedBMRCSV = validationError.repairedBMRCSV;
-System.err.println("WARNING: *** invalid CSV FUELINST data as repaired.");
-				// Dump after repair...
-				if(parsedBMRCSV != null)
-					{
-					for(final List<String> row : parsedBMRCSV)
-				    	{ System.err.println("WARNING: " + row); }
-					}
-                }
-            // Reject unrepairable data...
-            else
-	            {
-            	parsedBMRCSV = null;
-System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
-	            }
-        	}
-System.out.println("INFO: CHECKPOINT: data fetched etc: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-
-
-//        // Collect results of long store load.
-////System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
-//		if(!longStoreLoad.isDone()) { System.out.println("INFO: long store load still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
-//		List<List<String>> _ls = null;
-//        try { _ls = longStoreLoad.get(); }
-//        catch(final ExecutionException|InterruptedException e)
-//	        {
-//System.err.println("WARNING: could not load long store "+longStoreFile+" error: " + e.getMessage());
-//	        }
-//if(null != _ls) { System.out.println("INFO: long store records loaded: "+_ls.size()); }
-
-
-
-
-//        // Sometimes last few live records are omitted apparently when server is busy.
-//        // Attempt to patch them up from the long store if so...
-//        if((null != parsedBMRCSV) && (null != longStoreFile))
-//	        {
-//        	final List<List<String>> appendedNewData = DataUtils.appendNewBMRDataRecords(
-//        			parsedBMRCSV, longStoreData);
-//        	if(null != appendedNewData)
+//        // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
+//        // If containable defects are found then repair on the fly.
+//        // Be prepared to reject entirely if unrepairable problem found.
+//        // FIXME: this is probably mainly redundant now.
+//        final DataUtils.ValidBMRDataResultError validationError =
+//    		DataUtils.isValidBMRData(parsedBMRCSV, System.currentTimeMillis(), HOURS_PER_DAY+1, true);
+//        if(null != validationError)
+//            {
+//System.err.println("WARNING: *** invalid CSV FUELINST data as received: " + validationError.errorMessage);
+//        	// Dump troublesome data, as received...
+//        	if(parsedBMRCSV != null)
 //	        	{
-//System.err.println("WARNING: some recent records omitted from this data fetch: patched back in.");
-//				parsedBMRCSV = appendedNewData;
+//	        	for(final List<String> row : parsedBMRCSV)
+//		        	{ System.err.println("WARNING: " + row); }
 //	        	}
-//	        }
+//            // Use repaired version if any.
+//            if(null != validationError.repairedBMRCSV)
+//                {
+//            	parsedBMRCSV = validationError.repairedBMRCSV;
+//System.err.println("WARNING: *** invalid CSV FUELINST data as repaired.");
+//				// Dump after repair...
+//				if(parsedBMRCSV != null)
+//					{
+//					for(final List<String> row : parsedBMRCSV)
+//				    	{ System.err.println("WARNING: " + row); }
+//					}
+//                }
+//            // Reject unrepairable data...
+//            else
+//	            {
+//            	parsedBMRCSV = null;
+//System.err.println("ERROR: invalid CSV FUELINST data not repaired so rejected: " + validationError.errorMessage);
+//	            }
+//        	}
+System.out.println("INFO: CHECKPOINT: data fetched etc: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
 
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
