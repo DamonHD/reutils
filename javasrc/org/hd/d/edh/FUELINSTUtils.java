@@ -709,6 +709,7 @@ public final class FUELINSTUtils
             final String template = rawProperties.get(FUELINST.FUELINST_MAIN_PROPNAME_ROW_FIELDNAMES);
 //System.err.println("lastLongStoreTime = " + lastLongStoreTime);
             parsedBMRCSV = DataUtils.parseBMRJSON(url, lastLongStoreTime, template);
+System.err.println("INFO: fetched rows: " + parsedBMRCSV.size());
 	        }
         catch(final URISyntaxException e)
 	        {
