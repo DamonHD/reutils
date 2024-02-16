@@ -896,7 +896,7 @@ System.out.println("INFO: CHECKPOINT: 24h summary computed: timestamp: "+(System
         // Also post to social media if enabled.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
         Future<Long> taskTootSend = null;
-        Future<Long> taskTweetSend = null;
+//        final Future<Long> taskTweetSend = null;
         Future<Long> taskXHTMLsave = null;
         if(outputHTMLFileName != null)
             {
@@ -935,15 +935,15 @@ System.out.println("INFO: CHECKPOINT: flags written: timestamp: "+(System.curren
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
 
             // Collect social media details.
-            final TwitterUtils.TwitterDetails td = null; // TwitterUtils.getTwitterHandle(false);
-            final TwitterUtils.MastodonDetails md = TwitterUtils.getMastodonDetails();
+//            final TwitterUtils.TwitterDetails td = null; // TwitterUtils.getTwitterHandle(false);
+            final SocialMediaUtils.MastodonDetails md = SocialMediaUtils.getMastodonDetails();
 
             // Update the HTML page.
 //System.out.println("INFO: doTrafficLights(): timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
             try
                 {
                 FUELINSTUtils.updateHTMLFile(startTime, outputHTMLFileName, summary24h, summary7d,
-                    isDataStale, hourOfDayHistorical, status, td, md);
+                    isDataStale, hourOfDayHistorical, status, md);
                 }
             catch(final IOException e) { e.printStackTrace(); }
 System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.currentTimeMillis()-startTime)+"ms.");
@@ -972,8 +972,8 @@ System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.cu
             // There are different messages when working from historical data
             // because real-time / live data is not available.
             // *** Only tweet/toot once the HTML is updated since the messages link to it.
-            if(((null != td) || (null != md)) &&
-            		(TwitterUtils.POST_INFERRED_INTENSITY || !isDataStale))
+            if((null != md) &&
+            		(SocialMediaUtils.POST_INFERRED_INTENSITY || !isDataStale))
 	            {
 	            // Compute name of file in which to cache last status posted to social media.
 	            final File socialMediaPostStatusCacheFile = new File(
@@ -981,7 +981,7 @@ System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.cu
 	                (outputHTMLFileName + ".postStatusCache"));
 
 	            // Should an update be posted (yet)?
-	        	final boolean canPost = TwitterUtils.canPostNewStatusMessage(
+	        	final boolean canPost = SocialMediaUtils.canPostNewStatusMessage(
 	            		socialMediaPostStatusCacheFile,
 	                    status,
 	            		false); // Log if/why a post should be deferred.
@@ -997,19 +997,18 @@ System.out.println("INFO: CHECKPOINT: HTML page written: timestamp: "+(System.cu
 		                {
 System.out.println("INFO: sending toot...");
 						taskTootSend = executor.submit(() ->
-						    { return(TwitterUtils.timeSetMastodonStatus(md, statusMessage)); });
+						    { return(SocialMediaUtils.timeSetMastodonStatus(md, statusMessage)); });
 		                }
 
 	                // Send tweet, if set up...
-		            if(TwitterUtils.ENABLE_TWEETING)
-			            {
-		            	if(td != null)
-			                {
-System.out.println("INFO: sending tweet...");
-			                taskTweetSend = executor.submit(() ->
-			                	{ return(TwitterUtils.timeSetTwitterStatus(td, statusMessage)); });
-			                }
-			            }
+//		            if(SocialMediaUtils.ENABLE_TWEETING)
+//			            {
+//		            	if(td != null)
+//			                {
+//System.out.println("INFO: sending tweet...");
+//			                taskTweetSend = executor.submit(() ->
+//			                	{ return(TwitterUtils.timeSetTwitterStatus(td, statusMessage)); });
+//			                }
 
 		            // Assume that status updates will almost always succeed.
 		            // And that it is not a disaster if an update (silently) fails...
@@ -1072,18 +1071,18 @@ System.out.println("INFO: sending tweet...");
 	        	System.err.println("ERROR: could not generate/save XHTML, error: " + e.getMessage());
 		        }
 	    	}
-        if(TwitterUtils.ENABLE_TWEETING && (null != taskTweetSend))
-	    	{
-        	if(!taskTweetSend.isDone()) { System.out.println("INFO: tweet still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
-	    	try {
-	        	final Long tsT = taskTweetSend.get();
-	        	System.out.println("INFO: tweet sent in "+tsT+"ms.");
-	        	}
-	        catch(final ExecutionException|InterruptedException e)
-		        {
-	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
-		        }
-	    	}
+//        if(TwitterUtils.ENABLE_TWEETING && (null != taskTweetSend))
+//	    	{
+//        	if(!taskTweetSend.isDone()) { System.out.println("INFO: tweet still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
+//	    	try {
+//	        	final Long tsT = taskTweetSend.get();
+//	        	System.out.println("INFO: tweet sent in "+tsT+"ms.");
+//	        	}
+//	        catch(final ExecutionException|InterruptedException e)
+//		        {
+//	        	System.err.println("ERROR: could not send tweet: " + e.getMessage());
+//		        }
+//	    	}
         if(null != taskTootSend)
 	    	{
         	if(!taskTootSend.isDone()) { System.out.println("INFO: toot still running: "+(System.currentTimeMillis()-startTime)+"ms."); }
@@ -1248,7 +1247,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             final int retailIntensity)
         {
         if(null == statusUncapped) { throw new IllegalArgumentException(); }
-        final String statusTemplate = MainProperties.getRawProperties().get((isDataStale ? TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : TwitterUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
+        final String statusTemplate = MainProperties.getRawProperties().get((isDataStale ? SocialMediaUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES : SocialMediaUtils.PNAME_PREFIX_TWITTER_TRAFFICLIGHT_STATUS_MESSAGES) + statusUncapped);
         final String tweetMessage = ((statusTemplate != null) && !statusTemplate.isEmpty()) ? String.format(statusTemplate, retailIntensity).trim() :
             ("Grid status " + statusUncapped);
         return(tweetMessage);
@@ -1563,8 +1562,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                                            final boolean isDataStale,
                                            final int hourOfDayHistorical,
                                            final TrafficLight status,
-                                           final TwitterUtils.TwitterDetails td,
-                                           final TwitterUtils.MastodonDetails md)
+                                           final SocialMediaUtils.MastodonDetails md)
         throws IOException
         {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(32768);
@@ -1636,17 +1634,17 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
                 w.println(".</p>");
                 }
 
-            // If there is  a Twitter account set up then brag about it here,
-            // but only if there is write access...
-            if(td != null)
-                {
-                w.print("<p>Follow this grid status on Twitter <a href=\"https://twitter.com/");
-                w.print(td.username);
-                w.print("\">@");
-                w.print(td.username);
-                w.print("</a>");
-                w.println(".</p>");
-                }
+//            // If there is  a Twitter account set up then brag about it here,
+//            // but only if there is write access...
+//            if(td != null)
+//                {
+//                w.print("<p>Follow this grid status on Twitter <a href=\"https://twitter.com/");
+//                w.print(td.username);
+//                w.print("\">@");
+//                w.print(td.username);
+//                w.print("</a>");
+//                w.println(".</p>");
+//                }
 
             // A bit of explanation...
             w.println(rawProperties.get("trafficLightPage.HTML.midamble"));

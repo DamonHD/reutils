@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2013, Damon Hart-Davis
+Copyright (c) 2008-2024, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,6 @@ import org.hd.d.edh.TrafficLight;
 import junit.framework.TestCase;
 
 /**Miscellaneous tests.
- *
  */
 public final class TestMisc extends TestCase
     {

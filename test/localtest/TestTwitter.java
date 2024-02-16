@@ -29,42 +29,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package localtest;
 
-import org.hd.d.edh.FUELINSTUtils;
-import org.hd.d.edh.TrafficLight;
-import org.hd.d.edh.TwitterUtils;
-
 import junit.framework.TestCase;
 
 /**Twitter tests.
  */
 public final class TestTwitter extends TestCase
     {
-    /**Test that all possible grid status Tweets are legal with the current property set.
-     * Check that message are not null and not too long.
-     */
-    public static void testTweetValidity()
-        {
-    	final int max_chars = TwitterUtils.MAX_TWEET_CHARS - 5; // Allow for some trailing decoration.
-    	
-        for(final boolean isDataStale : new boolean[]{ true, false } )
-            {
-            for(final TrafficLight status : TrafficLight.values())
-                {
-				for(final int retailIntensity : new int[]{9, 99, 999})
-					{
-					final String message = FUELINSTUtils.generateSocialMediaStatus(
-							isDataStale, status, retailIntensity);
-	                assertNotNull("Generated Tweet must not be null", message);
-//System.err.println("LENGTH="+message.length()+": "+message);
-                    assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
-                    assertTrue("Generated Tweet must not be over-long: was "+message.length()+" vs max "+TwitterUtils.MAX_TWEET_CHARS+" message: "+message,
-                            message.length() <= TwitterUtils.MAX_TWEET_CHARS);
-                    // Ensure that template has been filled in.
-                    assertFalse("Template not applied?", message.contains("%1$"));
-					}
-                }
-            }
-        }
+//    /**Test that all possible grid status Tweets are legal with the current property set.
+//     * Check that message are not null and not too long.
+//     */
+//    public static void testTweetValidity()
+//        {
+//    	final int max_chars = TwitterUtils.MAX_TWEET_CHARS - 5; // Allow for some trailing decoration.
+//
+//        for(final boolean isDataStale : new boolean[]{ true, false } )
+//            {
+//            for(final TrafficLight status : TrafficLight.values())
+//                {
+//				for(final int retailIntensity : new int[]{9, 99, 999})
+//					{
+//					final String message = FUELINSTUtils.generateSocialMediaStatus(
+//							isDataStale, status, retailIntensity);
+//	                assertNotNull("Generated Tweet must not be null", message);
+////System.err.println("LENGTH="+message.length()+": "+message);
+//                    assertFalse("Generated Tweet must not be empty", message.trim().isEmpty());
+//                    assertTrue("Generated Tweet must not be over-long: was "+message.length()+" vs max "+TwitterUtils.MAX_TWEET_CHARS+" message: "+message,
+//                            message.length() <= TwitterUtils.MAX_TWEET_CHARS);
+//                    // Ensure that template has been filled in.
+//                    assertFalse("Template not applied?", message.contains("%1$"));
+//					}
+//                }
+//            }
+//        }
 
 //    /**Test very basic access to our selected Twitter user.
 //     */

@@ -7,11 +7,8 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/jtwitter.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
-	<classpathentry kind="lib" path="/Users/dhd/git/reutils/libs/signpost-core.jar"/>
 	<classpathentry kind="lib" path="/Users/dhd/git/reutils/libs/commons-codec.jar"/>
-	<classpathentry kind="lib" path="libs/signpost-commonshttp4.jar"/>
 	<classpathentry kind="lib" path="libs/json-20240205.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2021, Damon Hart-Davis
+Copyright (c) 2008-2024, Damon Hart-Davis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.hd.d.edh;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -42,40 +40,36 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import winterwell.jtwitter.Twitter;
 
-
-/**Twitter Utilities.
- * Handles some common interactions with Twitter and other social media (eg Mastodon).
+/**Social media utilities.
+ * Handles some common interactions with social media (eg Mastodon).
  */
-public final class TwitterUtils
+public final class SocialMediaUtils
     {
     /**Prevent creation of an instance. */
-    private TwitterUtils() { }
+    private SocialMediaUtils() { }
 
-    /**Enable tweeting.
-     * As of 2023-02-13 Twitter is due to disable all the relevant (free) APIs.
-     * <p>
-     * As of 2023-04-07 (~3pm BST) authentication started failing.
-     */
-    public static final boolean ENABLE_TWEETING = false;
+//    /**Enable tweeting.
+//     * As of 2023-02-13 Twitter is due to disable all the relevant (free) APIs.
+//     * <p>
+//     * As of 2023-04-07 (~3pm BST) authentication started failing.
+//     */
+//    public static final boolean ENABLE_TWEETING = false;
 
     /**Should inferred intensities be tooted when live data is absent? */
     public static final boolean POST_INFERRED_INTENSITY = false;
 
-    /**Maximum Twitter message length (tweet) in (ASCII) characters.
-     * This allows some elbow room for trailing automatic/variable content.
-     * <p>
-     * Was 134 before upgrade to JTwitter 3.8.5.
-     */
-    public static final int MAX_TWEET_CHARS = 274;
+//    /**Maximum Twitter message length (tweet) in (ASCII) characters.
+//     * This allows some elbow room for trailing automatic/variable content.
+//     * <p>
+//     * Was 134 before upgrade to JTwitter 3.8.5.
+//     */
+//    public static final int MAX_TWEET_CHARS = 274;
 
     /**Maximum Mastodon message length (post) in (ASCII) characters.
      * This allows some elbow room for trailing automatic/variable content.
@@ -88,16 +82,16 @@ public final class TwitterUtils
     /**Property name prefix (needs traffic-light colour appended) for Twitter status messages when using historical data, ie predicting; not null. */
     public static final String PNAME_PREFIX_TWITTER_TRAFFICLIGHT_PREDICTION_MESSAGES = "Twitter.trafficlight.prediction.";
 
-    /**Property name for Twitter user; not null. */
-    public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
+//    /**Property name for Twitter user; not null. */
+//    public static final String PNAME_TWITTER_USERNAME = "Twitter.username";
+//
+//    /**Property name for file containing Twitter OAuth tokens; not null. */
+//    public static final String PNAME_TWITTER_AUTHTOK_FILENAME = "Twitter.authtokenfile";
+//
+//    /**Property name for alternate file containing Twitter OAuth tokens; not null. */
+//    public static final String PNAME_TWITTER_AUTHTOK_FILENAME2 = "Twitter.authtokenfile2";
 
-    /**Property name for file containing Twitter OAuth tokens; not null. */
-    public static final String PNAME_TWITTER_AUTHTOK_FILENAME = "Twitter.authtokenfile";
-
-    /**Property name for alternate file containing Twitter OAuth tokens; not null. */
-    public static final String PNAME_TWITTER_AUTHTOK_FILENAME2 = "Twitter.authtokenfile2";
-
-    /**Property name for minimum gap between Tweets in minutes (non-negative); not null. */
+    /**Property name for minimum gap between posts in minutes (non-negative); not null. */
     public static final String PNAME_SOCIAL_MEDIA_POST_MIN_GAP_MINS = "Twitter.minGapMins";
 
     /**Property name for Mastodon user; not null. */
@@ -110,37 +104,37 @@ public final class TwitterUtils
     public static final String PNAME_MASTODON_AUTH_TOKEN_FILE = "Mastodon.authtokenfile";
 
 
-    /**Immutable class containing Twitter handle, user ID and read-only flag. */
-    public static final class TwitterDetails
-        {
-        /**User name on Twitter; never null nor empty. */
-        public final String username;
-        /**Handle; never null. */
-        public final Twitter handle;
-        /**True if we know the handle to be read-only, eg because we have no password. */
-        public final boolean readOnly;
+//    /**Immutable class containing Twitter handle, user ID and read-only flag. */
+//    public static final class TwitterDetails
+//        {
+//        /**User name on Twitter; never null nor empty. */
+//        public final String username;
+//        /**Handle; never null. */
+//        public final Twitter handle;
+//        /**True if we know the handle to be read-only, eg because we have no password. */
+//        public final boolean readOnly;
+//
+//        /**Create an instance. */
+//        public TwitterDetails(final String username, final Twitter handle, final boolean readOnly)
+//            {
+//            if((null == username) || username.isEmpty()) { throw new IllegalArgumentException(); }
+//            if(null == handle) { throw new IllegalArgumentException(); }
+//            this.username = username;
+//            this.handle = handle;
+//            this.readOnly = readOnly;
+//            }
+//        }
 
-        /**Create an instance. */
-        public TwitterDetails(final String username, final Twitter handle, final boolean readOnly)
-            {
-            if((null == username) || username.isEmpty()) { throw new IllegalArgumentException(); }
-            if(null == handle) { throw new IllegalArgumentException(); }
-            this.username = username;
-            this.handle = handle;
-            this.readOnly = readOnly;
-            }
-        }
-
-    /**Get the specified non-empty Twitter user name or null if none. */
-    public static String getTwitterUsername()
-        {
-        final Map<String, String> rawProperties = MainProperties.getRawProperties();
-        final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
-        // Transform empty user name to null.
-        if((null != tUsername) && tUsername.isEmpty()) { return(null); }
-        if(null == tUsername) { return(null); }
-        return(tUsername.intern());
-        }
+//    /**Get the specified non-empty Twitter user name or null if none. */
+//    public static String getTwitterUsername()
+//        {
+//        final Map<String, String> rawProperties = MainProperties.getRawProperties();
+//        final String tUsername = rawProperties.get(PNAME_TWITTER_USERNAME);
+//        // Transform empty user name to null.
+//        if((null != tUsername) && tUsername.isEmpty()) { return(null); }
+//        if(null == tUsername) { return(null); }
+//        return(tUsername.intern());
+//        }
 
 //    /**Get Twitter handle for updates; null if nothing suitable set up.
 //     * May return a read-only handle for testing
@@ -176,105 +170,105 @@ public final class TwitterUtils
 //        return(new TwitterDetails(tUsername, new Twitter(tUsername, client), noWriteAccess));
 //        }
 
-    /**Extract a (non-empty) password from the specified file, or null if none or if the filename is bad.
-     * This does not throw an exception if it cannot find or open the specified file
-     * (or the file name is null or empty)
-     * of it the file does not contain a password; for all these cases null is returned.
-     * <p>
-     * The password must be on the first line.
-     *
-     * @param passwordFilename  name of file containing password or null/empty if none
-     * @param quiet  if true then keep quiet about file errors
-     * @return non-null, non-empty password
-     */
-    private static String getPasswordFromFile(final String passwordFilename, final boolean quiet)
-        {
-        // Null/empty file name results in quiet return of null.
-        if((null == passwordFilename) || passwordFilename.trim().isEmpty()) { return(null); }
+//    /**Extract a (non-empty) password from the specified file, or null if none or if the filename is bad.
+//     * This does not throw an exception if it cannot find or open the specified file
+//     * (or the file name is null or empty)
+//     * of it the file does not contain a password; for all these cases null is returned.
+//     * <p>
+//     * The password must be on the first line.
+//     *
+//     * @param passwordFilename  name of file containing password or null/empty if none
+//     * @param quiet  if true then keep quiet about file errors
+//     * @return non-null, non-empty password
+//     */
+//    private static String getPasswordFromFile(final String passwordFilename, final boolean quiet)
+//        {
+//        // Null/empty file name results in quiet return of null.
+//        if((null == passwordFilename) || passwordFilename.trim().isEmpty()) { return(null); }
+//
+//        final File f = new File(passwordFilename);
+//        if(!f.canRead())
+//            {
+//            if(!quiet)
+//                {
+//                System.err.println("Cannot open pass file for reading: " + f);
+//                try { System.err.println("  Canonical path: " + f.getCanonicalPath()); } catch(final IOException e) { }
+//                }
+//            return(null);
+//            }
+//
+//        try
+//            {
+//            try(final BufferedReader r =  new BufferedReader(new FileReader(f)))
+//                {
+//                final String firstLine = r.readLine();
+//                if((null == firstLine) || firstLine.trim().isEmpty()) { return(null); }
+//                // Return non-null non-empty password.
+//                return(firstLine);
+//                }
+//            }
+//        // In case of error whinge but continue.
+//        catch(final Exception e)
+//            {
+//            if(!quiet) { e.printStackTrace(); }
+//            return(null);
+//            }
+//        }
 
-        final File f = new File(passwordFilename);
-        if(!f.canRead())
-            {
-            if(!quiet)
-                {
-                System.err.println("Cannot open pass file for reading: " + f);
-                try { System.err.println("  Canonical path: " + f.getCanonicalPath()); } catch(final IOException e) { }
-                }
-            return(null);
-            }
 
-        try
-            {
-            try(final BufferedReader r =  new BufferedReader(new FileReader(f)))
-                {
-                final String firstLine = r.readLine();
-                if((null == firstLine) || firstLine.trim().isEmpty()) { return(null); }
-                // Return non-null non-empty password.
-                return(firstLine);
-                }
-            }
-        // In case of error whinge but continue.
-        catch(final Exception e)
-            {
-            if(!quiet) { e.printStackTrace(); }
-            return(null);
-            }
-        }
-
-
-    /**Extract a (non-empty) set of non-empty auth tokens from the specified file, or null if none or if the filename is bad.
-     * This does not throw an exception if it cannot find or open the specified file
-     * (or the file name is null or empty)
-     * of it the file does not contain a password; for all these cases null is returned.
-     * <p>
-     * Each token must be on a separate line.
-     * <p>
-     * There must be at least two token else this will return null.
-     *
-     * @param tokensFilename  name of file containing auth tokens or null/empty if none
-     * @param quiet  if true then keep quiet about file errors
-     * @return non-null, non-empty password
-     */
-    private static String[] getAuthTokensFromFile(final String tokensFilename, final boolean quiet)
-        {
-        // Null/empty file name results in quiet return of null.
-        if((null == tokensFilename) || tokensFilename.trim().isEmpty()) { return(null); }
-
-        final File f = new File(tokensFilename);
-        if(!f.canRead())
-            {
-            if(!quiet)
-                {
-                System.err.println("Cannot open pass file for reading: " + f);
-                try { System.err.println("  Canonical path: " + f.getCanonicalPath()); } catch(final IOException e) { }
-                }
-            return(null);
-            }
-
-        try
-            {
-            final List<String> result = new ArrayList<>();
-            try(final BufferedReader r =  new BufferedReader(new FileReader(f)))
-                {
-                String line;
-                while(null != (line = r.readLine()))
-                    {
-                    final String trimmed = line.trim();
-                    if(trimmed.isEmpty()) { return(null); } // Give up with *any* blank token.
-                    result.add(trimmed);
-                    }
-                if(result.size() < 2) { return(null); } // Give up if not (at least) two tokens.
-                // Return non-null non-empty token(s).
-                return(result.toArray(new String[result.size()]));
-                }
-            }
-        // In case of error whinge but continue.
-        catch(final Exception e)
-            {
-            if(!quiet) { e.printStackTrace(); }
-            return(null);
-            }
-        }
+//    /**Extract a (non-empty) set of non-empty auth tokens from the specified file, or null if none or if the filename is bad.
+//     * This does not throw an exception if it cannot find or open the specified file
+//     * (or the file name is null or empty)
+//     * of it the file does not contain a password; for all these cases null is returned.
+//     * <p>
+//     * Each token must be on a separate line.
+//     * <p>
+//     * There must be at least two token else this will return null.
+//     *
+//     * @param tokensFilename  name of file containing auth tokens or null/empty if none
+//     * @param quiet  if true then keep quiet about file errors
+//     * @return non-null, non-empty password
+//     */
+//    private static String[] getAuthTokensFromFile(final String tokensFilename, final boolean quiet)
+//        {
+//        // Null/empty file name results in quiet return of null.
+//        if((null == tokensFilename) || tokensFilename.trim().isEmpty()) { return(null); }
+//
+//        final File f = new File(tokensFilename);
+//        if(!f.canRead())
+//            {
+//            if(!quiet)
+//                {
+//                System.err.println("Cannot open pass file for reading: " + f);
+//                try { System.err.println("  Canonical path: " + f.getCanonicalPath()); } catch(final IOException e) { }
+//                }
+//            return(null);
+//            }
+//
+//        try
+//            {
+//            final List<String> result = new ArrayList<>();
+//            try(final BufferedReader r =  new BufferedReader(new FileReader(f)))
+//                {
+//                String line;
+//                while(null != (line = r.readLine()))
+//                    {
+//                    final String trimmed = line.trim();
+//                    if(trimmed.isEmpty()) { return(null); } // Give up with *any* blank token.
+//                    result.add(trimmed);
+//                    }
+//                if(result.size() < 2) { return(null); } // Give up if not (at least) two tokens.
+//                // Return non-null non-empty token(s).
+//                return(result.toArray(new String[result.size()]));
+//                }
+//            }
+//        // In case of error whinge but continue.
+//        catch(final Exception e)
+//            {
+//            if(!quiet) { e.printStackTrace(); }
+//            return(null);
+//            }
+//        }
 
 //    /**If true then resend tweet only when different to previous tweeted status.
 //     * More robust than only sending when our message changes because Twitter can lose messages,
@@ -282,18 +276,18 @@ public final class TwitterUtils
 //     */
 //    private static final boolean SEND_TWEET_IF_TWITTER_TEXT_DIFFERENT = true;
 
-    /**If true then resend tweet only when different R/A/G status to previous tweeted status.
-     * More robust than only sending when our message changes because Twitter can lose messages,
-     * but will result in any manual tweet followed up by retweet of previous status.
-     */
-    private static final boolean SEND_TWEET_ONLY_IF_TWITTER_STATUS_DIFFERENT = true;
+//    /**If true then resend tweet only when different R/A/G status to previous tweeted status.
+//     * More robust than only sending when our message changes because Twitter can lose messages,
+//     * but will result in any manual tweet followed up by retweet of previous status.
+//     */
+//    private static final boolean SEND_TWEET_ONLY_IF_TWITTER_STATUS_DIFFERENT = true;
 
-    /**Character used to separate (trailing) variable part from main part of message.
-     * There is no longer a need to reliably parse this from a message already sent,
-     * so can be whitespace,
-     * else whitespace would also be inserted to avoid confusion.
-     */
-    private static final char TWEET_TAIL_SEP = ' ';
+//    /**Character used to separate (trailing) variable part from main part of message.
+//     * There is no longer a need to reliably parse this from a message already sent,
+//     * so can be whitespace,
+//     * else whitespace would also be inserted to avoid confusion.
+//     */
+//    private static final char TWEET_TAIL_SEP = ' ';
 
     /**Returns true if a social media grid intensity update should be posted.
      * This is based on whether the status has changed since the lost status post,
@@ -372,44 +366,44 @@ public final class TwitterUtils
         return(true);
 	    }
 
-    /**Attempt to update Twitter status.
-     * Can be run on a background thread.
-     *
-     * @param td  non-null, non-read-only Twitter handle
-     * @param statusMessage  short (max 140 chars) Twitter status message; never null
-     * @param status  overall R/A/G status, null if no attempt to regulate by this
-     */
-    public static void setTwitterStatus(final TwitterUtils.TwitterDetails td,
-                                                 final String statusMessage)
-        throws IOException
-        {
-        if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
-        if(null == statusMessage) { throw new IllegalArgumentException(); }
-        if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long"); }
+//    /**Attempt to update Twitter status.
+//     * Can be run on a background thread.
+//     *
+//     * @param td  non-null, non-read-only Twitter handle
+//     * @param statusMessage  short (max 140 chars) Twitter status message; never null
+//     * @param status  overall R/A/G status, null if no attempt to regulate by this
+//     */
+//    public static void setTwitterStatus(final TwitterUtils.TwitterDetails td,
+//                                                 final String statusMessage)
+//        throws IOException
+//        {
+//        if((null == td) || td.readOnly) { throw new IllegalArgumentException(); }
+//        if(null == statusMessage) { throw new IllegalArgumentException(); }
+//        if(statusMessage.length() > MAX_TWEET_CHARS) { throw new IllegalArgumentException("message too long"); }
+//
+//        // UTC timestamp to append to message to help make it unique.
+//        // Without this, in the olden days, Twitter sometimes blocked updates as duplicates.
+//        final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
+//	    // Append timestamp to status message.
+//        final String fullMessage = statusMessage + TWEET_TAIL_SEP + time + 'Z';
+//
+//        // Send message...
+//        td.handle.setStatus(fullMessage);
+//        }
 
-        // UTC timestamp to append to message to help make it unique.
-        // Without this, in the olden days, Twitter sometimes blocked updates as duplicates.
-        final String time = new java.text.SimpleDateFormat("HHmm").format(new java.util.Date());
-	    // Append timestamp to status message.
-        final String fullMessage = statusMessage + TWEET_TAIL_SEP + time + 'Z';
-
-        // Send message...
-        td.handle.setStatus(fullMessage);
-        }
-
-    /**Send a tweet and time it.
-     * @param td  non-null, non-read-only Twitter handle
-     * @param statusMessage  short (max 140 chars) Twitter status message; never null
-     * @param status  overall R/A/G status, null if no attempt to regulate by this
-     */
-	public static Long timeSetTwitterStatus(final TwitterDetails td, final String statusMessage)
-		throws IOException
-	    {
-		final long s = System.currentTimeMillis();
-		setTwitterStatus(td, statusMessage);
-		final long e = System.currentTimeMillis();
-		return(e - s);
-	    }
+//    /**Send a tweet and time it.
+//     * @param td  non-null, non-read-only Twitter handle
+//     * @param statusMessage  short (max 140 chars) Twitter status message; never null
+//     * @param status  overall R/A/G status, null if no attempt to regulate by this
+//     */
+//	public static Long timeSetTwitterStatus(final TwitterDetails td, final String statusMessage)
+//		throws IOException
+//	    {
+//		final long s = System.currentTimeMillis();
+//		setTwitterStatus(td, statusMessage);
+//		final long e = System.currentTimeMillis();
+//		return(e - s);
+//	    }
 
 //    /**Removes any trailing automatic/variable part from the tweet, leaving the core.
 //     * The 'trailing part' starts at the last occurrence of the TWEET_TAIL_SEP,
@@ -556,7 +550,6 @@ public final class TwitterUtils
 
         final int timeout_ms = 10000;
 
-//        final URL u = new URL("https", md.hostname, "/api/v1/statuses");
         final URL u;
         try { u = new URI("https", md.hostname, "/api/v1/statuses", null).toURL(); }
         catch(final URISyntaxException e) { throw new IllegalArgumentException(e); }

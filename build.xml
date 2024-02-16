@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="app.name" value="reutils"/>
     <property name="app.version.major" value="1"/>
     <property name="app.version.minor" value="4"/>
-    <property name="app.version.micro" value="0"/>
+    <property name="app.version.micro" value="1"/>
     <property name="app.version" value="${app.version.major}.${app.version.minor}.${app.version.micro}"/>
     <!-- Version excluding the "micro" portion, thus reflecting only significant API/functionality changes. -->
     <property name="app.version.notmicro" value="${app.version.major}.${app.version.minor}"/>
@@ -89,14 +89,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <property name="tmp.workdir" value="work.tmp"/>
 
     <!-- Basic class path we compile against; includes any external libs. -->
-    <property name="cp.common.basic" value="libs/jtwitter.jar:libs/json-20240205.jar"/>
+    <property name="cp.common.basic" value="libs/json-20240205.jar"/>
     <!-- Provided in debug/non-debug versions. -->
     <!-- Expects cp.J2EEAPI to contain a classpath fragment for the J2EE API. -->
     <property name="cp.dbg.basic" value="${cp.common.basic}"/>
     <property name="cp.opt.basic" value="${cp.common.basic}"/>
 
     <!-- Class path for libs that may run against; includes any external libs. -->
-    <property name="cp.common.rt" value="libs/commons-codec.jar:libs/signpost-core.jar:libs/signpost-commonshttp4.jar"/>
+    <property name="cp.common.rt" value="libs/commons-codec.jar"/>
 
 
     <!--Place where source snapshot is built. -->
