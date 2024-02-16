@@ -17,6 +17,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 PENDING:
 
     DHD20240216: reduced redundant data fetch to ~2 intervals.
+    DHD20240216: some dead Twitter code removed.
 
 
 
@@ -31,6 +32,17 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20240216:
+    freezepoint name: V1.4.1
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.4.0
+    DHD20240216: reduced redundant data fetch to ~2 intervals.
+    DHD20240216: Proguard minified JAR build working again.
+    DHD20240216: some dead Twitter code removed.
 
 
 20240216:
