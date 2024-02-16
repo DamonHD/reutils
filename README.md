@@ -1,5 +1,7 @@
 # RE Utils
 
+[![DOI](https://zenodo.org/badge/40993318.svg)](https://zenodo.org/doi/10.5281/zenodo.10447168)
+
 Various utilities for off-line and on-line/real-time processing of
 Renewable Energy data.
 
