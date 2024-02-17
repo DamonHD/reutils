@@ -938,8 +938,6 @@ curl -X 'GET' \
      */
 
 
-
-
     /**Convert from new (2024) format JSON stream FUELINST data to (immutable) by-time fuel-generation Map; never null.
      * Can optionally clamp negative values to zero
      *
@@ -1010,7 +1008,6 @@ curl -X 'GET' \
 	    return(Collections.unmodifiableSortedMap(r2));
 	    }
 
-
     /**Parse recent JSON file/stream data and return as if parsed from pre-2024 CSV; never null but may be empty.
      * Extracts up to 48h of data up to now from JSON streaming V1 API.
      * <p>
@@ -1056,6 +1053,7 @@ curl -X 'GET' \
         conn.setUseCaches(false); // Ensure that we get non-stale values each time.
         conn.setConnectTimeout(60000); // Set a long-ish connection timeout.
         conn.setReadTimeout(60000); // Set a long-ish read timeout.
+        conn.setRequestProperty("Accept", "application/json"); // JSON response accepted.
 
         try(final InputStreamReader is = new InputStreamReader(conn.getInputStream()))
             { return(DataUtils.parseBMRJSON(is, template)); }
