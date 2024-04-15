@@ -17,6 +17,7 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 PENDING:
 
     DHD20240217: forces "Accept: application/json" on the data collection connection.
+    DHD20240415: added support for INTGRNL due 2024-08-01.
 
 
 
