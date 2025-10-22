@@ -1045,7 +1045,7 @@ curl -X 'GET' \
 				twoDaysAgo : Instant.ofEpochMilli(noOlderThan).minusSeconds(61);
     	final String suffix = URLEncoder.encode(requestDataFrom.toString(), StandardCharsets.US_ASCII);
     	final URL fullURL = new URI(urlPrefix.toString() + suffix).toURL();
-//System.err.println("Full JSON URL: " + fullURL);
+System.out.println("INFO: Full JSON URL: " + fullURL);
 
         // Set up URL connection to fetch the data.
         final URLConnection conn = fullURL.openConnection();
