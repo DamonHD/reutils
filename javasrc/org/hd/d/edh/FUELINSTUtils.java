@@ -1571,7 +1571,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.println();
 
             // Note very gently when the 7d status view is different.
-            if(summary24h.status != summary7d.status)
+            if((null != summary7d) && summary24h.status != summary7d.status)
 	            {
                 w.println("<p style=\"text-align:center\">(Over a longer period, the current status is "+summary7d.status+".)</p>");
 	            }
@@ -1808,8 +1808,11 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.write("<p>(Histogram input windows: ");
             w.write(Long.toString((summary24h.histWindowSize + (1800*1000)) / (3600*1000)));
             	w.write("h, ");
-            w.write(Long.toString((summary7d.histWindowSize + (1800*1000)) / (3600*1000)));
-            	w.write("h");
+            if(null != summary7d)
+	            {
+	            w.write(Long.toString((summary7d.histWindowSize + (1800*1000)) / (3600*1000)));
+	            	w.write("h");
+	            }
             w.write(".)</p>");
             w.println();
 
