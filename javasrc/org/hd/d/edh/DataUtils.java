@@ -1070,6 +1070,15 @@ System.out.println("INFO: Full JSON URL: " + fullURL);
 	 * in the old CSV format.
 	 *
 	 * @param template  for where to insert values by fuel type; non-null and non-empty
+	 *
+	 * <p>
+	 * JSON response format seen 2025-10-22:
+<pre>
+[{"dataset":"FUELINST","publishTime":"2025-10-22T11:45:00Z","startTime":"2025-10-22T11:40:00Z","settlementDate":"2025-10-22","settlementPeriod":26,"fuelType":"BIOMASS","generation":3006},{"dataset":"FUELINST","publishTime":"2025-10-22T11:45:00Z","startTime":"2025-10-22T11:40:00Z","settlementDate":"2025-10-22","settlementPeriod":26,"fuelType":"CCGT","generation":13503},{"dataset":"FUELINST","publishTime":"2025-10-22T11:45:00Z","startTime":"2025-10-22T11:40:00Z","settlementDate":"2025-10-22","settlementPeriod":26,"fuelType":"COAL","generation":0},
+...
+{"dataset":"FUELINST","publishTime":"2025-10-22T11:15:00Z","startTime":"2025-10-22T11:10:00Z","settlementDate":"2025-10-22","settlementPeriod":25,"fuelType":"OTHER","generation":430},{"dataset":"FUELINST","publishTime":"2025-10-22T11:15:00Z","startTime":"2025-10-22T11:10:00Z","settlementDate":"2025-10-22","settlementPeriod":25,"fuelType":"PS","generation":-170},{"dataset":"FUELINST","publishTime":"2025-10-22T11:15:00Z","startTime":"2025-10-22T11:10:00Z","settlementDate":"2025-10-22","settlementPeriod":25,"fuelType":"WIND","generation":5246}]
+</pre>
+	 * </p>
 	 */
 	public static List<List<String>> parseBMRJSON(final Reader r, final String template) throws IOException
 		{
