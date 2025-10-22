@@ -36,7 +36,7 @@ SIGNIFICANT RELEASES (newest first)
     branch name: HEAD
     Deployed where: earth.org.uk
     Changes since last freezepoint (developer/mgr initials and brief description):
-    Previous significant freezepoint: V1.4.0
+    Previous significant freezepoint: V1.4.1
     DHD20251022: emergency fix to avoid crashing when 7D summary not available.
     DHD20240217: force "Accept: application/json" on the data collection connection.
     DHD20240415: added support for INTGRNL due 2024-08-01.
