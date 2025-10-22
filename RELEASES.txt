@@ -16,9 +16,6 @@ SIGNIFICANT CHANGES SINCE LAST RELEASE
 
 PENDING:
 
-    DHD20251022: emergency fix to avoid crashing when 7D summary not available.
-    DHD20240217: force "Accept: application/json" on the data collection connection.
-    DHD20240415: added support for INTGRNL due 2024-08-01.
 
 
 
@@ -32,6 +29,17 @@ PENDING:
 
 SIGNIFICANT RELEASES (newest first)
 ===================================
+
+
+20251022:
+    freezepoint name: V1.4.2
+    branch name: HEAD
+    Deployed where: earth.org.uk
+    Changes since last freezepoint (developer/mgr initials and brief description):
+    Previous significant freezepoint: V1.4.0
+    DHD20251022: emergency fix to avoid crashing when 7D summary not available.
+    DHD20240217: force "Accept: application/json" on the data collection connection.
+    DHD20240415: added support for INTGRNL due 2024-08-01.
 
 
 20240216:

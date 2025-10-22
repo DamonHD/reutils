@@ -710,7 +710,7 @@ System.out.println("INFO: fetched rows: " + parsedBMRCSV.size());
         catch(final IOException e)
             {
             // Could not get data, so status is unknown.
-System.err.println("ERROR: could not fetch data from " + url + " error: " + e.getMessage());
+System.err.println("ERROR: could not fetch data from " + url + "... error: " + e.getMessage());
             }
 //        // Validate parsedBMRCSV (correct ordering, no dates in future, etc).
 //        // If containable defects are found then repair on the fly.
