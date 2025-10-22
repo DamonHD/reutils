@@ -1069,6 +1069,7 @@ System.out.println("INFO: Full JSON URL: " + fullURL);
 	 * of generation across all sources at each time,
 	 * in the old CSV format.
 	 *
+	 * @param r  JSON input; never null
 	 * @param template  for where to insert values by fuel type; non-null and non-empty
 	 *
 	 * <p>
