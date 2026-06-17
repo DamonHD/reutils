@@ -1781,7 +1781,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             w.write(".</p>");
             w.println();
 
-            w.write("<p>Rolling correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable sources):");
+            w.write("<p>Rolling correlation of fuel use against grid intensity (-ve implies that this fuel reduces grid intensity for non-callable/non-constrained sources):");
             final SortedMap<String,Float> goodness = new TreeMap<>(summary24h.correlationIntensityToFuel);
             for(final String fuel : goodness.keySet())
                 {
