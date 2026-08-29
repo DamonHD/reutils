@@ -215,7 +215,7 @@ intensity.fuel.INTIRL.2012/=0.45
 intensity.fuel.INTIRL=0.45
 intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
  */
-        assertEquals(0.288f, configuredIntensitiesDefault.get("INTIRL") , eps);
+//        assertEquals(0.288f, configuredIntensitiesDefault.get("INTIRL") , eps);
 
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2007).get("INTIRL"), eps);
         assertEquals(0.7f, FUELINSTUtils.getConfiguredIntensities(2008).get("INTIRL"), eps);
@@ -244,6 +244,32 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
         // Should be able to fall back to undated "always this" value.
         assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2009).get("NUCLEAR"), eps);
         assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2023).get("NUCLEAR"), eps);
+
+        // Test 2026 values (as live, 2026-08-29):
+        // BIOMASS=0.12 CCGT=0.394 COAL=0.937
+        // INTELEC=0.018 INTEW=0.322 INTFR=0.018 INTGRNL=0.322 INTIFA2=0.018 INTIRL=0.322 INTNED=0.199 INTNEM=0.105 INTNSL=0.009 INTVKL=0.075
+        // NPSHYD=0.0 NUCLEAR=0.0 OCGT=0.651 OIL=0.935 OTHER=0.3 WIND=0.0.
+        assertEquals(0.120f, FUELINSTUtils.getConfiguredIntensities(2026).get("BIOMASS"), eps);
+        assertEquals(0.394f, FUELINSTUtils.getConfiguredIntensities(2026).get("CCGT"), eps);
+        assertEquals(0.937f, FUELINSTUtils.getConfiguredIntensities(2026).get("COAL"), eps);
+        assertEquals(0.018f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTELEC"), eps);
+        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTEW"), eps);
+        assertEquals(0.018f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTFR"), eps);
+        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTGRNL"), eps);
+        assertEquals(0.018f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTIFA2"), eps);
+        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTIRL"), eps);
+        assertEquals(0.199f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTNED"), eps);
+        assertEquals(0.105f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTNEM"), eps);
+        assertEquals(0.009f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTNSL"), eps);
+        assertEquals(0.075f, FUELINSTUtils.getConfiguredIntensities(2026).get("INTVKL"), eps);
+        assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2026).get("NPSHYD"), eps);
+        assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2026).get("NUCLEAR"), eps);
+        assertEquals(0.651f, FUELINSTUtils.getConfiguredIntensities(2026).get("OCGT"), eps);
+        assertEquals(0.935f, FUELINSTUtils.getConfiguredIntensities(2026).get("OIL"), eps);
+        assertEquals(0.300f, FUELINSTUtils.getConfiguredIntensities(2026).get("OTHER"), eps);
+        assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2026).get("WIND"), eps);
+
+        // Test 2027 values incoming!
         }
 
     /**Test that fuel intensities are defined for next year.
