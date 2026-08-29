@@ -270,6 +270,25 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
         assertEquals(0f, FUELINSTUtils.getConfiguredIntensities(2026).get("WIND"), eps);
 
         // Test 2027 values incoming!
+        assertEquals(0.120f, FUELINSTUtils.getConfiguredIntensities(2027).get("BIOMASS"), eps);
+        assertEquals(0.394f, FUELINSTUtils.getConfiguredIntensities(2027).get("CCGT"), eps);
+        assertEquals(0.937f, FUELINSTUtils.getConfiguredIntensities(2027).get("COAL"), eps);
+//        assertEquals(0.018f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTELEC"), eps);
+//        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTEW"), eps);
+//        assertEquals(0.018f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTFR"), eps);
+//        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTGRNL"), eps);
+//        assertEquals(0.018f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTIFA2"), eps);
+//        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTIRL"), eps);
+//        assertEquals(0.199f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNED"), eps);
+//        assertEquals(0.105f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNEM"), eps);
+//        assertEquals(0.009f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNSL"), eps);
+//        assertEquals(0.075f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTVKL"), eps);
+        assertEquals(0.011f, FUELINSTUtils.getConfiguredIntensities(2027).get("NPSHYD"), eps);
+        assertEquals(0.005f, FUELINSTUtils.getConfiguredIntensities(2027).get("NUCLEAR"), eps);
+        assertEquals(0.651f, FUELINSTUtils.getConfiguredIntensities(2027).get("OCGT"), eps);
+        assertEquals(0.935f, FUELINSTUtils.getConfiguredIntensities(2027).get("OIL"), eps);
+        assertEquals(0.300f, FUELINSTUtils.getConfiguredIntensities(2027).get("OTHER"), eps);
+        assertEquals(0.013f, FUELINSTUtils.getConfiguredIntensities(2027).get("WIND"), eps);
         }
 
     /**Test that fuel intensities are defined for next year.
