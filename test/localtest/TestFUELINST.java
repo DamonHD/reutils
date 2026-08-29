@@ -279,9 +279,9 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
         assertEquals(0.228f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTGRNL"), eps);
         assertEquals(0.015f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTIFA2"), eps);
         assertEquals(0.228f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTIRL"), eps);
-//        assertEquals(0.199f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNED"), eps);
+        assertEquals(0.185f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNED"), eps);
         assertEquals(0.128f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNEM"), eps);
-//        assertEquals(0.009f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNSL"), eps);
+        assertEquals(0.006f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNSL"), eps);
         assertEquals(0.074f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTVKL"), eps);
         assertEquals(0.011f, FUELINSTUtils.getConfiguredIntensities(2027).get("NPSHYD"), eps);
         assertEquals(0.005f, FUELINSTUtils.getConfiguredIntensities(2027).get("NUCLEAR"), eps);
