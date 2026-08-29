@@ -274,11 +274,11 @@ intensity.fuelname.INTIRL=Irish (Moyle) Interconnector
         assertEquals(0.394f, FUELINSTUtils.getConfiguredIntensities(2027).get("CCGT"), eps);
         assertEquals(0.937f, FUELINSTUtils.getConfiguredIntensities(2027).get("COAL"), eps);
         assertEquals(0.015f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTELEC"), eps);
-//        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTEW"), eps);
+        assertEquals(0.228f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTEW"), eps);
         assertEquals(0.015f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTFR"), eps);
-//        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTGRNL"), eps);
+        assertEquals(0.228f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTGRNL"), eps);
         assertEquals(0.015f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTIFA2"), eps);
-//        assertEquals(0.322f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTIRL"), eps);
+        assertEquals(0.228f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTIRL"), eps);
 //        assertEquals(0.199f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNED"), eps);
         assertEquals(0.128f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNEM"), eps);
 //        assertEquals(0.009f, FUELINSTUtils.getConfiguredIntensities(2027).get("INTNSL"), eps);
