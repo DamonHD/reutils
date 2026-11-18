@@ -1573,7 +1573,7 @@ System.out.println("INFO: doTrafficLights(): "+(endTime-startTime)+"ms.");
             // Note very gently when the 7d status view is different.
             if((null != summary7d) && summary24h.status != summary7d.status)
 	            {
-                w.println("<p style=\"text-align:center\">(Over a longer period, the current status is "+summary7d.status+".)</p>");
+                w.println("<p style=\"text-align:center\"><strong>(Over a longer period, the current status is "+summary7d.status+".)</strong></p>");
 	            }
 
             // Note carbon savings that were available.
